@@ -1,8 +1,8 @@
 <h1 align="center">GitHub Radar</h1>
 
 <p align="center">
-  <b>Open-source intelligence engine from an AI PM perspective.</b><br>
-  AI PM 视角的开源情报引擎。
+  <b>Tech trend observation engine for AI PMs.</b><br>
+  AI PM 的科技趋势观察引擎。
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 ---
 
-GitHub Radar doesn't just show data — it produces **paradigm-level insights**. Scripts collect raw data from the GitHub API; an AI agent applies a PM analysis framework to generate structured reports.
+GitHub Radar scans GitHub for emerging AI projects, detects growth signals, and produces **paradigm-level insights** — not just data. Scripts collect raw data from the GitHub API; an AI agent applies a PM analysis framework to generate structured reports.
 
 ## Report Preview
 
