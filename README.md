@@ -22,7 +22,7 @@
 
 ---
 
-GitHub Radar scans GitHub for emerging AI projects, detects growth signals, and produces **paradigm-level insights** — not just data. Scripts collect raw data from the GitHub API; an AI agent applies a PM analysis framework to generate structured reports.
+After 10 years as an AI product manager, I've found that understanding and analyzing tech trends through open-source development has become a core competency for PMs, especially AI PMs, in today's rapidly evolving AI landscape. Today I'm open-sourcing one of my tech observation skills. It helps you see not just data and projects, but open-source trends and insights. Install it with OpenClaw or Claude Code, and as a PM or AI builder, you'll see results you didn't expect.
 
 ## Report Preview
 
