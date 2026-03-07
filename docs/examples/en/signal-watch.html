@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Watch — 2026-03-06</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #1f2937; font-size: 17px; line-height: 1.6; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { color: #9ca3af; font-size: 14px; }
+  .headline { font-size: 22px; font-weight: 600; color: #111827; line-height: 1.4; margin: 20px 0 0; padding: 16px 20px; background: #ffffff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; }
+
+  /* Layer legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; color: #9ca3af; }
+
+  /* Sections */
+  h2 { font-size: 18px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+
+  /* PM Focus */
+  .focus-list { list-style: none; padding: 0; }
+  .focus-list li { padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 16px; line-height: 1.65; }
+  .focus-list li:last-child { border-bottom: none; }
+  .focus-list strong { font-weight: 600; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .badge-l1 { background: #f3f4f6; color: #6b7280; }
+  .badge-l2 { background: #dbeafe; color: #1e40af; }
+  .badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .badge-l4 { background: #fef3c7; color: #92400e; }
+  .badge-l5 { background: #f3f4f6; color: #9ca3af; }
+  .signal-tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .tag-sustained { background: #dcfce7; color: #166534; }
+  .tag-accelerating { background: #dbeafe; color: #1e40af; }
+  .tag-spike { background: #fef2f2; color: #dc2626; }
+  .tag-step { background: #fef3c7; color: #92400e; }
+  .tag-unverified { background: #f3f4f6; color: #6b7280; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  tr:hover td { background: #f9fafb; }
+  td.stars { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Card */
+  .card { background: #ffffff; border-radius: 8px; padding: 24px; margin: 16px 0; border: 1px solid #e5e7eb; }
+  .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .card-header h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .card-header h3 a { color: #1f2937; }
+  .card-desc { color: #6b7280; font-size: 15px; margin-bottom: 16px; font-style: italic; }
+  .card-meta { font-size: 15px; color: #9ca3af; margin-bottom: 10px; }
+  .card-meta span { margin-right: 14px; }
+  .card .spark { margin: 8px 0 14px; }
+  .card .spark svg { display: block; }
+  .spark-label { font-size: 12px; color: #9ca3af; }
+  .pm { font-size: 16px; padding: 10px 14px; background: #eff6ff; border-left: 3px solid #2563eb; border-radius: 0 4px 4px 0; line-height: 1.65; }
+  .pm strong { font-weight: 600; }
+
+  /* Developer activity */
+  .dev-item { padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-size: 16px; }
+  .dev-item:last-child { border-bottom: none; }
+  .dev-item .dev-name { font-weight: 600; }
+  .dev-item .dev-note { color: #9ca3af; font-size: 15px; }
+
+  /* Misc */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+  details { margin: 16px 0; }
+  summary { cursor: pointer; font-weight: 600; color: #9ca3af; font-size: 14px; padding: 8px 0; }
+  details[open] summary { margin-bottom: 8px; }
+  .filtered-list { color: #9ca3af; font-size: 14px; line-height: 1.8; }
+  .cost { font-size: 14px; color: #9ca3af; margin-top: 32px; line-height: 1.7; }
+  .footer { color: #d1d5db; font-size: 12px; text-align: center; margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Signal Watch</h1>
+  <span class="meta">2026-03-06 · 97 candidates · 8 verified growth curves · ai-agent domain + global three-window (7d/30d/90d)</span>
+</div>
+
+<p class="headline">Big Tech Triple Launch — OpenAI (Symphony), Anthropic (Financial Services Plugins), and Google (Workspace CLI) all ship Agent infrastructure in the same week, collectively shifting from "model provider" to "toolchain provider." Agent capabilities are also expanding: from code-world to perceiving the internet.</p>
+
+<div class="legend">
+  <span><span class="badge badge-l2">L2</span> Agent Runtime</span>
+  <span><span class="badge badge-l3">L3</span> Dev Tools</span>
+  <span><span class="badge badge-l4">L4</span> End Products</span>
+  <span><span class="badge badge-l5">L5</span> Vertical Apps</span>
+</div>
+
+<h2>PM Focus</h2>
+<ul class="focus-list">
+  
+  <li><strong>Big Tech Agent Toolchain Race</strong> — OpenAI Symphony (isolated project execution), Anthropic Financial Services Plugins (vertical industry), Google Workspace CLI (office automation) — three projects released in the same week. Signal: big tech is no longer just selling models, they're extending control downstream into agent execution environments and toolchains.</li>
+  
+
+  <li><strong>Agent Perception Layer Emerging</strong> — Agent-Reach (6.6K, reads Twitter/Reddit/YouTube/GitHub) represents a new category: giving agents "eyes" to see internet content. Previously agents could only call APIs and write code — now they're gaining active information-gathering capabilities.</li>
+  
+
+  <li><strong>OpenClaw Ecosystem Noise is Extreme</strong> — ~30 of 97 candidates are OpenClaw peripherals (skill collections, lightweight versions, security guides, translations). Platform effect is significant but signal-to-noise ratio is declining. PMs need to distinguish "ecosystem heat" from "technical innovation."</li>
+  
+</ul>
+
+<h2>Picks</h2>
+
+<table>
+  <thead>
+    <tr><th>Project</th><th>Layer</th><th>Stars</th><th>Created</th><th>Pattern</th><th>Summary</th></tr>
+  </thead>
+  <tbody>
+  
+    <tr>
+      <td><a href="https://github.com/openai/symphony">openai/symphony</a></td>
+      <td><span class="badge badge-l2">L2</span></td>
+      <td class="stars">7,917</td>
+      <td>02-26</td>
+      <td><span class="signal-tag tag-step">step</span></td>
+      <td>By OpenAI — turns project work into isolated, autonomous agent tasks</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
+      <td><span class="badge badge-l4">L4</span></td>
+      <td class="stars">6,307</td>
+      <td>03-02</td>
+      <td><span class="signal-tag tag-accelerating">accelerating</span></td>
+      <td>Zero-human company orchestration — fully automated business operations</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></td>
+      <td><span class="badge badge-l3">L3</span></td>
+      <td class="stars">6,572</td>
+      <td>02-24</td>
+      <td><span class="signal-tag tag-sustained">sustained</span></td>
+      <td>Give agents eyes — reads Twitter/Reddit/YouTube/GitHub/Bilibili/XiaoHongShu</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/anthropics/financial-services-plugins">anthropics/financial-services-plugins</a></td>
+      <td><span class="badge badge-l3">L3</span></td>
+      <td class="stars">5,470</td>
+      <td>02-23</td>
+      <td><span class="signal-tag tag-step">step</span></td>
+      <td>Anthropic's official financial services plugins — big tech going vertical</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/HKUDS/nanobot">HKUDS/nanobot</a></td>
+      <td><span class="badge badge-l4">L4</span></td>
+      <td class="stars">29,720</td>
+      <td>02-01</td>
+      <td><span class="signal-tag tag-sustained">sustained</span></td>
+      <td>Ultra-Lightweight OpenClaw — 30K stars proves "lightweight agent" is a real need</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+<h2>Pick Details</h2>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/openai/symphony">openai/symphony</a></h3>
+    <span class="badge badge-l2">L2</span>
+    <span class="signal-tag tag-step">step</span>
+  </div>
+  <p class="card-desc">Symphony turns project work into isolated, autonomous agent tasks with built-in sandboxing and state management.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>7,917 stars</span>
+    <span>— forks</span>
+    <span>Created 02-26</span>
+  </div>
+  <div class="card-meta">
+    <span>7d +5,000+</span>
+    <span>avg/day ~1,000</span>
+    <span>8 days of growth</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,32 66,32 99,32 132,32 165,25 198,4" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="198" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · Peak 4,059★/day</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> OpenAI is extending from model provider to agent infrastructure. Symphony's core isn't an agent framework — it's "project-level isolated execution environment," echoing Alibaba's OpenSandbox. Signal: agent execution environment standardization is now happening at big-tech level.</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></h3>
+    <span class="badge badge-l4">L4</span>
+    <span class="signal-tag tag-accelerating">accelerating</span>
+  </div>
+  <p class="card-desc">Open-source orchestration for zero-human company operations. Automated business processes end-to-end.</p>
+  <div class="card-meta">
+    <span>TypeScript</span>
+    <span>6,307 stars</span>
+    <span>— forks</span>
+    <span>Created 03-02</span>
+  </div>
+  <div class="card-meta">
+    <span>7d +5,000+</span>
+    <span>avg/day ~1,576</span>
+    <span>3 consecutive growth days, still active</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,32 66,32 99,32 132,21 165,4 198,8" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="165" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">03/02 → 03/06 · Only 4 days old · Still growing</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> "Zero-human company" is a provocative and viral concept. Technically it's multi-agent orchestration, but the product positioning directly targets "fully automated operations." Even if the project itself doesn't succeed, this category definition is worth watching — if "agents replacing humans" narrative gains market acceptance, it will reshape all Agent product positioning.</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></h3>
+    <span class="badge badge-l3">L3</span>
+    <span class="signal-tag tag-sustained">sustained</span>
+  </div>
+  <p class="card-desc">Give your AI agent eyes to see the entire internet — reads Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu and more.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>6,572 stars</span>
+    <span>— forks</span>
+    <span>Created 02-24</span>
+  </div>
+  <div class="card-meta">
+    <span>7d +3,241</span>
+    <span>avg/day ~463</span>
+    <span>9 consecutive growth days</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,6 33,19 66,17 99,14 132,4 165,32 198,32" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="0" cy="6" r="2" fill="#2563eb"/><circle cx="132" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 5-day sustained growth then brief pause</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> Agent capabilities expanding from "execution" to "perception." Previously agents got information from users or RAG; Agent-Reach lets agents actively browse Twitter/Reddit. Dual US-China platform support (YouTube + Bilibili, Reddit + XiaoHongShu) signals global market ambition. This is the early form of the Agent Perception Layer.</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/anthropics/financial-services-plugins">anthropics/financial-services-plugins</a></h3>
+    <span class="badge badge-l3">L3</span>
+    <span class="signal-tag tag-step">step</span>
+  </div>
+  <p class="card-desc">Anthropic's official plugins for financial services — pre-built agent capabilities for banking, insurance, and fintech workflows.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>5,470 stars</span>
+    <span>— forks</span>
+    <span>Created 02-23</span>
+  </div>
+  <div class="card-meta">
+    <span>7d +2,520</span>
+    <span>avg/day ~497</span>
+    <span>6 days of growth</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,4 33,27 66,32 99,32 132,32 165,32 198,32" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="0" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · Post-launch growth, entering observation phase</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> Anthropic moving from horizontal API to vertical industry plugins. Financial services is one of the fastest-monetizing AI verticals. This project's strategic significance > technical significance — it signals big tech competing for vertical Agent ecosystem positioning. If successful, Anthropic will likely follow with healthcare, legal, and other industry plugins.</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/HKUDS/nanobot">HKUDS/nanobot</a></h3>
+    <span class="badge badge-l4">L4</span>
+    <span class="signal-tag tag-sustained">sustained</span>
+  </div>
+  <p class="card-desc">Ultra-Lightweight OpenClaw — runs on minimal resources with full agent capabilities, from Hong Kong University of Science.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>29,720 stars</span>
+    <span>— forks</span>
+    <span>Created 02-01</span>
+  </div>
+  <div class="card-meta">
+    <span>7d +2,920</span>
+    <span>avg/day ~900</span>
+    <span>6 consecutive growth days</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,11 66,9 99,7 132,4 165,10 198,11" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="132" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 6-day stable growth, 431-588★/day</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> 30K stars proves "lightweight agent" is a real demand. Not every scenario needs a heavyweight agent framework — many developers just need minimal viable autonomous agent capabilities. nanobot comes from HKU research team; academic backing + high growth is a combination worth monitoring.</div>
+</div>
+
+
+<h2>Developer Activity</h2>
+<p style="font-size:13px;color:#9ca3af;margin:-8px 0 16px">New repos from tracked developers in last 30 days (tracking 0)</p>
+
+
+
+<!-- When there is no developer activity -->
+<!-- <p style="font-size:15px;color:#9ca3af">No new repos from tracked developers this period.</p> -->
+
+<h2>Other Signals</h2>
+<p style="font-size:13px;color:#9ca3af;margin:-8px 0 16px">Candidates with high rough velocity, growth curve not verified</p>
+
+<table>
+  <thead><tr><th>Project</th><th>Stars</th><th>Created</th><th>avg/day</th><th>Description</th></tr></thead>
+  <tbody>
+  
+    <tr>
+      <td><a href="https://github.com/agentscope-ai/CoPaw">agentscope-ai/CoPaw</a></td>
+      <td class="stars">9,099</td>
+      <td>02-24</td>
+      <td class="stars">910/d</td>
+      <td>Personal AI assistant, growth paused 4 days ago, monitoring</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/xai-org/x-algorithm">xai-org/x-algorithm</a></td>
+      <td class="stars">15,890</td>
+      <td>01-19</td>
+      <td class="stars">345/d</td>
+      <td>xAI open-sources X/Twitter 'For You' recommendation algorithm</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/koala73/worldmonitor">koala73/worldmonitor</a></td>
+      <td class="stars">32,587</td>
+      <td>01-08</td>
+      <td class="stars">572/d</td>
+      <td>AI-powered real-time global intelligence dashboard, spike growth</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/maderix/ANE">maderix/ANE</a></td>
+      <td class="stars">5,895</td>
+      <td>02-28</td>
+      <td class="stars">983/d</td>
+      <td>Apple Neural Engine training reverse-engineering, L1 model layer</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/open-pencil/open-pencil">open-pencil/open-pencil</a></td>
+      <td class="stars">1,813</td>
+      <td>02-27</td>
+      <td class="stars">259/d</td>
+      <td>AI-native design editor, open-source Figma alternative</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/jamiepine/voicebox">jamiepine/voicebox</a></td>
+      <td class="stars">12,303</td>
+      <td>01-25</td>
+      <td class="stars">308/d</td>
+      <td>Open-source voice synthesis studio</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/tanishqkumar/ssd">tanishqkumar/ssd</a></td>
+      <td class="stars">661</td>
+      <td>03-04</td>
+      <td class="stars">331/d</td>
+      <td>Lightweight inference engine with speculative decoding</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+<hr>
+
+<details>
+  <summary>Filtered — 35 filtered (OpenClaw ecosystem 28 + Non-AI 4 + L5 3)</summary>
+  
+  <p style="margin: 8px 0;">
+    <strong>OpenClaw Ecosystem (28)</strong> — Skill collections, lightweight forks, translations, security guides, backup tools — ecosystem heat but not independent innovation<br>
+    <span class="filtered-list">everything-claude-code (63K), VoltAgent/awesome-openclaw-skills (30K), zeroclaw (24K), picoclaw (23K), antigravity-awesome-skills (21K), nanoclaw (20K), awesome-openclaw-usecases (20K), vercel-labs/agent-skills (22K), OthmanAdi/planning-with-files (15K), coreyhaines31/marketingskills (12K), snarktank/ralph (12K), vercel-labs/json-render (12K), gsd-build/get-shit-done (25K), HKUDS/ClawWork (6.7K), nullclaw (5.8K), nicobailon/visual-explainer (5.7K), slowmist/openclaw-security-practice-guide (1.3K), LeoYeAI/openclaw-master-skills (1.4K), LeoYeAI/openclaw-guardian (1K), pm-skills (3.6K), SwiftUI-Agent-Skill (732)</span>
+  </p>
+  
+
+  <p style="margin: 8px 0;">
+    <strong>Non-AI (4)</strong> — Caught by high-star strategy but not AI projects<br>
+    <span class="filtered-list">smartcmd/MinecraftConsoles (3.5K, gaming), cloudflare/vinext (6.2K, Vite plugin), bwya77/vscode-dark-islands (5.1K, VSCode theme), Flowseal/tg-ws-proxy (496, proxy tool)</span>
+  </p>
+  
+
+  <p style="margin: 8px 0;">
+    <strong>L5 Jailbreak/Prompt (3)</strong> — Prompt tricks or jailbreak related<br>
+    <span class="filtered-list">elder-plinius/OBLITERATUS (1.9K), millionco/react-doctor (5.4K, React fixer), pinchtab/pinchtab (5.4K, browser automation)</span>
+  </p>
+  
+</details>
+
+<div class="cost">
+  <strong>Cost</strong> — watch_signals.py 6 searches + fetch_star_history 8 verifications ≈ 20 API calls · Analysis cost ~$0.10
+</div>
+
+<p class="footer">GitHub Radar v0.1.0 · Signal Watch · 2026-03-06 · ai-agent domain + global three-window (7d/30d/90d) · 97 candidates · 8 verified</p>
+
+</body>
+</html>

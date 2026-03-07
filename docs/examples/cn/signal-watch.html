@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Watch — 2026-03-06</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #1f2937; font-size: 17px; line-height: 1.6; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { color: #9ca3af; font-size: 14px; }
+  .headline { font-size: 22px; font-weight: 600; color: #111827; line-height: 1.4; margin: 20px 0 0; padding: 16px 20px; background: #ffffff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; }
+
+  /* Layer legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; color: #9ca3af; }
+
+  /* Sections */
+  h2 { font-size: 18px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+
+  /* PM Focus */
+  .focus-list { list-style: none; padding: 0; }
+  .focus-list li { padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 16px; line-height: 1.65; }
+  .focus-list li:last-child { border-bottom: none; }
+  .focus-list strong { font-weight: 600; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .badge-l1 { background: #f3f4f6; color: #6b7280; }
+  .badge-l2 { background: #dbeafe; color: #1e40af; }
+  .badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .badge-l4 { background: #fef3c7; color: #92400e; }
+  .badge-l5 { background: #f3f4f6; color: #9ca3af; }
+  .signal-tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+  .tag-sustained { background: #dcfce7; color: #166534; }
+  .tag-accelerating { background: #dbeafe; color: #1e40af; }
+  .tag-spike { background: #fef2f2; color: #dc2626; }
+  .tag-step { background: #fef3c7; color: #92400e; }
+  .tag-unverified { background: #f3f4f6; color: #6b7280; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
+  tr:hover td { background: #f9fafb; }
+  td.stars { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Card */
+  .card { background: #ffffff; border-radius: 8px; padding: 24px; margin: 16px 0; border: 1px solid #e5e7eb; }
+  .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .card-header h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .card-header h3 a { color: #1f2937; }
+  .card-desc { color: #6b7280; font-size: 15px; margin-bottom: 16px; font-style: italic; }
+  .card-meta { font-size: 15px; color: #9ca3af; margin-bottom: 10px; }
+  .card-meta span { margin-right: 14px; }
+  .card .spark { margin: 8px 0 14px; }
+  .card .spark svg { display: block; }
+  .spark-label { font-size: 12px; color: #9ca3af; }
+  .pm { font-size: 16px; padding: 10px 14px; background: #eff6ff; border-left: 3px solid #2563eb; border-radius: 0 4px 4px 0; line-height: 1.65; }
+  .pm strong { font-weight: 600; }
+
+  /* Developer activity */
+  .dev-item { padding: 12px 0; border-bottom: 1px solid #e5e7eb; font-size: 16px; }
+  .dev-item:last-child { border-bottom: none; }
+  .dev-item .dev-name { font-weight: 600; }
+  .dev-item .dev-note { color: #9ca3af; font-size: 15px; }
+
+  /* Misc */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+  details { margin: 16px 0; }
+  summary { cursor: pointer; font-weight: 600; color: #9ca3af; font-size: 14px; padding: 8px 0; }
+  details[open] summary { margin-bottom: 8px; }
+  .filtered-list { color: #9ca3af; font-size: 14px; line-height: 1.8; }
+  .cost { font-size: 14px; color: #9ca3af; margin-top: 32px; line-height: 1.7; }
+  .footer { color: #d1d5db; font-size: 12px; text-align: center; margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Signal Watch</h1>
+  <span class="meta">2026-03-06 · 97 个候选 · 8 个已验证增长曲线 · ai-agent 领域 + 全局三窗口（7d/30d/90d）</span>
+</div>
+
+<p class="headline">大厂三连发 — OpenAI (Symphony)、Anthropic (Financial Services Plugins)、Google (Workspace CLI) 同一周发布 Agent 基础设施，集体从「提供模型」转向「提供工具链」。Agent 的能力边界也在扩张：从代码世界走向感知互联网。</p>
+
+<div class="legend">
+  <span><span class="badge badge-l2">L2</span> Agent Runtime</span>
+  <span><span class="badge badge-l3">L3</span> 开发工具</span>
+  <span><span class="badge badge-l4">L4</span> 终端产品</span>
+  <span><span class="badge badge-l5">L5</span> 垂直应用</span>
+</div>
+
+<h2>PM 关注重点</h2>
+<ul class="focus-list">
+  
+  <li><strong>Big Tech Agent 工具链竞赛</strong> — OpenAI Symphony（项目隔离执行）、Anthropic Financial Services Plugins（垂直行业）、Google Workspace CLI（办公自动化）三个项目同周发布。信号含义：大厂不再只卖模型，开始向下游延伸控制 Agent 的执行环境和工具链。</li>
+  
+
+  <li><strong>Agent 感知层兴起</strong> — Agent-Reach（6.6K，读 Twitter/Reddit/YouTube/GitHub）代表一个新品类：给 Agent 加上「眼睛」看互联网内容。之前 Agent 只能调 API 和写代码，现在开始具备主动信息获取能力。</li>
+  
+
+  <li><strong>OpenClaw 生态噪声极大</strong> — 97 个候选中约 30 个是 OpenClaw 周边（Skills 合集、精简版、安全指南、翻译）。平台效应显著但信噪比下降。PM 需要区分「生态热度」和「技术创新」。</li>
+  
+</ul>
+
+<h2>Picks</h2>
+
+<table>
+  <thead>
+    <tr><th>项目</th><th>层级</th><th>星数</th><th>创建</th><th>形态</th><th>一句话</th></tr>
+  </thead>
+  <tbody>
+  
+    <tr>
+      <td><a href="https://github.com/openai/symphony">openai/symphony</a></td>
+      <td><span class="badge badge-l2">L2</span></td>
+      <td class="stars">7,917</td>
+      <td>02-26</td>
+      <td><span class="signal-tag tag-step">step</span></td>
+      <td>OpenAI 出品 — 把项目工作变成隔离的自主 Agent 任务</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></td>
+      <td><span class="badge badge-l4">L4</span></td>
+      <td class="stars">6,307</td>
+      <td>03-02</td>
+      <td><span class="signal-tag tag-accelerating">accelerating</span></td>
+      <td>零人类公司编排 — 全自动化公司运营概念验证</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></td>
+      <td><span class="badge badge-l3">L3</span></td>
+      <td class="stars">6,572</td>
+      <td>02-24</td>
+      <td><span class="signal-tag tag-sustained">sustained</span></td>
+      <td>给 Agent 加眼睛 — 读 Twitter/Reddit/YouTube/GitHub/B站/小红书</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/anthropics/financial-services-plugins">anthropics/financial-services-plugins</a></td>
+      <td><span class="badge badge-l3">L3</span></td>
+      <td class="stars">5,470</td>
+      <td>02-23</td>
+      <td><span class="signal-tag tag-step">step</span></td>
+      <td>Anthropic 官方金融服务插件 — 大厂走垂直行业的信号</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/HKUDS/nanobot">HKUDS/nanobot</a></td>
+      <td><span class="badge badge-l4">L4</span></td>
+      <td class="stars">29,720</td>
+      <td>02-01</td>
+      <td><span class="signal-tag tag-sustained">sustained</span></td>
+      <td>Ultra-Lightweight OpenClaw — 30K 星说明「轻量 Agent」是刚需</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+<h2>Pick 详情</h2>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/openai/symphony">openai/symphony</a></h3>
+    <span class="badge badge-l2">L2</span>
+    <span class="signal-tag tag-step">step</span>
+  </div>
+  <p class="card-desc">Symphony turns project work into isolated, autonomous agent tasks with built-in sandboxing and state management.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>7,917 星</span>
+    <span>— 人 fork</span>
+    <span>创建于 02-26</span>
+  </div>
+  <div class="card-meta">
+    <span>近 7 天 +5,000+</span>
+    <span>日均 ~1,000</span>
+    <span>8 天增长</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,32 66,32 99,32 132,32 165,25 198,4" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="198" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 峰值 4,059★/天</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> OpenAI 从模型提供商向 Agent 基础设施延伸。Symphony 的核心不是 Agent 框架，是「项目级隔离执行环境」— 和 Alibaba OpenSandbox 异曲同工。信号：Agent 执行环境标准化正在大厂层面展开。</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/paperclipai/paperclip">paperclipai/paperclip</a></h3>
+    <span class="badge badge-l4">L4</span>
+    <span class="signal-tag tag-accelerating">accelerating</span>
+  </div>
+  <p class="card-desc">Open-source orchestration for zero-human company operations. Automated business processes end-to-end.</p>
+  <div class="card-meta">
+    <span>TypeScript</span>
+    <span>6,307 星</span>
+    <span>— 人 fork</span>
+    <span>创建于 03-02</span>
+  </div>
+  <div class="card-meta">
+    <span>近 7 天 +5,000+</span>
+    <span>日均 ~1,576</span>
+    <span>3 天连续增长中</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,32 66,32 99,32 132,21 165,4 198,8" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="165" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">03/02 → 03/06 · 仅 4 天 · 仍在增长中</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> 「零人类公司」概念很有争议性也很有传播力。技术上是 multi-agent orchestration，但产品定位直接对标「全自动化运营」。即使项目本身不成功，这个品类定义值得关注 — 如果「Agent 替代人」的叙事被市场接受，会重塑整个 Agent 产品的定位。</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></h3>
+    <span class="badge badge-l3">L3</span>
+    <span class="signal-tag tag-sustained">sustained</span>
+  </div>
+  <p class="card-desc">Give your AI agent eyes to see the entire internet — reads Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu and more.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>6,572 星</span>
+    <span>— 人 fork</span>
+    <span>创建于 02-24</span>
+  </div>
+  <div class="card-meta">
+    <span>近 7 天 +3,241</span>
+    <span>日均 ~463</span>
+    <span>9 天连续增长</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,6 33,19 66,17 99,14 132,4 165,32 198,32" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="0" cy="6" r="2" fill="#2563eb"/><circle cx="132" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 5 天持续增长后短暂停歇</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> Agent 能力从「执行」扩展到「感知」。之前 Agent 的信息来源靠用户喂或 RAG，Agent-Reach 让 Agent 能主动去看 Twitter/Reddit 等平台。中美双平台支持（YouTube + B站，Reddit + 小红书）说明瞄准全球市场。这是 Agent Perception Layer 的早期形态。</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/anthropics/financial-services-plugins">anthropics/financial-services-plugins</a></h3>
+    <span class="badge badge-l3">L3</span>
+    <span class="signal-tag tag-step">step</span>
+  </div>
+  <p class="card-desc">Anthropic's official plugins for financial services — pre-built agent capabilities for banking, insurance, and fintech workflows.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>5,470 星</span>
+    <span>— 人 fork</span>
+    <span>创建于 02-23</span>
+  </div>
+  <div class="card-meta">
+    <span>近 7 天 +2,520</span>
+    <span>日均 ~497</span>
+    <span>6 天增长</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,4 33,27 66,32 99,32 132,32 165,32 198,32" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="0" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 发布窗口增长后进入观察期</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> Anthropic 从水平 API 走向垂直行业插件。金融服务是 AI 变现最快的垂直领域之一。这个项目的战略意义 > 技术意义 — 它标志着大厂开始争夺垂直行业的 Agent 生态位。如果成功，Anthropic 会继续推出 healthcare、legal 等行业插件。</div>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/HKUDS/nanobot">HKUDS/nanobot</a></h3>
+    <span class="badge badge-l4">L4</span>
+    <span class="signal-tag tag-sustained">sustained</span>
+  </div>
+  <p class="card-desc">Ultra-Lightweight OpenClaw — runs on minimal resources with full agent capabilities, from Hong Kong University.</p>
+  <div class="card-meta">
+    <span>Python</span>
+    <span>29,720 星</span>
+    <span>— 人 fork</span>
+    <span>创建于 02-01</span>
+  </div>
+  <div class="card-meta">
+    <span>近 7 天 +2,920</span>
+    <span>日均 ~900</span>
+    <span>6 天连续增长</span>
+  </div>
+  <div class="spark">
+    <svg width="200" height="32" viewBox="0 0 200 32">
+      <polyline points="0,32 33,11 66,9 99,7 132,4 165,10 198,11" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+      <circle cx="132" cy="4" r="2.5" fill="#dc2626"/>
+    </svg>
+    <span class="spark-label">02/28 → 03/06 · 6 天稳定增长，431-588★/天</span>
+  </div>
+  <div class="pm"><strong>PM:</strong> 30K 星说明「轻量级 Agent」是真需求。不是所有场景都需要重量级 Agent 框架，很多开发者只需要最小可用的自主 Agent 能力。nanobot 来自港大研究团队，学术背景 + 高增长的组合值得关注。</div>
+</div>
+
+
+<h2>开发者动态</h2>
+<p style="font-size:13px;color:#9ca3af;margin:-8px 0 16px">种子名单开发者近 30 天新建项目（追踪 0 人）</p>
+
+
+
+<!-- 当没有开发者动态时 -->
+<!-- <p style="font-size:15px;color:#9ca3af">本期种子名单开发者无新建项目。</p> -->
+
+<h2>其他信号</h2>
+<p style="font-size:13px;color:#9ca3af;margin:-8px 0 16px">未拉取增长曲线但粗速度较高的候选</p>
+
+<table>
+  <thead><tr><th>项目</th><th>星数</th><th>创建</th><th>日均</th><th>描述</th></tr></thead>
+  <tbody>
+  
+    <tr>
+      <td><a href="https://github.com/agentscope-ai/CoPaw">agentscope-ai/CoPaw</a></td>
+      <td class="stars">9,099</td>
+      <td>02-24</td>
+      <td class="stars">910/d</td>
+      <td>个人 AI 助手，4 天前增长停歇，观察后续</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/xai-org/x-algorithm">xai-org/x-algorithm</a></td>
+      <td class="stars">15,890</td>
+      <td>01-19</td>
+      <td class="stars">345/d</td>
+      <td>xAI 开源 X/Twitter For You 推荐算法</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/koala73/worldmonitor">koala73/worldmonitor</a></td>
+      <td class="stars">32,587</td>
+      <td>01-08</td>
+      <td class="stars">572/d</td>
+      <td>AI 驱动全球实时情报仪表盘，spike 增长</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/maderix/ANE">maderix/ANE</a></td>
+      <td class="stars">5,895</td>
+      <td>02-28</td>
+      <td class="stars">983/d</td>
+      <td>Apple Neural Engine 训练逆向工程，L1 模型层</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/open-pencil/open-pencil">open-pencil/open-pencil</a></td>
+      <td class="stars">1,813</td>
+      <td>02-27</td>
+      <td class="stars">259/d</td>
+      <td>AI 原生设计编辑器，开源 Figma 替代品</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/jamiepine/voicebox">jamiepine/voicebox</a></td>
+      <td class="stars">12,303</td>
+      <td>01-25</td>
+      <td class="stars">308/d</td>
+      <td>开源语音合成工作室</td>
+    </tr>
+  
+
+    <tr>
+      <td><a href="https://github.com/tanishqkumar/ssd">tanishqkumar/ssd</a></td>
+      <td class="stars">661</td>
+      <td>03-04</td>
+      <td class="stars">331/d</td>
+      <td>轻量推理引擎，Speculative Decoding</td>
+    </tr>
+  
+  </tbody>
+</table>
+
+<hr>
+
+<details>
+  <summary>已过滤 — 35 个已过滤（OpenClaw 生态 28 + 非 AI 4 + L5 3）</summary>
+  
+  <p style="margin: 8px 0;">
+    <strong>OpenClaw 生态 (28 个)</strong> — Skills 合集、精简版、翻译、安全指南、备份工具等 — 生态热度高但不是独立创新<br>
+    <span class="filtered-list">everything-claude-code (63K), VoltAgent/awesome-openclaw-skills (30K), zeroclaw (24K), picoclaw (23K), antigravity-awesome-skills (21K), nanoclaw (20K), awesome-openclaw-usecases (20K), vercel-labs/agent-skills (22K), OthmanAdi/planning-with-files (15K), coreyhaines31/marketingskills (12K), snarktank/ralph (12K), vercel-labs/json-render (12K), gsd-build/get-shit-done (25K), HKUDS/ClawWork (6.7K), nullclaw (5.8K), nicobailon/visual-explainer (5.7K), slowmist/openclaw-security-practice-guide (1.3K), LeoYeAI/openclaw-master-skills (1.4K), LeoYeAI/openclaw-guardian (1K), pm-skills (3.6K), SwiftUI-Agent-Skill (732)</span>
+  </p>
+  
+
+  <p style="margin: 8px 0;">
+    <strong>非 AI (4 个)</strong> — 被高星策略误捞的非 AI 项目<br>
+    <span class="filtered-list">smartcmd/MinecraftConsoles (3.5K, 游戏), cloudflare/vinext (6.2K, Vite 插件), bwya77/vscode-dark-islands (5.1K, VSCode 主题), Flowseal/tg-ws-proxy (496, 代理工具)</span>
+  </p>
+  
+
+  <p style="margin: 8px 0;">
+    <strong>L5 Jailbreak/Prompt (3 个)</strong> — Prompt 技巧或 jailbreak 相关<br>
+    <span class="filtered-list">elder-plinius/OBLITERATUS (1.9K), millionco/react-doctor (5.4K, React 修复工具), pinchtab/pinchtab (5.4K, 浏览器自动化)</span>
+  </p>
+  
+</details>
+
+<div class="cost">
+  <strong>本次成本</strong> — watch_signals.py 6 次搜索 + fetch_star_history 8 次验证 ≈ 20 次 API 调用 · 分析成本 ~$0.10
+</div>
+
+<p class="footer">GitHub Radar v0.1.0 · Signal Watch · 2026-03-06 · ai-agent 领域 + 全局三窗口（7d/30d/90d） · 97 个候选 · 8 个已验证</p>
+
+</body>
+</html>

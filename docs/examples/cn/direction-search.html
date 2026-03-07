@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction Search: Agent Memory — 2026-03-06</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f4; color: #1f2937; font-size: 17px; line-height: 1.6; padding: 32px 24px; max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { color: #78716c; font-size: 14px; }
+  .headline { font-size: 22px; font-weight: 600; color: #111827; line-height: 1.4; margin: 20px 0 0; padding: 16px 20px; background: #ffffff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; }
+
+  /* Legend & Keywords */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; color: #78716c; }
+  .keywords-details { margin: 16px 0 0; }
+  .keywords-summary { cursor: pointer; font-size: 14px; font-weight: 600; color: #78716c; padding: 4px 0; }
+  .keywords-list { margin-top: 8px; line-height: 2; }
+  .keywords-list code { background: #e7e5e4; color: #44403c; padding: 3px 8px; border-radius: 3px; font-size: 13px; display: inline-block; margin: 2px 4px 2px 0; }
+
+  /* Sections */
+  h2 { font-size: 18px; font-weight: 600; color: #57534e; text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+  h3.section-sub { font-size: 15px; font-weight: 600; color: #78716c; margin: 24px 0 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* Cards */
+  .card { background: #ffffff; border-radius: 8px; padding: 24px; margin: 16px 0; border: 1px solid #d6d3d1; }
+  .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .card-header h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .card-desc { color: #57534e; font-size: 15px; margin-bottom: 16px; font-style: italic; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .badge-l1 { background: #f3f4f6; color: #6b7280; }
+  .badge-l2 { background: #dbeafe; color: #1e40af; }
+  .badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .badge-l4 { background: #fef3c7; color: #92400e; }
+  .badge-l5 { background: #f3f4f6; color: #78716c; }
+  .badge-std { background: #fce7f3; color: #9d174d; }
+  .signal-tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 4px; background: #fef2f2; color: #dc2626; margin-left: 4px; }
+
+  /* Metrics */
+  .metric-table { width: auto; min-width: 300px; margin: 12px 0 16px; }
+  .metric-table td { padding: 6px 14px 6px 0; border: none; font-size: 15px; }
+  .metric-table td:first-child { font-weight: 600; color: #78716c; width: 100px; }
+  .precision { font-size: 11px; color: #a8a29e; margin-left: 4px; }
+
+  /* Insight */
+  .insight { font-size: 16px; margin: 10px 0; line-height: 1.65; }
+  .insight strong { color: #374151; }
+
+  /* Paradigm */
+  .paradigm-box { border-left: 4px solid #2563eb; padding: 16px 20px; margin: 20px 0; background: #f0f5ff; font-size: 16px; color: #1e3a5f; line-height: 1.7; }
+
+  /* Landscape Tables */
+  table.landscape { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+  table.landscape th { text-align: left; font-weight: 600; padding: 8px 10px; border-bottom: 2px solid #d6d3d1; color: #78716c; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+  table.landscape td { padding: 7px 10px; border-bottom: 1px solid #e7e5e4; }
+  table.landscape tr:hover td { background: #f9fafb; }
+  table.landscape .stale { color: #a8a29e; }
+  table.landscape .hot { color: #059669; font-weight: 600; }
+
+  /* Suggestion Table */
+  table.suggestion { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  table.suggestion th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 2px solid #d6d3d1; color: #78716c; font-size: 13px; text-transform: uppercase; }
+  table.suggestion td { padding: 10px 12px; border-bottom: 1px solid #e7e5e4; }
+
+  /* Links */
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Misc */
+  hr { border: none; border-top: 1px solid #d6d3d1; margin: 32px 0; }
+  details { margin: 16px 0; }
+  summary { cursor: pointer; font-weight: 600; color: #78716c; font-size: 14px; padding: 8px 0; }
+  details[open] summary { margin-bottom: 8px; }
+  .filtered-list { color: #78716c; font-size: 14px; line-height: 1.8; }
+  .footer { color: #a8a29e; font-size: 12px; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Direction Search: Agent Memory</h1>
+  <span class="meta">93 个召回（含 Topic 补充），48 个高相关，竞争格局 6 个子品类 · 8 个关键词 + Topic 补充搜索</span>
+</div>
+
+<p class="headline">Agent Memory 赛道已有明确王者 — mem0（49K 星）占据绝对领先，但「第二代记忆」技术（自主学习、知识图谱、记忆 OS）正在从三个维度同时发起挑战。六条赛道、三代技术并行展开。</p>
+
+<div class="legend">
+  <span><span class="badge badge-l2">L2</span> Agent Runtime</span> <span><span class="badge badge-l3">L3</span> 开发框架/SDK</span> <span><span class="badge badge-l5">L5</span> Wrapper/Demo</span>
+</div>
+
+<details class="keywords-details">
+  <summary class="keywords-summary">搜索关键词 (8 个)</summary>
+  <p class="keywords-list">
+    <code>agent memory</code> <code>agent memory layer</code> <code>llm memory</code> <code>long term memory llm</code> <code>conversation memory</code> <code>agent context management</code> <code>agent state persistence</code> <code>memory retrieval agent</code><br><span style="color:#6b7280;font-size:14px;">+ Topic 补充搜索: <code>topic:memory+agent</code> <code>topic:memory+llm</code></span>
+  </p>
+</details>
+
+<h2>值得关注</h2>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Universal Memory Layer for AI Agents — 为 AI Agent 提供统一的记忆层，支持个性化、多用户、跨 session 长期记忆。</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>48,936 <span class="precision">[估算，5000 条 API 上限]</span></td></tr><tr><td>增长形态</td><td>mature（峰值在 188 天前）</td></tr><tr><td>语言</td><td>Python</td></tr><tr><td>创建</td><td>2024-04-16</td></tr><tr><td>生态</td><td>Chrome 扩展 (657★)、MCP Server (653★)、多平台集成</td></tr>
+  </table>
+  <p class="insight"><strong>为什么值得关注</strong> — 这是 Agent Memory 赛道无可争议的王者 — 49K 星，是第二名 cognee（13K）的近 4 倍。mem0 验证了一个关键假设：开发者需要一个「开箱即用的记忆层」，而不是自己搭建复杂的 RAG 管线。已有完整生态（Chrome 扩展、MCP 集成、企业版）。但增长已进入成熟期，说明第一代市场已经饱和。</p>
+  <p class="insight"><strong>范式信号</strong> — mem0 的成功说明 Agent Memory 的第一代需求是「简单可用的通用记忆层」。但这也意味着 mem0 的护城河是「早期采纳 + 生态」而非技术深度。第二代项目如果在技术维度（自主学习、知识图谱）证明显著优势，有可能实现范式替代 — 这是 cognee、hindsight 等项目的赌注。</p>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Agent Memory That Learns — 记忆系统不只是存取，会从交互中自主学习和进化。</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>2,409 <span class="precision">[精确]</span></td></tr><tr><td>30d 增长</td><td>+1,133 <span class="precision">[精确]</span></td></tr><tr><td>7d 增长</td><td>+544 <span class="precision">[精确]</span></td></tr><tr><td>加速度</td><td>2.06x（7d 日均 / 30d 日均）<span class="precision">[精确]</span></td></tr><tr><td>增长形态</td><td>sustained + accelerating（连续增长 83 天）</td></tr><tr><td>语言</td><td>Python</td></tr>
+  </table>
+  <p class="insight"><strong>为什么值得关注</strong> — 增长最快的第二代记忆项目。与 mem0 的「被动存取」不同，hindsight 让记忆系统主动从交互中提炼知识。这是从「数据库」到「认知引擎」的范式跃迁。在 mem0 已占据通用记忆市场的情况下，hindsight 的机会在于证明「主动学习的记忆」能带来显著不同的 agent 表现。</p>
+  <p class="insight"><strong>范式信号</strong> — Agent Memory 正在分化为两条路线：被动记忆（存取优化，mem0）和主动记忆（自主学习，hindsight）。如果主动记忆路线成立，记忆层将从「检索基础设施」升级为「认知基础设施」，成为 Agent 智能的第二引擎。</p>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/topoteretes/cognee">topoteretes/cognee</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Knowledge Engine for AI Agent Memory in 6 lines of code — 基于知识图谱的 Agent 记忆引擎。</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>13,013 <span class="precision">[精确]</span></td></tr><tr><td>30d 增长</td><td>平稳 <span class="precision">[估算，5000 条 API 上限]</span></td></tr><tr><td>增长形态</td><td>mature（峰值在 272 天前）</td></tr><tr><td>语言</td><td>Python</td></tr><tr><td>创建</td><td>2023-08-16</td></tr>
+  </table>
+  <p class="insight"><strong>为什么值得关注</strong> — 知识图谱路线的代表，赛道星数第二（13K）。与 mem0 的扁平存取不同，cognee 把记忆结构化为可推理的知识网络。「6 lines of code」的 DX 做得好。增长已平稳，说明知识图谱路线在技术上被验证，但还没有在市场上挑战 mem0 的地位。</p>
+  <p class="insight"><strong>范式信号</strong> — cognee 验证了一个假设：agent 的记忆不应该是扁平的向量，而应该是结构化的知识图谱。如果图谱是正确答案，那纯向量检索的 memory 方案（包括 mem0 的基础版）可能会被降维打击。但知识图谱的复杂性也是其短板 — 谁先解决「开箱即用 + 图谱深度」的矛盾，谁就赢。</p>
+</div>
+
+
+<h2>竞争格局</h2>
+
+<h3 class="section-sub">1. Memory Platform — 通用记忆平台</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>路线</th><th>增长</th></tr></thead><tbody><tr><td><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></td><td>48,936</td><td>通用记忆层</td><td>成熟期</td></tr><tr><td><a href="https://github.com/memvid/memvid">memvid/memvid</a></td><td>13,278</td><td>替代 RAG 管线（Rust）</td><td>成熟期</td></tr><tr><td><a href="https://github.com/MemoriLabs/Memori">MemoriLabs/Memori</a></td><td>12,314</td><td>SQL 原生记忆层</td><td>成熟期</td></tr><tr><td><a href="https://github.com/MemTensor/MemOS">MemTensor/MemOS</a></td><td>6,225</td><td>记忆操作系统</td><td>+125/30d</td></tr><tr><td><a href="https://github.com/CaviraOSS/OpenMemory">CaviraOSS/OpenMemory</a></td><td>3,532</td><td>开放记忆平台</td><td class="hot">+112/7d</td></tr><tr><td><a href="https://github.com/EverMind-AI/EverMemOS">EverMind-AI/EverMemOS</a></td><td>2,403</td><td>记忆 OS</td><td>早期</td></tr></tbody></table><h3 class="section-sub">2. Memory Engine — 独立记忆引擎</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>路线</th><th>增长</th></tr></thead><tbody><tr><td><a href="https://github.com/topoteretes/cognee">topoteretes/cognee</a></td><td>13,013</td><td>知识图谱</td><td class="stale">平稳期</td></tr><tr><td><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></td><td>2,409</td><td>自主学习型</td><td class="hot">+544/7d</td></tr><tr><td><a href="https://github.com/kayba-ai/agentic-context-engine">kayba-ai/agentic-context-engine</a></td><td>1,951</td><td>Agentic 上下文引擎</td><td>早期</td></tr><tr><td><a href="https://github.com/trustgraph-ai/trustgraph">trustgraph-ai/trustgraph</a></td><td>1,340</td><td>上下文图谱</td><td>+22/7d</td></tr><tr><td><a href="https://github.com/agiresearch/A-mem">agiresearch/A-mem</a></td><td>873</td><td>Agentic Memory (NeurIPS)</td><td>研究驱动</td></tr><tr><td><a href="https://github.com/VectorSpaceLab/general-agentic-memory">general-agentic-memory</a></td><td>822</td><td>Deep-research 驱动</td><td>研究驱动</td></tr><tr><td><a href="https://github.com/caspianmoon/memoripy">caspianmoon/memoripy</a></td><td>683</td><td>Python 记忆库</td><td>平稳</td></tr></tbody></table><h3 class="section-sub">3. MCP Memory Server — 记忆即服务</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>特点</th></tr></thead><tbody><tr><td><a href="https://github.com/coleam00/mcp-mem0">coleam00/mcp-mem0</a></td><td>653</td><td>Mem0 集成，MCP 模板</td></tr><tr><td><a href="https://github.com/AVIDS2/memorix">AVIDS2/memorix</a></td><td>166</td><td>跨 Agent 记忆桥接</td></tr><tr><td><a href="https://github.com/petabridge/memorizer">petabridge/memorizer</a></td><td>151</td><td>向量搜索 MCP</td></tr><tr><td><a href="https://github.com/pinkpixel-dev/mem0-mcp">pinkpixel-dev/mem0-mcp</a></td><td>87</td><td>Mem0 MCP 集成</td></tr><tr><td><a href="https://github.com/Pimzino/agentic-tools-mcp">agentic-tools-mcp</a></td><td>80</td><td>任务 + 记忆 MCP</td></tr><tr><td><a href="https://github.com/WhenMoon-afk/claude-memory-mcp">claude-memory-mcp</a></td><td>59</td><td>Claude 持久记忆</td></tr></tbody></table><h3 class="section-sub">4. Database-Native Memory — 数据库厂商入场</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>后端</th></tr></thead><tbody><tr><td><a href="https://github.com/microsoft/kernel-memory">microsoft/kernel-memory</a></td><td>2,138</td><td>Microsoft（.NET 生态）</td></tr><tr><td><a href="https://github.com/oceanbase/powermem">oceanbase/powermem</a></td><td>481</td><td>OceanBase（阿里系）</td></tr><tr><td><a href="https://github.com/elizaOS/agentmemory">elizaOS/agentmemory</a></td><td>231</td><td>ChromaDB / Postgres</td></tr><tr><td><a href="https://github.com/redis/agent-memory-server">redis/agent-memory-server</a></td><td>193</td><td>Redis（官方）</td></tr><tr><td><a href="https://github.com/neo4j-labs/agent-memory">neo4j-labs/agent-memory</a></td><td>45</td><td>Neo4j（官方 Labs）</td></tr></tbody></table><h3 class="section-sub">5. Coding Agent Memory — 编码场景专用</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>特点</th></tr></thead><tbody><tr><td><a href="https://github.com/Dicklesworthstone/cass_memory_system">cass_memory_system</a></td><td>267</td><td>跨 Agent 过程性记忆</td></tr><tr><td><a href="https://github.com/gavdalf/total-recall">total-recall</a></td><td>112</td><td>5 层观察式记忆</td></tr><tr><td><a href="https://github.com/christian-byrne/claude-code-vector-memory">claude-code-vector-memory</a></td><td>30</td><td>Claude Code 语义记忆</td></tr><tr><td><a href="https://github.com/faugustdev/git-context-controller">git-context-controller</a></td><td>25</td><td>Git 式记忆操作</td></tr></tbody></table><h3 class="section-sub">6. Research / Benchmark — 学术实现</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>论文/方法</th></tr></thead><tbody><tr><td><a href="https://github.com/agiresearch/A-mem">agiresearch/A-mem</a></td><td>873</td><td>NeurIPS 2025 A-MEM</td></tr><tr><td><a href="https://github.com/HUST-AI-HYZ/MemoryAgentBench">MemoryAgentBench</a></td><td>244</td><td>记忆 Agent 基准测试</td></tr><tr><td><a href="https://github.com/MemTensor/HaluMem">HaluMem</a></td><td>112</td><td>记忆幻觉评估基准</td></tr><tr><td><a href="https://github.com/toby-bridges/epro-memory">epro-memory</a></td><td>66</td><td>6 分类 + L0/L1/L2 分层</td></tr><tr><td><a href="https://github.com/HU-xiaobai/xMemory">xMemory</a></td><td>56</td><td>Beyond RAG（2026.02 Arxiv）</td></tr><tr><td><a href="https://github.com/microsoft/Mnemis">microsoft/Mnemis</a></td><td>46</td><td>层级图谱双路检索</td></tr></tbody></table>
+
+<h2>范式判断</h2>
+
+<div class="paradigm-box">
+  <strong>Agent Memory 已进入「王者 + 挑战者」格局。</strong><br><br>mem0（49K 星）以绝对领先占据第一代市场，但三股力量正在同时挑战：<br><br>1. <strong>知识图谱派</strong>（cognee 13K）— 结构化推理 vs. 扁平检索<br>2. <strong>主动学习派</strong>（hindsight 2.4K, accelerating）— 记忆系统从被动存取变为自主进化<br>3. <strong>记忆 OS 派</strong>（MemOS 6.2K, Memori 12.3K, EverMemOS）— 把记忆层从 SDK 升级为操作系统<br><br>过去 18 个月的三代演进：<br>1. <strong>对话历史</strong>（2024）— 简单的 message list，window 截断<br>2. <strong>通用记忆层</strong>（2025）— mem0 验证的「开箱即用」路线，向量存取 + 用户画像<br>3. <strong>认知记忆</strong>（2026）— 知识图谱、自主学习、多层分类、跨 agent 共享<br><br>关键结构信号：<strong>数据库厂商（Redis、Neo4j、OceanBase、Microsoft）集体入场</strong>，加上 <strong>MCP 协议让 Memory 成为标准化服务</strong>，记忆层正在从 framework 附属品变成独立基础设施品类。<br><br><strong>受威胁的</strong>：仍在用简单 vector store 做记忆的 agent framework。<br><strong>不受威胁的</strong>：底层的 LLM 推理层 — memory 做得再好，还是需要 LLM 来使用这些记忆。<br><br>下一个战场：<strong>跨 agent 记忆共享</strong>（memorix、cass）、<strong>记忆可信度验证</strong>（HaluMem、MemoryAgentBench）、<strong>Memory OS 标准化</strong>（谁定义 agent 的记忆接口）。
+</div>
+
+<h2>建议深挖</h2>
+
+<table class="suggestion">
+  <thead><tr><th>Repo</th><th>建议</th></tr></thead>
+  <tbody>
+
+    <tr>
+      <td><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></td>
+      <td>Mode 4 深度分析 — 赛道绝对王者（49K 星），看 contributor 结构、企业采纳、护城河</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/mem0ai/mem0">mem0 vs cognee</a></td>
+      <td>Mode 4 对比分析 — 通用记忆层 vs 知识图谱，两种路线的技术深度和市场表现对比</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></td>
+      <td>Mode 4 深度分析 — 增长最快的第二代项目，看技术路线和颠覆 mem0 的可能性</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/memvid/memvid">memvid/memvid</a></td>
+      <td>Mode 3 信号监控 — 13K 星 Rust 实现，「替代 RAG」定位值得关注</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<hr>
+
+<details>
+  <summary>过滤掉的项目 (45 个)</summary>
+  <p style="margin: 8px 0;"><strong>Paper List / Awesome List (8 个)</strong> — 学术资源汇总<br><span class="filtered-list">Agent-Memory-Paper-List (1.4K), agentic-memory (ALucek, 514), Awesome-AI-Memory (454), LLM_Agent_Memory_Survey (476), Awesome-Agent-Memory×2 (262/76), Awesome-GraphMemory (170), Awesome-Efficient-Agents (192)</span></p><p style="margin: 8px 0;"><strong>Tutorial / Demo / Guide (6 个)</strong> — 教程和演示<br><span class="filtered-list">optimize-ai-agent-memory (257), agent-memory-guide (33), conversation-memory-streamlit (52), Langchain-Interview-Preparation (32), oxbshw/Handbook (495), agentic-memory (lhl, 26)</span></p><p style="margin: 8px 0;"><strong>非 Memory 主业 (13 个)</strong> — Topic 搜索误捞或 memory 只是附属功能<br><span class="filtered-list">wgcloud (5.1K, 云监控), MineContext (5K, 上下文挖掘), OpenViking (4.9K, 向量数据库), MemMachine (4.6K), cipher (3.6K, 密码学), EvoAgentX (2.6K, 通用 Agent), fastapi-template (2K), RPG-ZeroRepo (541), doc-to-lora (472), Swarm (376), AlphaAvatar (562), chat2graph (398), Athena (418)</span></p><p style="margin: 8px 0;"><strong>其他过滤 (18 个)</strong> — 低星、功能重叠或非核心<br><span class="filtered-list">Gemini_Discordbot (98), Agentic-Desktop-Pet (223), fullstack-langgraph (85), Huaman-Agent-Memory (94), JoySafeter (162), Aeiva (159), memov (158), Squirrel (92), vibe (91), timem (76), yams (365), automem (647), memlayer (261), telemem (441), LightMem (659), memsearch (777), bosquet (366), honcho (402)</span></p>
+</details>
+
+<p class="footer">Generated by GitHub Radar v0.1.0 · 2026-03-06 · 93 repos scanned (keyword + topic supplement), 8 keywords, 48 high-relevance, 6 sub-categories</p>
+
+</body>
+</html>

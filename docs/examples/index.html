@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Radar - Report Examples</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: #fafafa; color: #1f2937; line-height: 1.6; }
+  .container { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .subtitle { color: #6b7280; font-size: 16px; margin-bottom: 40px; }
+  .lang-group { margin-bottom: 36px; }
+  .lang-group h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #374151; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  a.card { display: block; padding: 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; text-decoration: none; color: #1f2937; transition: border-color 0.15s; }
+  a.card:hover { border-color: #2563eb; }
+  .card-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .card-desc { font-size: 13px; color: #6b7280; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+  .badge-1 { background: #dbeafe; color: #1d4ed8; }
+  .badge-2 { background: #d1fae5; color: #065f46; }
+  .badge-3 { background: #fef3c7; color: #92400e; }
+  .badge-4 { background: #fce7f3; color: #9d174d; }
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e7eb; font-size: 13px; color: #9ca3af; text-align: center; }
+  footer a { color: #6b7280; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>GitHub Radar</h1>
+  <p class="subtitle">Open-source intelligence engine from an AI PM perspective. Below are sample reports from all four modes.</p>
+
+  <div class="lang-group">
+    <h2>English</h2>
+    <div class="cards">
+      <a class="card" href="en/radar-pulse.html">
+        <div class="card-title">Radar Pulse <span class="badge badge-1">Mode 1</span></div>
+        <div class="card-desc">Weekly scan for high-potential new projects</div>
+      </a>
+      <a class="card" href="en/direction-search.html">
+        <div class="card-title">Direction Search <span class="badge badge-2">Mode 2</span></div>
+        <div class="card-desc">Deep search for "Agent Memory" direction</div>
+      </a>
+      <a class="card" href="en/signal-watch.html">
+        <div class="card-title">Signal Watch <span class="badge badge-3">Mode 3</span></div>
+        <div class="card-desc">Global abnormal growth signal detection</div>
+      </a>
+      <a class="card" href="en/deep-link.html">
+        <div class="card-title">Deep Link <span class="badge badge-4">Mode 4</span></div>
+        <div class="card-desc">Comprehensive single-repo analysis</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="lang-group">
+    <h2>中文</h2>
+    <div class="cards">
+      <a class="card" href="cn/radar-pulse.html">
+        <div class="card-title">Radar Pulse <span class="badge badge-1">模式 1</span></div>
+        <div class="card-desc">每周扫描高潜新项目</div>
+      </a>
+      <a class="card" href="cn/direction-search.html">
+        <div class="card-title">Direction Search <span class="badge badge-2">模式 2</span></div>
+        <div class="card-desc">深度搜索 "Agent Memory" 方向</div>
+      </a>
+      <a class="card" href="cn/signal-watch.html">
+        <div class="card-title">Signal Watch <span class="badge badge-3">模式 3</span></div>
+        <div class="card-desc">全局异常增长信号检测</div>
+      </a>
+      <a class="card" href="cn/deep-link.html">
+        <div class="card-title">Deep Link <span class="badge badge-4">模式 4</span></div>
+        <div class="card-desc">单个 Repo 全方位深度分析</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://github.com/Kun-0546/github-radar">GitHub Radar</a> &middot; MIT License
+  </footer>
+</div>
+</body>
+</html>

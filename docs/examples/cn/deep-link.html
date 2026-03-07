@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Link: hindsight — 2026-03-06</title>
+<style>
+  :root {
+    --bg: #fafafa; --surface: #ffffff; --border: #e5e7eb;
+    --text: #1f2937; --muted: #6b7280; --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --green: #16a34a; --red: #dc2626; --amber: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    max-width: 760px; margin: 0 auto; padding: 48px 24px 80px;
+    font-size: 17px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--text); letter-spacing: -0.01em; }
+  h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  p { margin-bottom: 12px; font-size: 16px; }
+
+  .meta { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+  .meta span { margin-right: 16px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 16px; margin-bottom: 8px; }
+  th { text-align: left; font-weight: 600; padding: 10px 10px; border-bottom: 2px solid var(--text); font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .layer-badge { display: inline-block; font-size: 14px; font-weight: 600; padding: 3px 12px; border-radius: 4px; letter-spacing: 0.02em; }
+  .layer-badge-l2 { background: #dbeafe; color: #1e40af; }
+  .layer-badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .layer-badge-l4 { background: #fef3c7; color: #92400e; }
+
+  .layer-box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin-bottom: 16px; }
+  .layer-box p { font-size: 16px; margin-bottom: 8px; }
+  .layer-box .reason { font-size: 15px; color: var(--muted); margin-top: 8px; padding-left: 24px; }
+  .layer-box .reason li { margin-bottom: 4px; list-style: disc; margin-left: 0; }
+  .layer-box .not-l { font-size: 15px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .badge-l1 { background: #f3f4f6; color: #6b7280; }
+  .badge-l2 { background: #dbeafe; color: #1e40af; }
+  .badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .badge-l4 { background: #fef3c7; color: #92400e; }
+  .badge-l5 { background: #f3f4f6; color: #9ca3af; }
+
+  .pm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin-bottom: 16px; font-size: 16px; }
+  .pm-box ul { padding-left: 20px; }
+  .pm-box li { margin-bottom: 6px; list-style: disc; }
+  .pm-box strong { font-weight: 600; }
+
+  .paradigm { background: var(--accent-light); border: 1px solid #bfdbfe; border-radius: 6px; padding: 18px 20px; font-size: 16px; margin-bottom: 16px; }
+  .paradigm strong { font-weight: 600; }
+  .paradigm .sub { margin-top: 12px; }
+  .paradigm .sub-title { font-weight: 600; margin-bottom: 4px; }
+  .paradigm ul { padding-left: 20px; }
+  .paradigm li { margin-bottom: 4px; list-style: disc; }
+
+  .arch { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; margin-bottom: 16px; overflow-x: auto; }
+  .arch pre { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.5; white-space: pre; color: var(--text); }
+
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { color: var(--muted); font-size: 14px; }
+  .headline { font-size: 22px; font-weight: 600; color: #111827; line-height: 1.4; margin: 20px 0 0; padding: 16px 20px; background: var(--surface); border-left: 4px solid var(--accent); border-radius: 0 6px 6px 0; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; color: var(--muted); }
+
+  .timeline { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .timeline .rel { font-size: 13px; padding: 3px 8px; border-radius: 3px; background: var(--accent-light); border: 1px solid #bfdbfe; color: var(--accent); white-space: nowrap; }
+
+  .summary-table td:first-child { font-weight: 600; white-space: nowrap; width: 80px; vertical-align: top; }
+  .summary-table td { font-size: 16px; }
+
+  .alert { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 14px 18px; font-size: 15px; color: var(--red); margin-bottom: 16px; }
+  .alert strong { font-weight: 600; }
+
+  details { margin: 16px 0; }
+  summary { cursor: pointer; font-weight: 600; color: var(--muted); font-size: 14px; padding: 8px 0; }
+  details[open] summary { margin-bottom: 8px; }
+
+  .footer { color: #d1d5db; font-size: 12px; text-align: center; margin-top: 24px; }
+
+  @media (max-width: 600px) {
+    body { padding: 24px 16px 60px; }
+    table { font-size: 14px; }
+    .arch pre { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Deep Link: vectorize-io/hindsight</h1>
+  <span class="meta">2026-03-06 · Mode 4: 深度关联分析 · 数据精度: [精确]</span>
+</div>
+
+<p class="headline">Agent Memory That Learns — 不只是存取记忆，而是让记忆系统从 Agent 的交互中自主学习和进化。代表了 Agent Memory 从「被动数据库」到「主动认知引擎」的范式跃迁。</p>
+
+<div class="legend">
+  <span><span class="badge badge-l1">L1</span> 模型/推理</span>
+  <span><span class="badge badge-l2">L2</span> Agent Runtime</span>
+  <span><span class="badge badge-l3">L3</span> 开发框架/SDK</span>
+  <span><span class="badge badge-l4">L4</span> 垂直产品</span>
+  <span><span class="badge badge-l5">L5</span> Wrapper/Demo</span>
+</div>
+
+<hr>
+
+<!-- ==================== 基础画像 ==================== -->
+<h2>基础画像</h2>
+<table>
+  <colgroup><col style="width:90px"><col style="width:180px"><col></colgroup>
+  <tbody>
+    <tr><td>Stars</td><td class="num">2,409 [精确]</td><td></td></tr>
+    <tr><td>Forks</td><td class="num">203 [精确]</td><td>Fork 率 8.4%，高于同体量项目平均（~5%），说明有实际二次开发需求</td></tr>
+    <tr><td>7 天增长</td><td class="num">+544 [精确]</td><td>日均 77.7★，加速度 2.06x — 需求驱动的 sustained 增长</td></tr>
+    <tr><td>峰值日</td><td class="num">2026-03-05 (235★)</td><td>峰值在昨天，增长仍在爬升中</td></tr>
+    <tr><td>增长形态</td><td class="num">sustained + accelerating</td><td>连续增长 83 天，无 spike/decay — 这不是营销驱动的一波流</td></tr>
+    <tr><td colspan="3" style="border-bottom:2px solid var(--border);padding:4px"></td></tr>
+    <tr><td>Commits</td><td class="num">470（近 90 天）</td><td></td></tr>
+    <tr><td></td><td class="num" style="color:var(--muted)">└ 近 7 天: 58（日均 8.3）</td><td>日均 8+ commits，非常高的开发强度</td></tr>
+    <tr><td></td><td class="num" style="color:var(--muted)">└ 近 30 天: 190（日均 6.3）</td><td>30d 到 7d 开发强度在加速</td></tr>
+    <tr><td colspan="3" style="border-bottom:2px solid var(--border);padding:4px"></td></tr>
+    <tr><td>语言</td><td>Python</td><td>AI/ML 生态主流语言，降低集成门槛</td></tr>
+    <tr><td>License</td><td>MIT License</td><td></td></tr>
+    <tr><td>创建</td><td>2025-10-30</td><td>4.3 个月 — 极早期项目，发展速度惊人</td></tr>
+    <!-- 可选: Homepage -->
+    <!-- <tr><td>Homepage</td><td><a href="{{homepage_url}}">{{homepage_display}}</a></td><td></td></tr> -->
+  </tbody>
+</table>
+
+<!-- 每日增长折线图: SVG 面积图，X轴为日期，Y轴为每日新增星数 -->
+<h3 style="margin-top:20px">每日增长</h3>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:20px 20px 12px;">
+  <svg viewBox="0 0 560 200" style="width:100%;height:auto;display:block;">
+    <!-- 网格线 -->
+    <line x1="50" y1="20" x2="540" y2="20" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="50" y1="55" x2="540" y2="55" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="50" y1="90" x2="540" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="50" y1="125" x2="540" y2="125" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <line x1="50" y1="160" x2="540" y2="160" stroke="var(--border)" stroke-width="1"/>
+    <line x1="50" y1="20" x2="50" y2="160" stroke="var(--border)" stroke-width="1"/>
+
+    <!-- Y轴标签: 根据数据最大值调整 -->
+    <text x="46" y="164" text-anchor="end" font-size="11" fill="var(--muted)">0</text>
+    <text x="46" y="129" text-anchor="end" font-size="11" fill="var(--muted)">63</text>
+    <text x="46" y="94" text-anchor="end" font-size="11" fill="var(--muted)">125</text>
+    <text x="46" y="59" text-anchor="end" font-size="11" fill="var(--muted)">188</text>
+    <text x="46" y="24" text-anchor="end" font-size="11" fill="var(--muted)">250</text>
+
+    <!-- 面积填充: 根据实际数据点计算坐标 -->
+    <!-- Y 映射: y = 160 - (val / y_max) * 140 -->
+    <path d="M50,133 L132,149 L213,118 L295,131 L377,148 L458,28 L540,155 L540,160 L50,160 Z" fill="var(--accent-light)" opacity="0.5"/>
+
+    <!-- 折线 -->
+    <polyline points="50,133 132,149 213,118 295,131 377,148 458,28 540,155" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- 数据点: 峰值用 var(--red)，其余用 var(--accent) -->
+    <circle cx="50" cy="133" r="3" fill="var(--accent)"/><circle cx="132" cy="149" r="3" fill="var(--accent)"/><circle cx="213" cy="118" r="3" fill="var(--accent)"/><circle cx="295" cy="131" r="3" fill="var(--accent)"/><circle cx="377" cy="148" r="3" fill="var(--accent)"/><circle cx="458" cy="28" r="4" fill="var(--red)"/><circle cx="540" cy="155" r="3" fill="var(--accent)"/>
+
+    <!-- 峰值标注 -->
+    <text x="458" y="18" text-anchor="middle" font-size="11" fill="var(--red)" font-weight="600">235 ★</text>
+
+    <!-- X轴日期标签 -->
+    <text x="50" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">02-28</text><text x="132" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-01</text><text x="213" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-02</text><text x="295" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-03</text><text x="377" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-04</text><text x="458" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-05</text><text x="540" y="176" text-anchor="middle" font-size="10" fill="var(--muted)">03-06</text>
+
+    <!-- 单位 -->
+    <text x="300" y="192" text-anchor="middle" font-size="10" fill="var(--muted)">新增星数 / 天</text>
+  </svg>
+</div>
+<p style="font-size:14px;color:var(--muted);margin-top:8px">近 7 天 +544 星，加速度 2.06x。3/5 单日 235★ 是目前峰值（可能有 HN/Twitter 曝光），但 3/6 回落到 9★ 说明不是纯自然增长，需要观察后续几天是否回升到 50-70 区间。</p>
+
+<hr>
+
+<!-- ==================== Layer 定位 ==================== -->
+<h2>Layer 定位</h2>
+<div class="layer-box">
+  <!-- 使用对应的 layer-badge-l2 / l3 / l4 class -->
+  <span class="layer-badge layer-badge-l2">L2 — Agent Runtime</span>
+  <p style="margin-top:10px;font-size:16px;">Hindsight 是独立的 Agent 记忆运行时层 — 不绑定任何特定 Agent 框架，为 Agent 提供可插拔的记忆基础设施服务。</p>
+  <ul class="reason">
+    <li>独立运行时 — 不依赖 LangChain/AutoGen 等框架，独立部署和运行</li><li>基础设施级 — 提供 observe/distill/integrate/evolve 原语，类似 DB 为应用提供 CRUD</li><li>有配套基础设施 — pg0 (pgvector), Hindsight Cloud, Python SDK</li>
+    <!-- <li>理由 1</li> -->
+    <!-- <li>理由 2</li> -->
+  </ul>
+  <div class="not-l"><strong>为什么不是 L3（开发框架）？</strong> Hindsight 不提供 Agent 构建能力（路由、工具调用、编排），它只做记忆层。使用 Hindsight 的 Agent 仍然需要一个 L3 框架来构建。</div>
+</div>
+
+<hr>
+
+<!-- ==================== 采纳深度 ==================== -->
+<h2>采纳深度</h2>
+
+<!-- 可选: 当采纳信号异常时使用 alert -->
+<!-- <div class="alert"><strong>{{adoption_alert_title}}</strong> {{adoption_alert_body}}</div> -->
+
+<table>
+  <colgroup><col style="width:110px"><col style="width:100px"><col></colgroup>
+  <thead><tr><th>指标</th><th>值</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td>Fork 率</td><td class="num">8.4%</td><td>高于同体量平均，说明有实际二次开发和定制需求</td></tr>
+    <tr><td>Watch 率</td><td class="num">0.9% (21 人)</td><td>极低 — 大量 star 可能来自发现/收藏，而非持续关注。需要时间转化为深度用户</td></tr>
+    <tr><td>Issue 活跃率</td><td class="num">3.49%</td><td>中等水平 — 用户确实在用并报问题，不是纯收藏项目</td></tr>
+    <tr><td>Issue 零回复率</td><td class="num">33.3%</td><td>三分之一 issue 无回复 — 单核心维护者的瓶颈信号</td></tr>
+    <tr><td>平均评论数</td><td class="num">1.5 条/issue</td><td>讨论深度一般，大部分 issue 快速关闭</td></tr>
+    <tr><td>高星 Fork</td><td class="num">10 个</td><td>有 10 个 fork 获得了星 — fork 活跃度健康</td></tr>
+  </tbody>
+</table>
+
+<div class="pm-box">
+  <p><strong>采纳深度判断</strong></p>
+  <ul>
+    <li><strong>真实使用 vs 收藏</strong> — Fork 率高 + Issue 活跃 说明有人在真用，但 Watch 率极低 说明大量 star 是「看到 → 收藏 → 离开」的模式</li><li><strong>社区响应瓶颈</strong> — 33% 零回复率 + 单核心维护者 = 社区支持能力跟不上增长速度</li><li><strong>结论</strong> — 真实采纳正在发生，但深度使用者比例还不高。当前处于「发现 → 试用」阶段，尚未进入「深度集成」阶段</li>
+    <!-- <li><strong>要点</strong> — 解读</li> -->
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== Contributor 结构 ==================== -->
+<h2>Contributor 结构</h2>
+<table>
+  <colgroup><col style="width:30px"><col style="width:160px"><col style="width:80px"><col></colgroup>
+  <thead><tr><th>#</th><th>贡献者</th><th>Commits</th><th>角色</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><a href="https://github.com/nicoloboschi">nicoloboschi</a></td><td class="num">447</td><td>创始人 / 核心维护者（79.2% commits）</td></tr><tr><td>2</td><td><a href="https://github.com/cdbartholomew">cdbartholomew</a></td><td class="num">41</td><td>DevRel / 文档（7.3%）</td></tr><tr><td>3</td><td><a href="https://github.com/slayoffer">slayoffer</a></td><td class="num">21</td><td>工程师（3.7%）</td></tr><tr><td>4</td><td><a href="https://github.com/chrislatimer">chrislatimer</a></td><td class="num">17</td><td>工程师（3.0%）</td></tr><tr><td>5</td><td><a href="https://github.com/DK09876">DK09876</a></td><td class="num">13</td><td>外部贡献者</td></tr>
+    <!-- <tr><td>1</td><td><a href="https://github.com/{{login}}">{{login}}</a></td><td class="num">{{contributions}}</td><td>{{role}}</td></tr> -->
+  </tbody>
+</table>
+
+<div class="pm-box">
+  <ul>
+    <li><strong>Bus Factor = 1</strong> — nicoloboschi 贡献了 79% 的 commit，这是最大风险。如果此人离开或精力转移，项目可能停滞</li><li><strong>Vectorize.io 团队</strong> — 至少 3-4 人是公司员工（nicoloboschi, cdbartholomew, slayoffer, chrislatimer），说明有公司资源投入，不是纯 side project</li><li><strong>外部贡献极少</strong> — 10 个 contributor 中仅 DK09876 等少数是外部贡献，社区参与度低</li>
+    <!-- <li><strong>Bus factor = N</strong> — 解读</li> -->
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== Release 节奏 ==================== -->
+<h2>Release 节奏</h2>
+<div class="timeline">
+  <span class="rel">v0.4.16 <small>03-05</small></span><span class="rel">v0.4.15 <small>03-03</small></span><span class="rel">v0.4.14 <small>02-26</small></span><span class="rel">v0.4.13 <small>02-19</small></span><span class="rel">v0.4.12 <small>02-18</small></span><span class="rel">v0.4.11 <small>02-13</small></span><span class="rel">v0.4.10 <small>02-09</small></span><span class="rel">v0.4.9 <small>02-04</small></span><span class="rel">v0.4.8 <small>02-03</small></span><span class="rel">v0.4.7 <small>01-31</small></span>
+  <!-- <span class="rel">v1.0.0 <small>MM-DD</small></span> -->
+</div>
+<p style="font-size:16px;color:var(--muted)">35 天内发布 10 个版本（~3.5 天/版），iteration 速度极快。全部在 v0.4.x 区间 — 产品还在快速演化，API 可能不稳定。还没有 v1.0 的迹象。</p>
+
+<hr>
+
+<!-- ==================== Issue 构成 ==================== -->
+<h2>Issue 构成</h2>
+<table>
+  <colgroup><col style="width:140px"><col style="width:60px"><col style="width:60px"><col></colgroup>
+  <thead><tr><th>类型</th><th>数量</th><th>占比</th><th>解读</th></tr></thead>
+  <tbody>
+    <tr><td>Bug</td><td class="num">30</td><td class="num">35.7%</td><td>快速迭代期的正常水平</td></tr><tr><td>Feature Request</td><td class="num">28</td><td class="num">33.3%</td><td>用户需求活跃 — 功能空间还很大</td></tr><tr><td>Other</td><td class="num">22</td><td class="num">26.2%</td><td>—</td></tr><tr><td>Integration</td><td class="num">4</td><td class="num">4.8%</td><td>集成需求少 — 还在核心能力打磨阶段</td></tr><tr><td>Ecosystem Question</td><td class="num">0</td><td class="num">0%</td><td>没有「怎么用」的问题 — 用户要么文档够好，要么还太少</td></tr>
+    <!-- <tr><td>Bug</td><td class="num">30</td><td class="num">30%</td><td>解读</td></tr> -->
+  </tbody>
+</table>
+<p style="font-size:14px;color:var(--muted)">基于最近 84 条 issue 的自动分类。Bug 和 Feature Request 各占三分之一，说明产品在快速功能扩展阶段。</p>
+
+<!-- 当未分类占比 > 50% 时，增加手动抽样分析 -->
+<!-- <div class="pm-box">
+  <p><strong>手动抽样（最近 10 条 issue）：</strong></p>
+  <ul>
+    {{issue_manual_analysis}}
+  </ul>
+  <p style="margin-bottom:0"><strong>与自动分类的交叉验证：</strong>{{issue_cross_validation}}</p>
+</div> -->
+
+<hr>
+
+<!-- ==================== 核心创新 ==================== -->
+<h2>核心创新</h2>
+<p style="font-size:16px;margin-bottom:12px">Hindsight 的核心创新是将 Agent Memory 从「被动数据库」升级为「主动认知引擎」。传统记忆系统（包括 mem0）是 write/read 模式 — Agent 写入信息，需要时检索。Hindsight 引入了自主学习循环：记忆系统会从交互中自动提炼知识、合并重复、发现模式、进化自身。这有一篇 <a href="https://arxiv.org/abs/2512.12818">ArXiv 论文</a>作为理论基础。</p>
+
+<!-- 新旧对比架构图 (必须) -->
+<div class="arch"><pre>
+传统 Agent Memory（被动模式）         Hindsight（主动学习模式）
+┌─────────────────────┐          ┌────────────────────────────┐
+│  Agent Session       │          │  Agent Session              │
+│  ├─ LLM              │          │  ├─ LLM                     │
+│  └─ Memory           │          │  └─ Hindsight Memory        │
+│     ├─ write(fact)    │          │     ├─ observe(interaction) │
+│     └─ read(query)    │          │     ├─ distill(knowledge)  ←┐
+│        ↓              │          │     ├─ integrate(merge)    │ │
+│   Vector DB           │          │     └─ evolve(pattern) ────┘ │
+│   (flat storage)      │          │        ↓                    │
+└─────────────────────┘          │   Knowledge Graph + Learned  │
+                                  │   Patterns (自我进化)         │
+数据流: Agent → 存 → 取           └────────────────────────────┘
+无自主行为                        数据流: Agent ↔ 学习循环 ↔ 进化
+                                  记忆系统有自主行为
+</pre></div>
+
+<div class="pm-box">
+  <p><strong>创新评估</strong></p>
+  <ul>
+    <li><strong>范式级创新</strong> — 从被动存取到主动学习是认知科学中的根本区分。Hindsight 把这个区分带到了 Agent 记忆领域</li><li><strong>有学术支撑</strong> — ArXiv 论文（2512.12818）提供理论基础，不是纯工程 hack</li><li><strong>与 mem0 的本质差异</strong> — mem0 做的是「更好的数据库」，hindsight 做的是「认知引擎」。二者可以共存（hindsight 可以建立在 mem0 之上），也可以替代</li><li><strong>风险</strong> — 「自主学习」的可控性和可解释性是难题。如果记忆系统自主进化出错误知识，可能导致 Agent 行为退化</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== Ecosystem Map ==================== -->
+<h2>Ecosystem Map</h2>
+<div class="arch"><pre>
+                    ┌─────────────────────────┐
+                    │   Vectorize.io（母公司）  │
+                    └──────────┬──────────────┘
+                               │
+             ┌─────────────────┼─────────────────┐
+             │                 │                 │
+    ┌────────▼───────┐  ┌──────▼──────┐  ┌───────▼──────┐
+    │  hindsight     │  │  Hindsight  │  │  pg0         │
+    │  (core OSS)    │  │  Cloud      │  │  (pgvector)  │
+    │  2,409★ MIT    │  │  (商业 SaaS) │  │  35★ MIT     │
+    └────────┬───────┘  └─────────────┘  └──────────────┘
+             │
+    ┌────────┼────────┐
+    │                 │
+ ┌──▼──────┐   ┌──────▼───────┐
+ │Cookbook  │   │ Benchmarks   │
+ │ 12★     │   │ 2★           │
+ └─────────┘   └──────────────┘
+
+ 外部集成:
+ └── awesome-mcp-servers（82K★）中已收录
+</pre></div>
+
+<div class="pm-box">
+  <ul>
+    <li><strong>典型的 Open Core 模式</strong> — OSS 版免费（MIT），Cloud 版收费。这是可持续的商业模式</li><li><strong>生态极早期</strong> — 没有第三方 plugin/wrapper/extension。生态系统还没有建立</li><li><strong>配套工具齐全</strong> — Cookbook（教程）、Benchmarks（对比）、pg0（基础设施）说明团队在系统性地建生态</li><li><strong>MCP 集成</strong> — 已被 awesome-mcp-servers 收录，说明正在融入 Agent 工具链标准</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ==================== 范式判断 ==================== -->
+<!-- 注意: 不包含"与你的关联"部分 -->
+<h2>范式判断</h2>
+<div class="paradigm">
+  <p><strong>Hindsight 代表了 Agent Memory 的第二代范式：从「被动存取」到「主动认知」。</strong></p>
+  <p>第一代 Agent Memory（以 mem0 为代表）解决了「Agent 需要跨 session 记忆」的问题，但记忆系统本身是被动的 — 只有 write/read。Hindsight 提出第二代范式：记忆系统自身是一个学习系统，会从 Agent 的交互中自主提炼知识、发现模式、进化自身。<br><br>如果这个方向被市场验证，Agent Memory 赛道将出现分化：通用记忆层（mem0）服务「只需要记住东西」的场景，认知记忆引擎（hindsight）服务「需要记忆越用越智能」的高级场景。</p>
+
+  <div class="sub">
+    <p class="sub-title">谁可能受威胁：</p>
+    <ul>
+      <li><strong>简单 RAG 管线</strong> — 如果 hindsight 的自主学习确实有效，手动构建 embedding + retrieval 的方案会显得过于原始</li><li><strong>mem0 的高级场景</strong> — 对于需要「记忆进化」的复杂 agent，mem0 的被动模式可能不够</li>
+      <!-- <li><strong>谁</strong> — 为什么</li> -->
+    </ul>
+  </div>
+  <div class="sub">
+    <p class="sub-title">谁不受威胁：</p>
+    <ul>
+      <li><strong>mem0 的基础市场</strong> — 大部分 agent 只需要简单的跨 session 记忆，不需要认知进化。mem0 的「开箱即用」仍然是这些场景的最优解</li><li><strong>知识图谱路线（cognee）</strong> — 知识图谱是记忆的结构化方式，与主动学习是正交的。cognee 的结构化能力可以和 hindsight 的学习能力互补</li><li><strong>LLM 推理层</strong> — 记忆层做得再好，仍然需要 LLM 来消费记忆</li>
+      <!-- <li><strong>谁</strong> — 为什么</li> -->
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== PM 总结 ==================== -->
+<h2>PM 总结</h2>
+<table class="summary-table">
+  <tbody>
+    <tr><td>成熟度</td><td>🟡 极早期（v0.4.x，4.3 个月），开发强度极高但产品还在快速变化中</td></tr>
+    <tr><td>可信度</td><td>🟢 可信度高 — 有 ArXiv 论文支撑、公司团队持续投入、MIT 开源、Open Core 商业模式清晰</td></tr>
+    <tr><td>增长性质</td><td>🟢 健康的需求驱动增长 — sustained + accelerating（83 天连续增长），不是 spike/marketing 驱动</td></tr>
+    <tr><td>PM 价值</td><td>🟢 高 — 代表 Agent Memory 赛道的范式演进方向。无论 hindsight 本身成败，「主动学习记忆」这个方向值得持续跟踪</td></tr>
+    <tr><td>风险</td><td>🔴 Bus Factor = 1（79% commits 由一人贡献）<br>🟡 v0.4.x 阶段 API 不稳定，不适合生产环境深度集成<br>🟡 Watch 率极低（0.9%），star 到深度采纳的转化有待观察<br>🟡 「自主进化」的可控性和可解释性是未解难题</td></tr>
+    <tr><td>建议</td><td>持续跟踪（Mode 3 Signal Watch），等 v1.0 或 API 稳定后再评估生产集成。当前最大价值是作为「主动记忆」范式的参考实现来学习和理解方向。</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ==================== 竞品候选 (折叠) ==================== -->
+<details>
+  <summary>原始数据：竞品候选（脚本返回 10 个）</summary>
+  <p style="font-size:14px;color:var(--muted);margin-top:8px">竞品候选基于 repo topics（agentic-ai, memory, agents）自动搜索。大部分是泛 Agent 平台而非直接竞品。</p>
+  <table style="margin-top:8px;font-size:14px">
+    <thead><tr><th>项目</th><th>星数</th><th>是否直接竞品</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></td><td class="num">48,938</td><td>✅ 直接竞品 — 通用记忆层市场领导者，被动存取模式</td></tr><tr><td><a href="https://github.com/topoteretes/cognee">topoteretes/cognee</a></td><td class="num">13,013</td><td>✅ 间接竞品 — 知识图谱记忆引擎，结构化路线</td></tr><tr><td><a href="https://github.com/langflow-ai/langflow">langflow-ai/langflow</a></td><td class="num">145,329</td><td>❌ Agent workflow 平台，不是记忆层</td></tr><tr><td><a href="https://github.com/langgenius/dify">langgenius/dify</a></td><td class="num">131,499</td><td>❌ Agent 开发平台，记忆是附属功能</td></tr><tr><td><a href="https://github.com/langchain-ai/langchain">langchain-ai/langchain</a></td><td class="num">128,498</td><td>❌ Agent 框架，内置记忆是 ConversationMemory（最基础）</td></tr><tr><td><a href="https://github.com/microsoft/autogen">microsoft/autogen</a></td><td class="num">55,258</td><td>❌ Multi-agent 框架，不是记忆层</td></tr><tr><td><a href="https://github.com/infiniflow/ragflow">infiniflow/ragflow</a></td><td class="num">74,304</td><td>⚠️ 间接 — RAG 引擎，hindsight 号称替代 RAG 管线</td></tr>
+      <!-- <tr><td>owner/repo</td><td>10k</td><td>判断</td></tr> -->
+    </tbody>
+  </table>
+</details>
+
+<hr>
+
+<p style="font-size:14px;color:var(--muted)">
+  <strong>数据采集</strong> — deep_link.py 9 步 + star history（约 80 次 GitHub API 调用）<br>
+  <strong>分析成本</strong> — 估算 ~$0.12
+</p>
+
+<p class="footer">GitHub Radar v0.1.0 &middot; Deep Link &middot; 2026-03-06 &middot; 数据精度: [精确]</p>
+
+</body>
+</html>

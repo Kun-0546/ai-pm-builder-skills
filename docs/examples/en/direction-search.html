@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction Search: Agent Memory — 2026-03-06</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f4; color: #1f2937; font-size: 17px; line-height: 1.6; padding: 32px 24px; max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .meta { color: #78716c; font-size: 14px; }
+  .headline { font-size: 22px; font-weight: 600; color: #111827; line-height: 1.4; margin: 20px 0 0; padding: 16px 20px; background: #ffffff; border-left: 4px solid #2563eb; border-radius: 0 6px 6px 0; }
+
+  /* Legend & Keywords */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 0; font-size: 13px; color: #78716c; }
+  .keywords-details { margin: 16px 0 0; }
+  .keywords-summary { cursor: pointer; font-size: 14px; font-weight: 600; color: #78716c; padding: 4px 0; }
+  .keywords-list { margin-top: 8px; line-height: 2; }
+  .keywords-list code { background: #e7e5e4; color: #44403c; padding: 3px 8px; border-radius: 3px; font-size: 13px; display: inline-block; margin: 2px 4px 2px 0; }
+
+  /* Sections */
+  h2 { font-size: 18px; font-weight: 600; color: #57534e; text-transform: uppercase; letter-spacing: 0.5px; margin: 40px 0 16px; }
+  h3.section-sub { font-size: 15px; font-weight: 600; color: #78716c; margin: 24px 0 10px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* Cards */
+  .card { background: #ffffff; border-radius: 8px; padding: 24px; margin: 16px 0; border: 1px solid #d6d3d1; }
+  .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .card-header h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .card-desc { color: #57534e; font-size: 15px; margin-bottom: 16px; font-style: italic; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+  .badge-l1 { background: #f3f4f6; color: #6b7280; }
+  .badge-l2 { background: #dbeafe; color: #1e40af; }
+  .badge-l3 { background: #e0e7ff; color: #3730a3; }
+  .badge-l4 { background: #fef3c7; color: #92400e; }
+  .badge-l5 { background: #f3f4f6; color: #78716c; }
+  .badge-std { background: #fce7f3; color: #9d174d; }
+  .signal-tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 4px; background: #fef2f2; color: #dc2626; margin-left: 4px; }
+
+  /* Metrics */
+  .metric-table { width: auto; min-width: 300px; margin: 12px 0 16px; }
+  .metric-table td { padding: 6px 14px 6px 0; border: none; font-size: 15px; }
+  .metric-table td:first-child { font-weight: 600; color: #78716c; width: 100px; }
+  .precision { font-size: 11px; color: #a8a29e; margin-left: 4px; }
+
+  /* Insight */
+  .insight { font-size: 16px; margin: 10px 0; line-height: 1.65; }
+  .insight strong { color: #374151; }
+
+  /* Paradigm */
+  .paradigm-box { border-left: 4px solid #2563eb; padding: 16px 20px; margin: 20px 0; background: #f0f5ff; font-size: 16px; color: #1e3a5f; line-height: 1.7; }
+
+  /* Landscape Tables */
+  table.landscape { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+  table.landscape th { text-align: left; font-weight: 600; padding: 8px 10px; border-bottom: 2px solid #d6d3d1; color: #78716c; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+  table.landscape td { padding: 7px 10px; border-bottom: 1px solid #e7e5e4; }
+  table.landscape tr:hover td { background: #f9fafb; }
+  table.landscape .stale { color: #a8a29e; }
+  table.landscape .hot { color: #059669; font-weight: 600; }
+
+  /* Suggestion Table */
+  table.suggestion { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0; }
+  table.suggestion th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 2px solid #d6d3d1; color: #78716c; font-size: 13px; text-transform: uppercase; }
+  table.suggestion td { padding: 10px 12px; border-bottom: 1px solid #e7e5e4; }
+
+  /* Links */
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Misc */
+  hr { border: none; border-top: 1px solid #d6d3d1; margin: 32px 0; }
+  details { margin: 16px 0; }
+  summary { cursor: pointer; font-weight: 600; color: #78716c; font-size: 14px; padding: 8px 0; }
+  details[open] summary { margin-bottom: 8px; }
+  .filtered-list { color: #78716c; font-size: 14px; line-height: 1.8; }
+  .footer { color: #a8a29e; font-size: 12px; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Direction Search: Agent Memory</h1>
+  <span class="meta">93 repos found (incl. topic supplement), 48 high-relevance, 6 sub-categories across 8 keywords + topic supplement</span>
+</div>
+
+<p class="headline">Agent Memory has a clear champion — mem0 (49K stars) dominates the first generation, but "second-gen memory" technologies (self-learning, knowledge graphs, Memory OS) are challenging from three dimensions simultaneously. Six tracks, three generations running in parallel.</p>
+
+<div class="legend">
+  <span><span class="badge badge-l2">L2</span> Agent Runtime</span> <span><span class="badge badge-l3">L3</span> Dev Framework/SDK</span> <span><span class="badge badge-l5">L5</span> Wrapper/Demo</span>
+</div>
+
+<details class="keywords-details">
+  <summary class="keywords-summary">Search Keywords (8)</summary>
+  <p class="keywords-list">
+    <code>agent memory</code> <code>agent memory layer</code> <code>llm memory</code> <code>long term memory llm</code> <code>conversation memory</code> <code>agent context management</code> <code>agent state persistence</code> <code>memory retrieval agent</code><br><span style="color:#6b7280;font-size:14px;">+ Topic supplement: <code>topic:memory+agent</code> <code>topic:memory+llm</code></span>
+  </p>
+</details>
+
+<h2>Notable Picks</h2>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Universal Memory Layer for AI Agents — provides a unified memory layer for AI agents with personalization, multi-user support, and cross-session long-term memory.</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>48,936 <span class="precision">[est., 5000 API limit]</span></td></tr><tr><td>Pattern</td><td>mature (peak 188 days ago)</td></tr><tr><td>Language</td><td>Python</td></tr><tr><td>Created</td><td>2024-04-16</td></tr><tr><td>Ecosystem</td><td>Chrome extension (657★), MCP Server (653★), multi-platform integrations</td></tr>
+  </table>
+  <p class="insight"><strong>Why it matters</strong> — The undisputed champion of the Agent Memory space — 49K stars, nearly 4x the runner-up cognee (13K). mem0 validated a key hypothesis: developers want a "plug-and-play memory layer" rather than building complex RAG pipelines themselves. It has a complete ecosystem (Chrome extension, MCP integration, enterprise tier). But growth has entered maturity, suggesting the first-generation market is saturated.</p>
+  <p class="insight"><strong>Paradigm signal</strong> — mem0's success proves that the first-generation demand for Agent Memory is "simple, usable, universal memory layer." But this also means mem0's moat is "early adoption + ecosystem" rather than technical depth. If second-gen projects prove significant advantages in technical dimensions (self-learning, knowledge graphs), paradigm displacement is possible — that's the bet cognee and hindsight are making.</p>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Agent Memory That Learns — a memory system that doesn't just store and retrieve, but autonomously learns and evolves from interactions.</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>2,409 <span class="precision">[exact]</span></td></tr><tr><td>30d Growth</td><td>+1,133 <span class="precision">[exact]</span></td></tr><tr><td>7d Growth</td><td>+544 <span class="precision">[exact]</span></td></tr><tr><td>Acceleration</td><td>2.06x (7d avg / 30d avg) <span class="precision">[exact]</span></td></tr><tr><td>Pattern</td><td>sustained + accelerating (83 consecutive growth days)</td></tr><tr><td>Language</td><td>Python</td></tr>
+  </table>
+  <p class="insight"><strong>Why it matters</strong> — The fastest-growing second-gen memory project. Unlike mem0's passive storage/retrieval, hindsight lets the memory system actively distill knowledge from interactions. This is a paradigm leap from "database" to "cognitive engine." With mem0 already owning the general memory market, hindsight's opportunity lies in proving that "actively learning memory" delivers measurably better agent performance.</p>
+  <p class="insight"><strong>Paradigm signal</strong> — Agent Memory is splitting into two routes: passive memory (storage/retrieval optimization, mem0) and active memory (autonomous learning, hindsight). If the active memory route proves out, the memory layer will upgrade from "retrieval infrastructure" to "cognitive infrastructure" — becoming the agent's second engine.</p>
+</div>
+
+
+<div class="card">
+  <div class="card-header">
+    <h3><a href="https://github.com/topoteretes/cognee">topoteretes/cognee</a></h3>
+    <span class="badge badge-l2">L2</span>
+    
+  </div>
+  <p class="card-desc">Knowledge Engine for AI Agent Memory in 6 lines of code — a knowledge-graph-based agent memory engine.</p>
+  <table class="metric-table">
+    <tr><td>Stars</td><td>13,013 <span class="precision">[exact]</span></td></tr><tr><td>30d Growth</td><td>stable <span class="precision">[est., 5000 API limit]</span></td></tr><tr><td>Pattern</td><td>mature (peak 272 days ago)</td></tr><tr><td>Language</td><td>Python</td></tr><tr><td>Created</td><td>2023-08-16</td></tr>
+  </table>
+  <p class="insight"><strong>Why it matters</strong> — The knowledge graph approach leader, #2 by stars (13K). Unlike mem0's flat storage, cognee structures memory into a reasoned knowledge network. The "6 lines of code" DX is well-executed. Growth has plateaued, suggesting the knowledge graph route is technically validated but hasn't yet challenged mem0's market position.</p>
+  <p class="insight"><strong>Paradigm signal</strong> — cognee validated a hypothesis: agent memory shouldn't be flat vectors but structured knowledge graphs. If graphs are the right answer, pure vector-retrieval approaches (including mem0's basic tier) may get outclassed. But knowledge graph complexity is also its weakness — whoever solves the "plug-and-play + graph depth" tension first, wins.</p>
+</div>
+
+
+<h2>Competitive Landscape</h2>
+
+<h3 class="section-sub">1. Memory Platform — Universal Memory Layers</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Approach</th><th>Growth</th></tr></thead><tbody><tr><td><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></td><td>48,936</td><td>Universal memory layer</td><td>mature</td></tr><tr><td><a href="https://github.com/memvid/memvid">memvid/memvid</a></td><td>13,278</td><td>RAG replacement (Rust)</td><td>mature</td></tr><tr><td><a href="https://github.com/MemoriLabs/Memori">MemoriLabs/Memori</a></td><td>12,314</td><td>SQL-native memory layer</td><td>mature</td></tr><tr><td><a href="https://github.com/MemTensor/MemOS">MemTensor/MemOS</a></td><td>6,225</td><td>Memory OS</td><td>+125/30d</td></tr><tr><td><a href="https://github.com/CaviraOSS/OpenMemory">CaviraOSS/OpenMemory</a></td><td>3,532</td><td>Open memory platform</td><td class="hot">+112/7d</td></tr><tr><td><a href="https://github.com/EverMind-AI/EverMemOS">EverMind-AI/EverMemOS</a></td><td>2,403</td><td>Memory OS</td><td>early</td></tr></tbody></table><h3 class="section-sub">2. Memory Engine — Standalone Memory Systems</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Approach</th><th>Growth</th></tr></thead><tbody><tr><td><a href="https://github.com/topoteretes/cognee">topoteretes/cognee</a></td><td>13,013</td><td>Knowledge graph</td><td class="stale">plateau</td></tr><tr><td><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></td><td>2,409</td><td>Self-learning</td><td class="hot">+544/7d</td></tr><tr><td><a href="https://github.com/kayba-ai/agentic-context-engine">kayba-ai/agentic-context-engine</a></td><td>1,951</td><td>Agentic context engine</td><td>early</td></tr><tr><td><a href="https://github.com/trustgraph-ai/trustgraph">trustgraph-ai/trustgraph</a></td><td>1,340</td><td>Context graph</td><td>+22/7d</td></tr><tr><td><a href="https://github.com/agiresearch/A-mem">agiresearch/A-mem</a></td><td>873</td><td>Agentic Memory (NeurIPS)</td><td>research-driven</td></tr><tr><td><a href="https://github.com/VectorSpaceLab/general-agentic-memory">general-agentic-memory</a></td><td>822</td><td>Deep-research powered</td><td>research-driven</td></tr><tr><td><a href="https://github.com/caspianmoon/memoripy">caspianmoon/memoripy</a></td><td>683</td><td>Python memory library</td><td>stable</td></tr></tbody></table><h3 class="section-sub">3. MCP Memory Server — Memory as a Service</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Approach</th></tr></thead><tbody><tr><td><a href="https://github.com/coleam00/mcp-mem0">coleam00/mcp-mem0</a></td><td>653</td><td>Mem0 integration, MCP template</td></tr><tr><td><a href="https://github.com/AVIDS2/memorix">AVIDS2/memorix</a></td><td>166</td><td>Cross-agent memory bridge</td></tr><tr><td><a href="https://github.com/petabridge/memorizer">petabridge/memorizer</a></td><td>151</td><td>Vector-search MCP</td></tr><tr><td><a href="https://github.com/pinkpixel-dev/mem0-mcp">pinkpixel-dev/mem0-mcp</a></td><td>87</td><td>Mem0 MCP integration</td></tr><tr><td><a href="https://github.com/Pimzino/agentic-tools-mcp">agentic-tools-mcp</a></td><td>80</td><td>Task + memory MCP</td></tr><tr><td><a href="https://github.com/WhenMoon-afk/claude-memory-mcp">claude-memory-mcp</a></td><td>59</td><td>Persistent Claude memory</td></tr></tbody></table><h3 class="section-sub">4. Database-Native Memory — DB Vendors Entering</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Backend</th></tr></thead><tbody><tr><td><a href="https://github.com/microsoft/kernel-memory">microsoft/kernel-memory</a></td><td>2,138</td><td>Microsoft (.NET ecosystem)</td></tr><tr><td><a href="https://github.com/oceanbase/powermem">oceanbase/powermem</a></td><td>481</td><td>OceanBase (Alibaba)</td></tr><tr><td><a href="https://github.com/elizaOS/agentmemory">elizaOS/agentmemory</a></td><td>231</td><td>ChromaDB / Postgres</td></tr><tr><td><a href="https://github.com/redis/agent-memory-server">redis/agent-memory-server</a></td><td>193</td><td>Redis (official)</td></tr><tr><td><a href="https://github.com/neo4j-labs/agent-memory">neo4j-labs/agent-memory</a></td><td>45</td><td>Neo4j (official Labs)</td></tr></tbody></table><h3 class="section-sub">5. Coding Agent Memory — Dev Workflow Specific</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Approach</th></tr></thead><tbody><tr><td><a href="https://github.com/Dicklesworthstone/cass_memory_system">cass_memory_system</a></td><td>267</td><td>Cross-agent procedural memory</td></tr><tr><td><a href="https://github.com/gavdalf/total-recall">total-recall</a></td><td>112</td><td>5-layer observational memory</td></tr><tr><td><a href="https://github.com/christian-byrne/claude-code-vector-memory">claude-code-vector-memory</a></td><td>30</td><td>Claude Code semantic memory</td></tr><tr><td><a href="https://github.com/faugustdev/git-context-controller">git-context-controller</a></td><td>25</td><td>Git-like memory operations</td></tr></tbody></table><h3 class="section-sub">6. Research / Benchmark — Academic</h3><table class="landscape"><thead><tr><th>Repo</th><th>Stars</th><th>Paper/Method</th></tr></thead><tbody><tr><td><a href="https://github.com/agiresearch/A-mem">agiresearch/A-mem</a></td><td>873</td><td>NeurIPS 2025 A-MEM</td></tr><tr><td><a href="https://github.com/HUST-AI-HYZ/MemoryAgentBench">MemoryAgentBench</a></td><td>244</td><td>Memory agent benchmark</td></tr><tr><td><a href="https://github.com/MemTensor/HaluMem">HaluMem</a></td><td>112</td><td>Memory hallucination evaluation benchmark</td></tr><tr><td><a href="https://github.com/toby-bridges/epro-memory">epro-memory</a></td><td>66</td><td>6-category + L0/L1/L2 tiers</td></tr><tr><td><a href="https://github.com/HU-xiaobai/xMemory">xMemory</a></td><td>56</td><td>Beyond RAG (2026.02 Arxiv)</td></tr><tr><td><a href="https://github.com/microsoft/Mnemis">microsoft/Mnemis</a></td><td>46</td><td>Hierarchical graph dual-route retrieval</td></tr></tbody></table>
+
+<h2>Paradigm Analysis</h2>
+
+<div class="paradigm-box">
+  <strong>Agent Memory has entered the "Champion + Challengers" era.</strong><br><br>mem0 (49K stars) dominates the first generation with absolute market lead, but three forces are challenging simultaneously:<br><br>1. <strong>Knowledge Graph Camp</strong> (cognee 13K) — structured reasoning vs. flat retrieval<br>2. <strong>Active Learning Camp</strong> (hindsight 2.4K, accelerating) — memory systems evolving from passive storage to autonomous learning<br>3. <strong>Memory OS Camp</strong> (MemOS 6.2K, Memori 12.3K, EverMemOS) — upgrading the memory layer from SDK to operating system<br><br>Three generations of evolution over the past 18 months:<br>1. <strong>Conversation History</strong> (2024) — simple message lists with window truncation<br>2. <strong>Universal Memory Layer</strong> (2025) — the "plug-and-play" route validated by mem0, vector storage + user profiles<br>3. <strong>Cognitive Memory</strong> (2026) — knowledge graphs, autonomous learning, multi-tier classification, cross-agent sharing<br><br>Key structural signal: <strong>database vendors (Redis, Neo4j, OceanBase, Microsoft) are entering collectively</strong>, and <strong>MCP protocol is turning Memory into a standardized service</strong> — memory is evolving from a framework add-on into a standalone infrastructure category.<br><br><strong>Threatened</strong>: Agent frameworks still using simple vector stores for memory.<br><strong>Not threatened</strong>: The underlying LLM inference layer — no matter how good memory gets, it still needs an LLM to consume it.<br><br>Next battlegrounds: <strong>cross-agent memory sharing</strong> (memorix, cass), <strong>memory trustworthiness verification</strong> (HaluMem, MemoryAgentBench), <strong>Memory OS standardization</strong> (who defines the agent's memory interface).
+</div>
+
+<h2>Suggested Deep Dives</h2>
+
+<table class="suggestion">
+  <thead><tr><th>Repo</th><th>Suggestion</th></tr></thead>
+  <tbody>
+
+    <tr>
+      <td><a href="https://github.com/mem0ai/mem0">mem0ai/mem0</a></td>
+      <td>Mode 4 deep analysis — undisputed champion (49K stars), examine contributor structure, enterprise adoption, moat</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/mem0ai/mem0">mem0 vs cognee</a></td>
+      <td>Mode 4 comparison — universal memory layer vs knowledge graph, technical depth and market performance</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/vectorize-io/hindsight">vectorize-io/hindsight</a></td>
+      <td>Mode 4 deep analysis — fastest growing second-gen project, examine technical approach and potential to displace mem0</td>
+    </tr>
+
+
+    <tr>
+      <td><a href="https://github.com/memvid/memvid">memvid/memvid</a></td>
+      <td>Mode 3 signal watch — 13K stars, Rust implementation, "replace RAG" positioning worth monitoring</td>
+    </tr>
+
+  </tbody>
+</table>
+
+<hr>
+
+<details>
+  <summary>Filtered Out (45)</summary>
+  <p style="margin: 8px 0;"><strong>Paper List / Awesome List (8)</strong> — academic resource aggregation<br><span class="filtered-list">Agent-Memory-Paper-List (1.4K), agentic-memory (ALucek, 514), Awesome-AI-Memory (454), LLM_Agent_Memory_Survey (476), Awesome-Agent-Memory x2 (262/76), Awesome-GraphMemory (170), Awesome-Efficient-Agents (192)</span></p><p style="margin: 8px 0;"><strong>Tutorial / Demo / Guide (6)</strong> — educational content<br><span class="filtered-list">optimize-ai-agent-memory (257), agent-memory-guide (33), conversation-memory-streamlit (52), Langchain-Interview-Preparation (32), oxbshw/Handbook (495), agentic-memory (lhl, 26)</span></p><p style="margin: 8px 0;"><strong>Not Memory-Focused (13)</strong> — caught by topic search or memory is just a feature<br><span class="filtered-list">wgcloud (5.1K, cloud monitoring), MineContext (5K, context mining), OpenViking (4.9K, vector DB), MemMachine (4.6K), cipher (3.6K, cryptography), EvoAgentX (2.6K, general agent), fastapi-template (2K), RPG-ZeroRepo (541), doc-to-lora (472), Swarm (376), AlphaAvatar (562), chat2graph (398), Athena (418)</span></p><p style="margin: 8px 0;"><strong>Other Filtered (18)</strong> — low stars, overlapping function, or non-core<br><span class="filtered-list">Gemini_Discordbot (98), Agentic-Desktop-Pet (223), fullstack-langgraph (85), Huaman-Agent-Memory (94), JoySafeter (162), Aeiva (159), memov (158), Squirrel (92), vibe (91), timem (76), yams (365), automem (647), memlayer (261), telemem (441), LightMem (659), memsearch (777), bosquet (366), honcho (402)</span></p>
+</details>
+
+<p class="footer">Generated by GitHub Radar v0.1.0 · 2026-03-06 · 93 repos scanned (keyword + topic supplement), 8 keywords, 48 high-relevance, 6 sub-categories</p>
+
+</body>
+</html>
