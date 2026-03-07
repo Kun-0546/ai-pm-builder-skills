@@ -1,8 +1,8 @@
-<h1 align="center">GitHub Radar</h1>
+<h1 align="center">AI PM / Builder Skills</h1>
 
 <p align="center">
-  <b>AI 产品经理的科技趋势观察引擎。</b><br>
-  Tech trend observation engine for AI PMs.
+  <b>AI 产品经理 / Builder 的技能包。</b><br>
+  Skills for AI product managers and builders.
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kun-0546.github.io/github-radar/examples/">在线报告预览 →</a><br>
+  <a href="https://kun-0546.github.io/ai-pm-builder-skills/examples/">在线报告预览 →</a><br>
   <sub>（开启 GitHub Pages 后可用）</sub>
 </p>
 
@@ -26,9 +26,11 @@
 
 今天我把自己用的其中一个技术观察 Skill 开源了。它可以帮助你不只看到数据和项目列表，还可以看到开源的趋势与洞察。你可以用 Claude Code 或 OpenClaw 直接安装使用，作为产品经理或 AI Builder 的你，会看到意想不到的结果。
 
-下面是四种模式生成的报告效果：
+## 技能 1：GitHub Radar — 科技趋势观察
 
-## 报告预览
+技能包中的第一个技能。它通过四种模式扫描 GitHub 上的新兴 AI 项目：
+
+### 报告预览
 
 | Radar Pulse | Direction Search |
 |:-----------:|:----------------:|

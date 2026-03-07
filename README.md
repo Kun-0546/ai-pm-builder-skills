@@ -1,8 +1,8 @@
-<h1 align="center">GitHub Radar</h1>
+<h1 align="center">AI PM / Builder Skills</h1>
 
 <p align="center">
-  <b>Tech trend observation engine for AI PMs.</b><br>
-  AI 产品经理的科技趋势观察引擎。
+  <b>Skills for AI product managers and builders.</b><br>
+  AI 产品经理 / Builder 的技能包。
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kun-0546.github.io/github-radar/examples/">Live Report Examples →</a><br>
+  <a href="https://kun-0546.github.io/ai-pm-builder-skills/examples/">Live Report Examples →</a><br>
   <sub>(Available after GitHub Pages is enabled)</sub>
 </p>
 
@@ -26,9 +26,11 @@ After 10 years as an AI product manager, I believe that understanding and analyz
 
 Today I'm open-sourcing one of my tech observation skills. It helps you see not just data and project lists, but open-source trends and insights. Install it with Claude Code or OpenClaw, and as a PM or AI builder, you'll see results you didn't expect.
 
-Here's what the four modes produce:
+## Skill 1: GitHub Radar — Tech Trend Observation
 
-## Report Preview
+The first skill in this collection. It scans GitHub for emerging AI projects across four modes:
+
+### Report Preview
 
 | Radar Pulse | Direction Search |
 |:-----------:|:----------------:|
