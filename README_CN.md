@@ -79,7 +79,7 @@
 |------|------|------|-----------|
 | L1 | 模型/推理 | llama.cpp, vLLM | 低 |
 | L2 | Agent Runtime | memory, tool-calling, orchestration | **高** |
-| L3 | 开发框架/SDK | 你 `pip install` 的框架 | **高** |
+| L3 | 开发框架/SDK |  `pip install` 的框架 | **高** |
 | L4 | 垂直产品 | 面向终端用户的 AI 产品 | 中 |
 | L5 | Wrapper/Demo | 套壳、教程 | 低 |
 
