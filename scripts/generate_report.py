@@ -56,13 +56,30 @@ def load_template(mode, lang="en"):
         return f.read()
 
 
-def preprocess_data(data):
+LABEL_CN = {
+    "sustained": "持续增长", "accelerating": "加速中",
+    "spike": "爆发", "step": "阶梯式增长", "spike+decay": "冲高回落",
+    "market-leader": "市场领先", "established": "成熟项目",
+    "google-official": "Google 官方", "openai-official": "OpenAI 官方",
+    "anthropic-official": "Anthropic 官方", "meta-official": "Meta 官方",
+}
+
+
+def preprocess_data(data, lang="en"):
     """Preprocess data: flatten nested list fields into _html strings to avoid template nesting"""
     for pick in data.get("picks", []):
         signals = pick.get("signals", [])
+        if lang == "cn":
+            signals = [LABEL_CN.get(s, s) for s in signals]
+            if pick.get("pattern_label"):
+                pick["pattern_label"] = LABEL_CN.get(pick["pattern_label"], pick["pattern_label"])
         pick["signals_html"] = "".join(
             f'<span class="signal-tag">{s}</span>' for s in signals
         )
+    if lang == "cn":
+        for detail in data.get("pick_details", []):
+            if detail.get("pattern_label"):
+                detail["pattern_label"] = LABEL_CN.get(detail["pattern_label"], detail["pattern_label"])
     return data
 
 
@@ -260,7 +277,7 @@ def main():
         data = json.load(f)
 
     # Preprocess: flatten nested data
-    data = preprocess_data(data)
+    data = preprocess_data(data, args.lang)
 
     # HTML
     template = load_template(args.mode, args.lang)
