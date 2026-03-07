@@ -1,7 +1,7 @@
 <h1 align="center">GitHub Radar</h1>
 
 <p align="center">
-  <b>AI PM 的科技趋势观察引擎。</b><br>
+  <b>AI 产品经理的科技趋势观察引擎。</b><br>
   Tech trend observation engine for AI PMs.
 </p>
 

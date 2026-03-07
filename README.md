@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Tech trend observation engine for AI PMs.</b><br>
-  AI PM 的科技趋势观察引擎。
+  AI 产品经理的科技趋势观察引擎。
 </p>
 
 <p align="center">
