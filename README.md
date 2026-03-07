@@ -22,7 +22,11 @@
 
 ---
 
-After 10 years as an AI product manager, I've found that understanding and analyzing tech trends through open-source development has become a core competency for PMs, especially AI PMs, in today's rapidly evolving AI landscape. Today I'm open-sourcing one of my tech observation skills. It helps you see not just data and projects, but open-source trends and insights. Install it with OpenClaw or Claude Code, and as a PM or AI builder, you'll see results you didn't expect.
+After 10 years as an AI product manager, I've found that understanding and analyzing tech trends through open-source development has become a core competency for PMs, especially AI PMs, in today's rapidly evolving AI landscape.
+
+Today I'm open-sourcing one of my tech observation skills. It helps you see not just data and projects, but open-source trends and insights. Install it with OpenClaw or Claude Code, and as a PM or AI builder, you'll see results you didn't expect.
+
+Here's what the four modes produce:
 
 ## Report Preview
 
