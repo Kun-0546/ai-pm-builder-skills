@@ -37,6 +37,61 @@ def get_star_count(repo):
     except ValueError:
         return None
 
+def fetch_stargazers_graphql(repo, max_records):
+    """Use GraphQL API to fetch the most recent stargazers.
+    Required for repos with >40k stars where REST API can't reach recent data
+    (REST returns oldest-first, capped at 400 pages = 40k items)."""
+    owner, name = repo.split("/", 1)
+    dates = []
+    cursor = None
+    remaining = max_records
+
+    while remaining > 0:
+        batch = min(100, remaining)
+        before = f', before: "{cursor}"' if cursor else ""
+
+        query = (
+            '{ repository(owner: "' + owner + '", name: "' + name + '") { '
+            'stargazers(last: ' + str(batch) + before
+            + ', orderBy: {field: STARRED_AT, direction: ASC}) { '
+            'edges { starredAt } '
+            'pageInfo { hasPreviousPage startCursor } '
+            '} } }'
+        )
+
+        raw = run_gh(["api", "graphql", "-f", f"query={query}"], timeout=30)
+        if raw is None:
+            sys.stderr.write("  GraphQL request failed, falling back to REST\n")
+            return None
+
+        try:
+            data = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            return None
+
+        errors = data.get("errors")
+        if errors:
+            sys.stderr.write(f"  GraphQL error: {errors[0].get('message', '')}\n")
+            return None
+
+        sg = data.get("data", {}).get("repository", {}).get("stargazers", {})
+        edges = sg.get("edges", [])
+        page_info = sg.get("pageInfo", {})
+
+        for edge in edges:
+            dates.append(edge["starredAt"][:10])
+
+        remaining -= len(edges)
+
+        if not page_info.get("hasPreviousPage") or len(edges) < batch:
+            break
+
+        cursor = page_info["startCursor"]
+        time.sleep(0.2)
+
+    return dates
+
+
 def fetch_stargazers(repo, star_count):
     """Select strategy based on star count and fetch stargazer timeline"""
     if star_count > 50000:
@@ -48,6 +103,15 @@ def fetch_stargazers(repo, star_count):
     else:
         precision = "exact"
         max_records = star_count
+
+    # GitHub REST stargazers API caps at 400 pages (40,000 items, oldest first).
+    # For repos >40k stars, REST returns old data, not recent. Use GraphQL instead.
+    if star_count > 40000:
+        sys.stderr.write(f"  Stars > 40k, using GraphQL API for recent data...\n")
+        dates = fetch_stargazers_graphql(repo, max_records)
+        if dates is not None:
+            return dates, precision, len(dates)
+        sys.stderr.write("  GraphQL failed, falling back to REST API...\n")
 
     per_page = 100
     total_pages_needed = min((max_records + per_page - 1) // per_page, 50)
