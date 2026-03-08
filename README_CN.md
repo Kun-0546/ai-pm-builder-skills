@@ -36,24 +36,24 @@
 
 ### 报告预览
 
-| Radar Pulse | Direction Search |
+| 主动探索 | 重点方向搜索 |
 |:-----------:|:----------------:|
-| ![Radar Pulse](docs/images/cn-radar-pulse-preview.png) | ![Direction Search](docs/images/cn-direction-search-preview.png) |
+| ![主动探索](docs/images/cn-radar-pulse-preview.png) | ![重点方向搜索](docs/images/cn-direction-search-preview.png) |
 | 每周扫描高潜新项目 | 深度搜索一个技术方向 |
 
-| Signal Watch | Deep Link |
+| 异常信号监控 | 深度拆解 |
 |:------------:|:---------:|
-| ![Signal Watch](docs/images/cn-signal-watch-preview.png) | ![Deep Link](docs/images/cn-deep-link-preview.png) |
+| ![异常信号监控](docs/images/cn-signal-watch-preview.png) | ![深度拆解](docs/images/cn-deep-link-preview.png) |
 | 全局异常增长信号检测 | 单个 Repo 全方位深度分析 |
 
 ### 四种模式
 
 | 模式 | 名称 | 用途 | 命令示例 |
 |------|------|------|---------|
-| 1 | **Radar Pulse** | 每日/每周扫描，发现高潜新项目 | `radar_pulse.py --days 7` |
-| 2 | **Direction Search** | 多关键词搜索一个技术方向 | `search_repos.py "agent memory"` |
-| 3 | **Signal Watch** | 检测异常增长信号（三窗口扫描） | `watch_signals.py` |
-| 4 | **Deep Link** | 单个 repo 深度分析：生态、竞品、采纳度 | `deep_link.py owner/repo` |
+| 1 | **主动探索** | 每日/每周扫描，发现高潜新项目 | `radar_pulse.py --days 7` |
+| 2 | **重点方向搜索** | 多关键词搜索一个技术方向 | `search_repos.py "agent memory"` |
+| 3 | **异常信号监控** | 检测异常增长信号（三窗口扫描） | `watch_signals.py` |
+| 4 | **深度拆解** | 单个 repo 深度分析：生态、竞品、采纳度 | `deep_link.py owner/repo` |
 
 ### 工作原理
 
