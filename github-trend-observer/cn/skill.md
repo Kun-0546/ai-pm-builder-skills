@@ -136,7 +136,7 @@ python scripts/fetch_star_history.py owner/repo
 
 ---
 
-## Mode 2: 方向搜索 (Direction Search)
+## Mode 2: 重点方向搜索 (Direction Search)
 
 **触发**：用户给出技术方向或关键词
 
@@ -301,7 +301,7 @@ headline（一句话总结本期最重要的信号）
 
 ---
 
-## Mode 4: 深度关联分析 (Deep Link)
+## Mode 4: 深度拆解 (Deep Link)
 
 **触发**：用户给出 repo URL 或 owner/repo 名称
 
