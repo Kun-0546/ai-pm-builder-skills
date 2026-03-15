@@ -4,15 +4,37 @@ description: >
   A GitHub Intelligence Tool from an AI PM perspective.
   Goes beyond displaying data to deliver PM-grade paradigm insights.
   Powered by the locally authenticated gh CLI + GitHub API.
-version: 0.1.0
+version: 0.1.1
 author: Kun
 tags: [github, intelligence, pm-insight, trending, ecosystem-analysis]
 categories: [research, developer-tools, product-intelligence]
+tools:
+  - name: gh
+    version: ">=2.40.0"
+    type: cli
+    required: true
+    install_url: https://cli.github.com
+    auth_required: true
+    check: "gh auth status"
+  - name: python
+    version: ">=3.9"
+    type: runtime
+    required: true
+    check: "python --version"
+    packages: []  # stdlib only, no pip dependencies
 ---
 
 # GitHub Radar
 
 An open-source intelligence engine for AI PMs. Four modes, one Layer analysis framework.
+
+## Language Selection
+
+This skill ships with both English and Chinese versions. The agent should **automatically match the user's language**:
+
+- If the user speaks **English** -> Use `skill.md`, `agents/analyzer.md`, `references/layer_model.md`, `templates/*.html`, and generate English reports
+- If the user speaks **Chinese** -> Use `skill_cn.md`, `agents/analyzer_cn.md`, `references/layer_model_cn.md`, `templates/*_cn.html`, and generate Chinese reports
+- Scripts (`scripts/`) and config (`config/`) are language-neutral and shared by both versions
 
 ## When to Use
 
@@ -25,13 +47,15 @@ An open-source intelligence engine for AI PMs. Four modes, one Layer analysis fr
 ## File Structure
 
 ```
-github-radar/
-├── README.md                    # Project documentation
-├── ONBOARD.md                   # Agent cold-start instructions
-├── skill.md                     # Agent execution instructions
-├── LICENSE                      # MIT license
+github-trend-observer/
+├── skill.md                     # Agent execution instructions (English)
+├── skill_cn.md                  # Agent execution instructions (Chinese)
+├── ONBOARD.md                   # Agent cold-start instructions (English)
+├── ONBOARD_CN.md                # Agent cold-start instructions (Chinese)
+├── requirements.txt             # Dependency declaration
 ├── agents/
-│   └── analyzer.md              # PM insight analyzer agent instructions
+│   ├── analyzer.md              # PM insight analyzer agent (English)
+│   └── analyzer_cn.md           # PM insight analyzer agent (Chinese)
 ├── scripts/
 │   ├── gh_utils.py              # Unified gh CLI utility functions
 │   ├── check_rate_limit.py      # API rate limit checker
@@ -46,14 +70,16 @@ github-radar/
 │   ├── seed_list.json           # Key developer list
 │   └── domain_keywords.json     # Domain keyword mappings
 ├── templates/
-│   ├── radar-pulse.html         # Mode 1 report template
+│   ├── radar-pulse.html         # Mode 1 report template (en/cn variants)
 │   ├── direction-search.html    # Mode 2 report template
 │   ├── signal-watch.html        # Mode 3 report template
 │   └── deep-link.html           # Mode 4 report template
 ├── evals/
-│   └── evals.json               # Test cases
+│   ├── evals.json               # Test cases (English)
+│   └── evals_cn.json            # Test cases (Chinese)
 └── references/
-    └── layer_model.md           # Layer classification standard
+    ├── layer_model.md           # Layer classification standard (English)
+    └── layer_model_cn.md        # Layer classification standard (Chinese)
 ```
 
 ## Dependencies

@@ -4,15 +4,37 @@ description: >
   AI PM 视角的 GitHub Intelligence Tool。
   不只展示数据，产出 PM 级别的 paradigm insight。
   底层调用本机已登录的 gh CLI + GitHub API。
-version: 0.1.0
+version: 0.1.1
 author: Kun
 tags: [github, intelligence, pm-insight, trending, ecosystem-analysis]
 categories: [research, developer-tools, product-intelligence]
+tools:
+  - name: gh
+    version: ">=2.40.0"
+    type: cli
+    required: true
+    install_url: https://cli.github.com
+    auth_required: true
+    check: "gh auth status"
+  - name: python
+    version: ">=3.9"
+    type: runtime
+    required: true
+    check: "python --version"
+    packages: []  # 仅用标准库，无需 pip 安装
 ---
 
 # GitHub Radar
 
 AI PM 的开源情报引擎。四种模式，一套 Layer 分析框架。
+
+## 语言选择
+
+本 Skill 同时提供中文和英文版本。Agent 应**自动匹配用户的语言**：
+
+- 用户使用**英文** → 读 `skill.md`、`agents/analyzer.md`、`references/layer_model.md`、`templates/*.html`，生成英文报告
+- 用户使用**中文** → 读 `skill_cn.md`、`agents/analyzer_cn.md`、`references/layer_model_cn.md`、`templates/*_cn.html`，生成中文报告
+- 脚本（`scripts/`）和配置（`config/`）为语言无关，两个版本共用
 
 ## 何时使用
 
@@ -25,13 +47,15 @@ AI PM 的开源情报引擎。四种模式，一套 Layer 分析框架。
 ## 文件结构
 
 ```
-github-radar/
-├── README.md                    # 项目文档
-├── ONBOARD.md                   # Agent 冷启动指引
-├── skill.md                     # Agent 执行指令
-├── LICENSE                      # MIT 许可证
+github-trend-observer/
+├── skill.md                     # Agent 执行指令（英文）
+├── skill_cn.md                  # Agent 执行指令（中文）
+├── ONBOARD.md                   # Agent 冷启动指引（英文）
+├── ONBOARD_CN.md                # Agent 冷启动指引（中文）
+├── requirements.txt             # 依赖声明
 ├── agents/
-│   └── analyzer.md              # PM 洞察分析 agent 指令
+│   ├── analyzer.md              # PM 洞察分析 agent（英文）
+│   └── analyzer_cn.md           # PM 洞察分析 agent（中文）
 ├── scripts/
 │   ├── gh_utils.py              # 统一 gh CLI 工具函数
 │   ├── check_rate_limit.py      # API 速率检查
@@ -46,14 +70,16 @@ github-radar/
 │   ├── seed_list.json           # 关键开发者列表
 │   └── domain_keywords.json     # 领域关键词映射
 ├── templates/
-│   ├── radar-pulse.html         # Mode 1 报告模板
+│   ├── radar-pulse.html         # Mode 1 报告模板（含 _cn 中文变体）
 │   ├── direction-search.html    # Mode 2 报告模板
 │   ├── signal-watch.html        # Mode 3 报告模板
 │   └── deep-link.html           # Mode 4 报告模板
 ├── evals/
-│   └── evals.json               # 测试用例
+│   ├── evals.json               # 测试用例（英文）
+│   └── evals_cn.json            # 测试用例（中文）
 └── references/
-    └── layer_model.md           # Layer 分类标准
+    ├── layer_model.md           # Layer 分类标准（英文）
+    └── layer_model_cn.md        # Layer 分类标准（中文）
 ```
 
 ## 依赖
