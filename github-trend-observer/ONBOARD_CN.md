@@ -33,7 +33,7 @@ python scripts/check_rate_limit.py
 cd scripts && python test_oss.py
 ```
 
-测试共 6 层 41 项：
+测试共 6 层 48 项：
 
 | 层级 | 测试内容 | 项数 | 需要网络 |
 |------|---------|------|---------|

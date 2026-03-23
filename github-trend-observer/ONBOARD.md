@@ -33,7 +33,7 @@ If any check fails, inform the user with the specific issue and fix:
 cd scripts && python test_oss.py
 ```
 
-The test suite has 6 tiers, 41 tests:
+The test suite has 6 tiers, 48 tests:
 
 | Tier | Coverage | Count | Network |
 |------|----------|-------|---------|
