@@ -78,6 +78,13 @@ Under threat: L3 frameworks still built around single-chain abstractions.
 - Ecosystem Map (ASCII diagram)
 - Paradigm assessment: what does the existence of this abstraction signify
 
+### Mode 5: Evolution Timeline
+- Classify projects into 5-12 technology domains derived from evolution logic (not search keywords)
+- Each domain gets a Wardley maturity label (Genesis/Custom/Product/Commodity) and status (Established/Emerging/Speculative)
+- Must include >= 3 speculative domains: categories that should emerge based on technology trends but have few/no projects yet
+- Phase 6 evolution panorama: holistic analysis across all domains (stage assessment, driving forces, convergence trajectories, inevitable vs. contingent trends, scenario projection, weak signals)
+- Phase 6-B afterword: retrospective patterns, structural tensions, time-window decisions — all derived from data, not generic commentary
+
 ## Output Format
 
 - Prefer tables + short bullets

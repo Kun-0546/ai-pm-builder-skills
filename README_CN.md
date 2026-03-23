@@ -25,14 +25,14 @@
 
 | # | 技能 | 说明 | 预览 |
 |---|------|------|------|
-| 1 | [GitHub Trend Observer](./github-trend-observer/) | 科技趋势观察引擎，4 种模式扫描 GitHub 上的新兴 AI 项目 | [在线示例 →](https://kun-0546.github.io/ai-pm-builder-skills/examples/) |
+| 1 | [GitHub Trend Observer](./github-trend-observer/) | 科技趋势观察引擎，5 种模式扫描 GitHub 上的新兴 AI 项目 | [在线示例 →](https://kun-0546.github.io/ai-pm-builder-skills/examples/) |
 | 2 | 即将推出 | | |
 
 ---
 
 ## 技能 1：GitHub Trend Observer — 科技趋势观察
 
-扫描 GitHub 上的新兴 AI 项目，检测增长信号，产出范式级洞察。支持四种模式。
+扫描 GitHub 上的新兴 AI 项目，检测增长信号，产出范式级洞察。支持五种模式。
 
 ### 报告预览
 
@@ -46,7 +46,12 @@
 | ![异常信号监控](docs/images/cn-signal-watch-preview.png) | ![深度拆解](docs/images/cn-deep-link-preview.png) |
 | 全局异常增长信号检测 | 单个 Repo 全方位深度分析 |
 
-### 四种模式
+| 演化时间线 |
+|:----------:|
+| ![演化时间线](docs/images/cn-evolution-timeline-preview.png) |
+| D3.js 交互时间线，完整呈现一个技术主题的演化图景 |
+
+### 五种模式
 
 | 模式 | 名称 | 用途 | 命令示例 |
 |------|------|------|---------|
@@ -54,6 +59,7 @@
 | 2 | **重点方向搜索** | 多关键词搜索一个技术方向 | `search_repos.py "agent memory"` |
 | 3 | **异常信号监控** | 检测异常增长信号（三窗口扫描） | `watch_signals.py` |
 | 4 | **深度拆解** | 单个 repo 深度分析：生态、竞品、采纳度 | `deep_link.py owner/repo` |
+| 5 | **演化时间线** | 一个技术主题的完整演化图景 | `evolution_timeline.py "context engineering"` |
 
 ### 工作原理
 
@@ -113,6 +119,7 @@ python scripts/radar_pulse.py --days 7              # 模式 1
 python scripts/search_repos.py "agent memory"       # 模式 2
 python scripts/watch_signals.py                      # 模式 3
 python scripts/deep_link.py langchain-ai/langgraph   # 模式 4
+python scripts/evolution_timeline.py "context engineering"  # 模式 5
 
 # 生成报告（中文或英文）
 python scripts/generate_report.py analysis.json --mode radar-pulse --lang cn
@@ -129,10 +136,11 @@ github-trend-observer/
 │   ├── search_repos.py          # 模式 2: 方向搜索
 │   ├── watch_signals.py         # 模式 3: 信号检测
 │   ├── deep_link.py             # 模式 4: 深度分析
+│   ├── evolution_timeline.py   # 模式 5: 主题演化数据采集
 │   ├── fetch_star_history.py    # star 增长数据拉取
 │   ├── generate_report.py       # 报告生成 (--lang en/cn)
 │   ├── check_rate_limit.py      # API 速率检查
-│   └── test_oss.py              # 自动化测试（6 层 33 项）
+│   └── test_oss.py              # 自动化测试（6 层 48 项）
 ├── en/                          # English: skill.md, templates, references
 ├── cn/                          # 中文: skill.md, 模板, 参考文档
 ├── config/                      # seed_list.json, domain_keywords.json

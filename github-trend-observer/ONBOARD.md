@@ -33,7 +33,7 @@ If any check fails, inform the user with the specific issue and fix:
 cd scripts && python test_oss.py
 ```
 
-The test suite has 6 tiers, 41 tests:
+The test suite has 6 tiers, 48 tests:
 
 | Tier | Coverage | Count | Network |
 |------|----------|-------|---------|
@@ -58,7 +58,7 @@ Once all checks and tests pass, reply to the user with the following (output dir
 
 GitHub Radar is a GitHub intelligence engine from an AI PM perspective. It doesn't just display data — it produces paradigm-level insights.
 
-**Four Modes:**
+**Five Modes:**
 
 | Mode | Name | Purpose | Command Example |
 |------|------|---------|-----------------|
@@ -66,6 +66,7 @@ GitHub Radar is a GitHub intelligence engine from an AI PM perspective. It doesn
 | 2 | **Direction Search** | Multi-keyword search for a tech direction | `search_repos.py "agent memory"` |
 | 3 | **Signal Watch** | Detect anomalous growth signals (triple-window scan) | `watch_signals.py` |
 | 4 | **Deep Link** | Single repo deep analysis: ecosystem, competitors, adoption | `deep_link.py owner/repo` |
+| 5 | **Evolution Timeline** | Map the full evolution landscape of a tech topic | `evolution_timeline.py "context engineering"` |
 
 **Layer Analysis Framework:**
 
@@ -76,8 +77,9 @@ Every project is tagged L1-L5. L2 (Agent Runtime) and L3 (Dev Frameworks) are th
 - "Find projects related to agent memory" → Mode 2
 - "Monitor recent anomalous growth" → Mode 3
 - "Analyze langchain-ai/langgraph" → Mode 4
+- "Map the evolution of context engineering" → Mode 5
 
-**Self-check result:** {Insert test results here, format: 41 tests, X passed / Y skipped / 0 failed}
+**Self-check result:** {Insert test results here, format: 48 tests, X passed / Y skipped / 0 failed}
 
 ---
 

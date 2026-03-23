@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Engineering: Open-Source Evolution Timeline</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --text: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #2563eb;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 10px;
+    --c-prompt: #7c3aed;
+    --c-rag: #2563eb;
+    --c-memory: #d97706;
+    --c-mcp: #059669;
+    --c-compress: #0284c7;
+    --c-longctx: #b45309;
+    --c-codectx: #db2777;
+    --c-ce: #0891b2;
+    --c-cli: #e11d48;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 1480px; margin: 0 auto; padding: 32px 24px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .mode-badge {
+    display: inline-block; background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 600; padding: 2px 10px;
+    border-radius: 10px; margin-bottom: 8px; letter-spacing: 0.5px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .legend-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .legend-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b5563; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .lane-defs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 20px; font-size: 13px; line-height: 1.5; }
+  .lane-defs b { font-weight: 600; }
+  .lane-tag {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 0 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle;
+  }
+  .class-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .class-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; background: #fafbfc; font-size: 13px;
+  }
+  .class-card summary {
+    cursor: pointer; font-weight: 600; font-size: 14px;
+    list-style: none; display: flex; align-items: center; gap: 6px;
+  }
+  .class-card summary::before { content: "▸"; font-size: 11px; color: var(--text-muted); }
+  .class-card[open] summary::before { content: "▾"; }
+  .class-card .cc-def { color: var(--text-secondary); margin: 6px 0 4px; }
+  .class-card .cc-row { display: flex; gap: 4px; margin: 2px 0; }
+  .class-card .cc-label { font-weight: 600; color: var(--text-secondary); min-width: 52px; flex-shrink: 0; }
+  .cc-wardley {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 0 5px; border-radius: 3px; background: #94a3b8;
+  }
+  .timeline-card { overflow-x: auto; }
+  #timeline-svg { display: block; margin: 0 auto; }
+  .tooltip {
+    position: absolute; pointer-events: none;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+    box-shadow: var(--shadow-md); font-size: 14px;
+    line-height: 1.5; z-index: 100; max-width: 340px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .tooltip .tt-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .tooltip .tt-org { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+  .tooltip .tt-desc { font-size: 13px; color: #4b5563; margin-bottom: 6px; }
+  .tooltip .tt-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 12px; }
+  .tooltip .tt-stars { font-weight: 600; color: #d97706; }
+  .tooltip .tt-paradigm-badge {
+    display: inline-block; padding: 1px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; color: #fff; margin-top: 4px;
+  }
+  .event-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .event-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
+  .event-date { flex-shrink: 0; font-weight: 600; color: var(--accent); font-size: 13px; min-width: 72px; }
+  .event-text { color: #4b5563; }
+  .paradigm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 1100px) { .paradigm-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 900px) { .paradigm-grid { grid-template-columns: 1fr; } .event-list { grid-template-columns: 1fr; } .class-cards { grid-template-columns: 1fr; } .lane-defs { grid-template-columns: 1fr; } }
+  .paradigm-box {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; background: #fafbfc;
+  }
+  .paradigm-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .paradigm-box .pb-label {
+    font-size: 11px; font-weight: 600; color: #fff;
+    padding: 1px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px;
+  }
+  .paradigm-box p { font-size: 13px; color: #4b5563; line-height: 1.55; }
+  .paradigm-box .rep { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .index-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .index-table th {
+    text-align: left; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    border-bottom: 2px solid var(--border); padding: 6px 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .index-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .index-table tr:hover { background: #f9fafb; }
+  .index-table a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .index-table a:hover { text-decoration: underline; }
+  .index-table .idx-org { color: var(--text-secondary); font-size: 13px; }
+  .index-table .idx-stars { color: #d97706; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .index-table .idx-desc { color: #4b5563; font-size: 13px; }
+  .idx-paradigm-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .footer { text-align: center; font-size: 13px; color: var(--text-muted); padding: 16px 0 8px; border-top: 1px solid var(--border); }
+  .header .lead {
+    font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+    max-width: 720px; margin: 10px auto 0; text-align: center;
+  }
+  .header .lead strong { color: var(--text); font-weight: 600; }
+  .timeline-hint {
+    text-align: center; font-size: 12px; color: var(--text-muted);
+    margin-top: 8px; letter-spacing: 0.3px;
+  }
+  .timeline-hint span { margin: 0 8px; }
+  .landscape-tier {
+    margin-bottom: 14px; padding: 12px 16px;
+    border-radius: 8px; background: #fafbfc; border: 1px solid var(--border);
+  }
+  .landscape-tier:last-child { margin-bottom: 0; }
+  .tier-header {
+    font-size: 14px; font-weight: 600; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tier-bar { flex: 1; height: 2px; border-radius: 1px; }
+  .tier-lanes { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 4px; }
+  .tier-lane {
+    display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 600;
+  }
+  .tier-lane .count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
+  .tier-note { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .direction-section-title {
+    font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    margin: 16px 0 10px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .direction-section-title.emerging { color: #b45309; border-color: #fde68a; }
+  .paradigm-box.emerging-box { background: #fffbeb; border-color: #fde68a; }
+  .paradigm-box .logic {
+    font-size: 12px; color: #92400e; margin-top: 6px;
+    padding: 4px 8px; background: #fef3c7; border-radius: 4px;
+  }
+  .futuro-section { margin-bottom: 22px; }
+  .futuro-section:last-child { margin-bottom: 0; }
+  .futuro-section-title {
+    font-size: 15px; font-weight: 600; color: var(--text);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .futuro-section-title .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .futuro-phase {
+    padding: 16px; background: #f0f9ff; border: 1px solid #bfdbfe;
+    border-radius: 8px; font-size: 14px; line-height: 1.7;
+  }
+  .futuro-phase .phase-track {
+    display: flex; align-items: center; gap: 0; margin-bottom: 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .futuro-phase .phase-step {
+    flex: 1; text-align: center; padding: 6px 0 5px;
+    border-bottom: 3px solid #e2e8f0; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s; border-radius: 4px 4px 0 0;
+    user-select: none; font-size: 12px;
+  }
+  .futuro-phase .phase-step:hover { background: #f8fafc; color: var(--text-secondary); }
+  .futuro-phase .phase-step.active {
+    border-color: var(--accent); color: var(--accent);
+    background: #eff6ff; font-weight: 700;
+  }
+  .futuro-phase .phase-step .now-dot {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); margin-left: 3px; vertical-align: middle;
+  }
+  .futuro-phase .phase-events {
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid #bfdbfe;
+    min-height: 44px;
+  }
+  .futuro-phase .phase-events .pe-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 5px 0;
+    font-size: 14px; line-height: 1.5;
+  }
+  .futuro-phase .phase-events .pe-date {
+    flex-shrink: 0; font-weight: 600; color: var(--accent); font-size: 13px; min-width: 62px;
+  }
+  .futuro-phase .phase-events .pe-text { color: #4b5563; }
+  .futuro-phase .phase-events .pe-summary {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .futuro-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .futuro-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 1100px) { .futuro-grid-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 900px) { .futuro-grid-3, .futuro-grid-2 { grid-template-columns: 1fr; } }
+  .futuro-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; background: #fafbfc; font-size: 13px; line-height: 1.6;
+  }
+  .futuro-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .futuro-card .fc-tag {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 1px 8px; border-radius: 4px; margin-bottom: 6px;
+  }
+  .futuro-card .fc-evidence {
+    font-size: 12px; color: var(--text-secondary); margin-top: 8px;
+    padding-top: 6px; border-top: 1px solid var(--border-light);
+  }
+  .futuro-convergence-item {
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fafbfc; font-size: 13px; line-height: 1.6;
+  }
+  .futuro-convergence-item .conv-formula {
+    font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text);
+  }
+  .futuro-convergence-item .conv-arrow { color: var(--accent); }
+  .futuro-convergence-item .conv-projects {
+    font-size: 12px; color: var(--text-secondary); margin-top: 6px;
+  }
+  .futuro-split-col h4 {
+    font-size: 13px; font-weight: 600; margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .futuro-split-col ul { list-style: none; padding: 0; }
+  .futuro-split-col li {
+    font-size: 13px; line-height: 1.6; padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .futuro-split-col li:last-child { border-bottom: none; }
+  .futuro-signal {
+    padding: 10px 12px; border-radius: 6px;
+    border: 1px solid #fde68a; background: #fffbeb;
+    font-size: 13px; line-height: 1.55;
+  }
+  .futuro-signal .sig-title { font-weight: 600; color: #92400e; margin-bottom: 3px; }
+  .futuro-signal .sig-evidence { font-size: 12px; color: #b45309; margin-top: 6px; }
+  .scenario-optimistic { border-left: 3px solid #059669; }
+  .scenario-base { border-left: 3px solid var(--accent); }
+  .scenario-risk { border-left: 3px solid #dc2626; }
+  .epilogue { padding-top: 0; }
+  .epilogue h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+  .epilogue-dims { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 1100px) { .epilogue-dims { grid-template-columns: 1fr; } }
+  .epi-dim {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; background: var(--surface);
+    border-top: 3px solid #e2e8f0;
+  }
+  .epi-dim.dim-past { border-top-color: #93c5fd; }
+  .epi-dim.dim-future { border-top-color: #059669; }
+  .epi-dim.dim-now { border-top-color: #f59e0b; }
+  .epi-dim .dim-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .epi-dim.dim-past .dim-label { color: #3b82f6; }
+  .epi-dim.dim-future .dim-label { color: #059669; }
+  .epi-dim.dim-now .dim-label { color: #d97706; }
+  .epi-dim h3 {
+    font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text);
+  }
+  .epi-dim p {
+    font-size: 13px; line-height: 1.7; color: #374151; margin-bottom: 8px;
+  }
+  .epi-dim p:last-child { margin-bottom: 0; }
+  .epi-dim .epi-data {
+    font-size: 12px; color: var(--text-secondary); margin-top: 10px;
+    padding-top: 8px; border-top: 1px solid var(--border-light);
+    line-height: 1.6;
+  }
+  .method-section { margin-top: 0; }
+  .method-section summary {
+    cursor: pointer; font-size: 16px; font-weight: 600;
+    list-style: none; padding: 4px 0;
+  }
+  .method-section summary::before { content: "▸ "; color: var(--text-muted); }
+  .method-section[open] summary::before { content: "▾ "; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="mode-badge">MODE 5</div>
+    <h1>Context Engineering: Open-Source Evolution Timeline</h1>
+    <div class="subtitle">92 projects &middot; 9 evolution lanes &middot; 2019&ndash;2026</div>
+    <p class="lead">From hand-written prompts to engineered context management, <strong>Context Engineering is evolving from fragmented tools into a unified discipline</strong>. The biggest variable in 2026 Q1: CLI runtimes challenging MCP as the primary context interface.</p>
+  </div>
+
+  <div class="card timeline-card">
+    <svg id="timeline-svg"></svg>
+    <div class="timeline-hint">
+      <span>Circle size = Stars count</span>
+      <span>Red border = 2026 new project</span>
+      <span>Click circle &rarr; GitHub</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Evolution Landscape Overview</h2>
+    <div id="landscape-tiers"></div>
+  </div>
+
+  <div class="card">
+    <h2>Evolution Panorama &mdash; Futurology Perspective</h2>
+    <div id="futurology-analysis"></div>
+  </div>
+
+  <div class="card">
+    <details class="method-section">
+      <summary>Classification Methodology</summary>
+      <p style="font-size:13px;color:#6b7280;margin:8px 0 12px;">The classification system is derived from a dual analysis of the context lifecycle and technology evolution paths, inductively generalized from project clustering and functional evolution trajectories.</p>
+      <div class="class-cards" id="class-cards"></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Project Index (sorted by Stars, descending)</h2>
+    <table class="index-table">
+      <thead><tr><th>Lane</th><th>Project</th><th>Stars</th><th>Created</th><th>Description</th></tr></thead>
+      <tbody id="index-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card epilogue">
+    <h2>Afterword</h2>
+    <div class="epilogue-dims" id="epilogue-dims"></div>
+  </div>
+
+  <div class="footer">GitHub Trend Observer &middot; Mode 5 &middot; Generated 2026-03-14</div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function() {
+  const projects = [
+    // === Prompt Engineering (12) ===
+    {"name":"LMQL","org":"eth-sri","stars":4200,"created":"2022-11-01","paradigm":"prompt-eng","desc":"Constraint-guided programming language for efficient LLM interaction","status":"stable"},
+    {"name":"guidance","org":"microsoft","stars":21300,"created":"2022-11-01","paradigm":"prompt-eng","desc":"Constrained grammar-based control of LLM outputs","status":"stable"},
+    {"name":"Promptify","org":"promptslab","stars":4600,"created":"2022-12-01","paradigm":"prompt-eng","desc":"Prompt engineering and version management library","status":"stable"},
+    {"name":"DSPy","org":"stanfordnlp","stars":32800,"created":"2023-01-01","paradigm":"prompt-eng","desc":"Programmable prompt optimization framework, replacing hand-written prompts with code","status":"active"},
+    {"name":"outlines","org":"dottxt-ai","stars":13600,"created":"2023-03-01","paradigm":"prompt-eng","desc":"Structured output generation framework","status":"active"},
+    {"name":"promptfoo","org":"promptfoo","stars":15900,"created":"2023-04-01","paradigm":"prompt-eng","desc":"Prompt/Agent/RAG testing and evaluation framework","status":"active"},
+    {"name":"langfuse","org":"langfuse","stars":23100,"created":"2023-05-01","paradigm":"prompt-eng","desc":"Open-source LLM engineering platform: observability + prompt management","status":"active"},
+    {"name":"instructor","org":"567-labs","stars":12500,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Pydantic-powered structured output library for LLMs","status":"active"},
+    {"name":"promptflow","org":"microsoft","stars":11100,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Microsoft prompt orchestration and deployment platform","status":"active"},
+    {"name":"baml","org":"BoundaryML","stars":7800,"created":"2023-10-01","paradigm":"prompt-eng","desc":"Software engineering mindset applied to prompt engineering","status":"active"},
+    {"name":"ell","org":"MadcowD","stars":5900,"created":"2024-07-01","paradigm":"prompt-eng","desc":"Language model programming library: Prompts as functions","status":"active"},
+    {"name":"poml","org":"microsoft","stars":4900,"created":"2024-11-01","paradigm":"prompt-eng","desc":"Prompt Orchestration Markup Language (POML)","status":"active"},
+    // === RAG & Retrieval (10) ===
+    {"name":"haystack","org":"deepset-ai","stars":24500,"created":"2019-11-01","paradigm":"rag","desc":"Open-source AI orchestration framework for context-driven LLM apps","status":"active"},
+    {"name":"llama_index","org":"run-llama","stars":47700,"created":"2022-11-01","paradigm":"rag","desc":"Leading data indexing and document agent platform","status":"active"},
+    {"name":"ragflow","org":"infiniflow","stars":75000,"created":"2023-12-01","paradigm":"rag","desc":"Open-source RAG engine with RAG+Agent context layer","status":"active"},
+    {"name":"graphrag","org":"microsoft","stars":31500,"created":"2024-03-01","paradigm":"rag","desc":"Microsoft modular knowledge-graph RAG system","status":"active"},
+    {"name":"HippoRAG","org":"OSU-NLP-Group","stars":3300,"created":"2024-05-01","paradigm":"rag","desc":"Hippocampus-inspired RAG framework","status":"active"},
+    {"name":"nano-graphrag","org":"gusye1234","stars":3700,"created":"2024-07-01","paradigm":"rag","desc":"Concise and easy-to-use GraphRAG implementation","status":"active"},
+    {"name":"LightRAG","org":"HKUDS","stars":29400,"created":"2024-10-01","paradigm":"rag","desc":"Simple, fast retrieval-augmented generation framework","status":"active"},
+    {"name":"fast-graphrag","org":"circlemind-ai","stars":3700,"created":"2024-10-01","paradigm":"rag","desc":"Self-adaptive GraphRAG implementation","status":"active"},
+    {"name":"chonkie","org":"chonkie-inc","stars":3800,"created":"2025-03-01","paradigm":"rag","desc":"Lightweight RAG chunking and ingestion library","status":"active"},
+    {"name":"RAG-Anything","org":"HKUDS","stars":14300,"created":"2025-06-01","paradigm":"rag","desc":"Universal multimodal RAG framework","status":"active"},
+    // === Memory (15) ===
+    {"name":"Zep","org":"getzep","stars":4200,"created":"2023-04-01","paradigm":"memory","desc":"Agent long-term memory service: conversation summarization and knowledge extraction","status":"active"},
+    {"name":"mem0","org":"mem0ai","stars":49800,"created":"2023-06-01","paradigm":"memory","desc":"Universal memory layer for AI agents","status":"active"},
+    {"name":"generative_agents","org":"joonspk-research","stars":20900,"created":"2023-07-01","paradigm":"memory","desc":"Stanford generative agents: interactive memory architecture","status":"stable"},
+    {"name":"cognee","org":"topoteretes","stars":13500,"created":"2023-08-01","paradigm":"memory","desc":"AI agent knowledge engine memory in 6 lines of code","status":"active"},
+    {"name":"letta","org":"letta-ai","stars":21600,"created":"2023-10-01","paradigm":"memory","desc":"Platform for building stateful agents (formerly MemGPT)","status":"active"},
+    {"name":"memvid","org":"memvid","stars":13400,"created":"2025-05-01","paradigm":"memory","desc":"Serverless single-file memory layer, replacing complex RAG pipelines","status":"active"},
+    {"name":"cipher","org":"campfirein","stars":3600,"created":"2025-06-01","paradigm":"memory","desc":"Open-source memory layer for coding agents (MCP compatible)","status":"active"},
+    {"name":"Acontext","org":"memodb-io","stars":3200,"created":"2025-07-01","paradigm":"memory","desc":"Agent skills as memory layer","status":"active"},
+    {"name":"memU","org":"NevaMind-AI","stars":12900,"created":"2025-07-01","paradigm":"memory","desc":"Persistent memory system for 24/7 autonomous agents","status":"active"},
+    {"name":"Memori","org":"MemoriLabs","stars":12400,"created":"2025-07-01","paradigm":"memory","desc":"SQL-native agent memory layer","status":"active"},
+    {"name":"MemOS","org":"MemTensor","stars":6900,"created":"2025-07-01","paradigm":"memory","desc":"AI memory operating system for cross-task skill reuse","status":"active"},
+    {"name":"MemMachine","org":"MemMachine","stars":4900,"created":"2025-08-01","paradigm":"memory","desc":"Universal agent memory layer: extensible and interoperable","status":"active"},
+    {"name":"claude-mem","org":"thedotmack","stars":34900,"created":"2025-08-01","paradigm":"memory","desc":"Auto-capture, compress, and inject agent context for Claude Code","status":"new"},
+    {"name":"beads","org":"steveyegge","stars":19000,"created":"2025-10-01","paradigm":"memory","desc":"Memory upgrade solution for coding agents","status":"new"},
+    {"name":"SimpleMem","org":"aiming-lab","stars":3200,"created":"2026-01-01","paradigm":"memory","desc":"Efficient lifelong memory system (lossless semantic compression)","status":"new"},
+    // === MCP & Protocol (11) ===
+    {"name":"modelcontextprotocol","org":"modelcontextprotocol","stars":7500,"created":"2024-09-01","paradigm":"mcp","desc":"Model Context Protocol specification and documentation","status":"active"},
+    {"name":"python-sdk","org":"modelcontextprotocol","stars":22100,"created":"2024-09-01","paradigm":"mcp","desc":"MCP official Python SDK","status":"active"},
+    {"name":"typescript-sdk","org":"modelcontextprotocol","stars":11800,"created":"2024-09-01","paradigm":"mcp","desc":"MCP official TypeScript SDK","status":"active"},
+    {"name":"servers","org":"modelcontextprotocol","stars":81000,"created":"2024-11-01","paradigm":"mcp","desc":"MCP official server collection","status":"active"},
+    {"name":"mcp-go","org":"mark3labs","stars":8400,"created":"2024-11-01","paradigm":"mcp","desc":"MCP Go language implementation","status":"active"},
+    {"name":"mcp-agent","org":"lastmile-ai","stars":8100,"created":"2024-12-01","paradigm":"mcp","desc":"Build efficient agents with MCP and workflow patterns","status":"active"},
+    {"name":"context7","org":"upstash","stars":49000,"created":"2025-03-01","paradigm":"mcp","desc":"MCP platform delivering up-to-date code docs to AI editors","status":"active"},
+    {"name":"fastapi_mcp","org":"tadata-org","stars":11700,"created":"2025-03-01","paradigm":"mcp","desc":"Expose FastAPI endpoints as MCP tools","status":"active"},
+    {"name":"go-sdk","org":"modelcontextprotocol","stars":4100,"created":"2025-04-01","paradigm":"mcp","desc":"MCP official Go SDK (co-developed with Google)","status":"active"},
+    {"name":"mcp-context-forge","org":"IBM","stars":3400,"created":"2025-05-01","paradigm":"mcp","desc":"IBM AI gateway: unified MCP/A2A/REST endpoint","status":"active"},
+    {"name":"docs-mcp-server","org":"arabold","stars":1100,"created":"2025-03-01","paradigm":"mcp","desc":"Documentation MCP server (open-source Context7 alternative)","status":"active"},
+    // === Compression (9) ===
+    {"name":"GPTCache","org":"zilliztech","stars":8000,"created":"2023-03-01","paradigm":"compress","desc":"LLM semantic cache","status":"stable"},
+    {"name":"LLMLingua","org":"microsoft","stars":5900,"created":"2023-07-01","paradigm":"compress","desc":"Prompt/KV-Cache compression, up to 20x compression ratio","status":"active"},
+    {"name":"GEAR","org":"opengear-project","stars":180,"created":"2023-11-01","paradigm":"compress","desc":"Near-lossless KV Cache compression","status":"stable"},
+    {"name":"KVCache-Factory","org":"Zefan-Cai","stars":1300,"created":"2024-06-01","paradigm":"compress","desc":"Unified KV Cache compression methods library","status":"active"},
+    {"name":"kvpress","org":"NVIDIA","stars":960,"created":"2024-11-01","paradigm":"compress","desc":"Simplified KV Cache compression toolkit","status":"active"},
+    {"name":"ShadowKV","org":"ByteDance-Seed","stars":284,"created":"2024-10-01","paradigm":"compress","desc":"KV Cache shadow projection, 3-4x memory reduction","status":"active"},
+    {"name":"R-KV","org":"Zefan-Cai","stars":1200,"created":"2025-05-01","paradigm":"compress","desc":"Redundancy-aware KV Cache compression for reasoning models (NeurIPS'25)","status":"active"},
+    {"name":"KVzip","org":"snu-mllab","stars":209,"created":"2025-05-01","paradigm":"compress","desc":"Query-agnostic KV Cache eviction (NeurIPS'25 Oral)","status":"active"},
+    {"name":"claw-compactor","org":"aeromomo","stars":1600,"created":"2026-02-01","paradigm":"compress","desc":"6-layer deterministic context compression, up to 97% token savings","status":"new"},
+    // === Long Context (9) ===
+    {"name":"RWKV-LM","org":"BlinkDL","stars":14400,"created":"2021-08-01","paradigm":"longctx","desc":"RNN+Transformer hybrid, linear-time infinite context","status":"active"},
+    {"name":"YaRN","org":"jquesnelle","stars":1700,"created":"2023-06-01","paradigm":"longctx","desc":"Efficient context window extension method","status":"stable"},
+    {"name":"LongLLaMA","org":"CStanKonrad","stars":1500,"created":"2023-07-01","paradigm":"longctx","desc":"Long-context LLM based on Focused Transformer","status":"stable"},
+    {"name":"streaming-llm","org":"mit-han-lab","stars":7200,"created":"2023-09-01","paradigm":"longctx","desc":"Attention Sink streaming inference (ICLR'24)","status":"stable"},
+    {"name":"ring-flash-attention","org":"zhuzilin","stars":1000,"created":"2024-02-01","paradigm":"longctx","desc":"Distributed long-sequence Ring+Flash Attention","status":"active"},
+    {"name":"RULER","org":"NVIDIA","stars":1500,"created":"2024-04-01","paradigm":"longctx","desc":"Benchmark for evaluating real context size of long-context models","status":"active"},
+    {"name":"MInference","org":"microsoft","stars":1200,"created":"2024-05-01","paradigm":"longctx","desc":"Dynamic sparse attention to accelerate long-context prefill","status":"active"},
+    {"name":"duo-attention","org":"mit-han-lab","stars":530,"created":"2024-10-01","paradigm":"longctx","desc":"Retrieval heads + streaming heads dual attention (ICLR'25)","status":"active"},
+    {"name":"MoBA","org":"MoonshotAI","stars":2100,"created":"2025-02-01","paradigm":"longctx","desc":"Moonshot AI mixture-of-block attention mechanism","status":"active"},
+    // === Code Context (5) ===
+    {"name":"code2prompt","org":"mufeedvh","stars":7200,"created":"2024-03-01","paradigm":"codectx","desc":"CLI to convert codebases into a single LLM prompt","status":"active"},
+    {"name":"prompt-tower","org":"backnotprop","stars":366,"created":"2024-05-01","paradigm":"codectx","desc":"Context manager for long-context agents","status":"active"},
+    {"name":"repomix","org":"yamadashy","stars":22400,"created":"2024-07-01","paradigm":"codectx","desc":"Pack code repositories into AI-friendly single files","status":"active"},
+    {"name":"kit","org":"cased","stars":1300,"created":"2025-04-01","paradigm":"codectx","desc":"Context engineering toolkit for AI development tools","status":"active"},
+    {"name":"MineContext","org":"volcengine","stars":5100,"created":"2025-06-01","paradigm":"codectx","desc":"ByteDance proactive context-aware AI companion","status":"active"},
+    // === Context Engineering (14) ===
+    {"name":"parlant","org":"emcie-co","stars":17800,"created":"2024-02-01","paradigm":"ce","desc":"Context engineering control-layer framework for AI agents","status":"active"},
+    {"name":"Context-Engineering","org":"davidkimai","stars":8600,"created":"2025-06-01","paradigm":"ce","desc":"First-principles handbook for context engineering (inspired by Karpathy)","status":"active"},
+    {"name":"fenic","org":"typedef-ai","stars":444,"created":"2025-06-01","paradigm":"ce","desc":"Declarative context engineering framework","status":"active"},
+    {"name":"context-engineering-intro","org":"coleam00","stars":12700,"created":"2025-07-01","paradigm":"ce","desc":"Claude Code context engineering introductory tutorial","status":"active"},
+    {"name":"Awesome-Context-Engineering","org":"Meirtz","stars":3000,"created":"2025-07-01","paradigm":"ce","desc":"Context engineering curated list","status":"active"},
+    {"name":"context-space","org":"context-space","stars":805,"created":"2025-07-01","paradigm":"ce","desc":"Ultimate context engineering infra: MCP + integrations","status":"active"},
+    {"name":"OpenCE","org":"sci-m-wang","stars":335,"created":"2025-10-01","paradigm":"ce","desc":"Open context engineering toolkit","status":"active"},
+    {"name":"Context-Engineering-2.0","org":"GAIR-NLP","stars":278,"created":"2025-10-01","paradigm":"ce","desc":"Context Engineering 2.0 (Shanghai Jiao Tong University research)","status":"active"},
+    {"name":"ace","org":"ace-agent","stars":787,"created":"2025-11-01","paradigm":"ce","desc":"Agentic Context Engineering with self-evolution","status":"active"},
+    {"name":"context-engineering-kit","org":"NeoLabHQ","stars":638,"created":"2025-11-01","paradigm":"ce","desc":"Handcrafted Claude Code Skills to improve context quality","status":"active"},
+    {"name":"get-shit-done","org":"gsd-build","stars":30000,"created":"2025-12-01","paradigm":"ce","desc":"Lightweight meta-prompt + context engineering driven development system","status":"new"},
+    {"name":"Agent-Skills-for-CE","org":"muratcankoylan","stars":13900,"created":"2025-12-01","paradigm":"ce","desc":"Agent skill collection: context engineering + multi-agent","status":"new"},
+    {"name":"OpenViking","org":"volcengine","stars":10500,"created":"2026-01-01","paradigm":"ce","desc":"ByteDance agent context database","status":"new"},
+    {"name":"gsd-2","org":"gsd-build","stars":1100,"created":"2026-03-01","paradigm":"ce","desc":"GSD v2: Long-running autonomous agents without losing context","status":"new"},
+    // === CLI / Agent Runtime (7) ===
+    {"name":"aider","org":"Aider-AI","stars":42000,"created":"2023-06-01","paradigm":"cli","desc":"CLI pair-programming pioneer: AI-assisted code editing in the terminal","status":"active"},
+    {"name":"OpenClaw","org":"openclaw","stars":302000,"created":"2024-09-01","paradigm":"cli","desc":"Fastest-growing open-source project ever, CLI-first 'Bash > MCP' philosophy","status":"active"},
+    {"name":"OpenCode","org":"opencode-ai","stars":122000,"created":"2024-06-01","paradigm":"cli","desc":"Terminal-native coding agent, privacy-first + LSP integration","status":"active"},
+    {"name":"Claude Code","org":"anthropics","stars":78000,"created":"2025-02-01","paradigm":"cli","desc":"Anthropic terminal agent: CLAUDE.md + Skills file-level context engineering","status":"active"},
+    {"name":"Codex CLI","org":"openai","stars":65000,"created":"2025-05-01","paradigm":"cli","desc":"OpenAI lightweight terminal agent, Rust-built, supports MCP + CLI","status":"active"},
+    {"name":"Gemini CLI","org":"google-gemini","stars":98000,"created":"2025-06-01","paradigm":"cli","desc":"Google terminal agent, MCP + CLI dual mode","status":"active"},
+    {"name":"Copilot CLI","org":"github","stars":9300,"created":"2025-09-01","paradigm":"cli","desc":"GitHub terminal agent: multi-model + skill system + Autopilot mode","status":"active"}
+  ];
+
+  const laneConfig = [
+    { id: "prompt-eng", label: "Prompt Engineering", color: "#7c3aed", paradigms: ["prompt-eng"],
+      def: "Control LLM input/output via templates, constraints, and programmatic interfaces", wardley: "Custom\u2192Product" },
+    { id: "rag", label: "RAG & Retrieval", color: "#2563eb", paradigms: ["rag"],
+      def: "Retrieve external knowledge and inject it into LLM context", wardley: "Custom\u2192Product" },
+    { id: "memory", label: "Memory Layer", color: "#d97706", paradigms: ["memory"],
+      def: "Provide agents with persistent, cross-session memory", wardley: "Custom" },
+    { id: "mcp", label: "MCP Protocol", color: "#059669", paradigms: ["mcp"],
+      def: "Standardized protocol and infrastructure for context services", wardley: "Custom" },
+    { id: "compress", label: "Compression", color: "#0284c7", paradigms: ["compress"],
+      def: "Reduce context token consumption via caching, compression, and distillation", wardley: "Custom" },
+    { id: "longctx", label: "Long Context", color: "#b45309", paradigms: ["longctx"],
+      def: "Extend the context window length models can process", wardley: "Custom" },
+    { id: "codectx", label: "Code Context", color: "#db2777", paradigms: ["codectx"],
+      def: "Convert codebases into AI-consumable context", wardley: "Genesis" },
+    { id: "ce", label: "Context Engineering", color: "#0891b2", paradigms: ["ce"],
+      def: "Systematic management of agent context as a unified discipline", wardley: "Genesis\u2192Custom", tags: ["Emerging"] },
+    { id: "cli", label: "CLI / Agent Runtime", color: "#e11d48", paradigms: ["cli"],
+      def: "Terminal-native agent runtimes: file-level context (CLAUDE.md/Skills) replacing protocol-level (MCP)", wardley: "Custom\u2192Product", tags: ["Emerging"] }
+  ];
+
+  const paradigmColors = {};
+  const paradigmToLane = {};
+  laneConfig.forEach(lane => {
+    lane.paradigms.forEach(p => {
+      paradigmColors[p] = lane.color;
+      paradigmToLane[p] = lane.id;
+    });
+  });
+
+  const paradigmLabels = {
+    "prompt-eng":"Prompt Eng","rag":"RAG & Retrieval","memory":"Memory",
+    "mcp":"MCP Protocol","compress":"Compression","longctx":"Long Context",
+    "codectx":"Code Context","ce":"Context Eng","cli":"CLI Runtime"
+  };
+
+  function getLane(paradigm) {
+    const lid = paradigmToLane[paradigm];
+    return laneConfig.find(l => l.id === lid) || laneConfig[laneConfig.length - 1];
+  }
+
+  // ====== CLASSIFICATION CARDS ======
+  const statusMap = { "Established": "Established", "Emerging": "Emerging", "Speculative": "Speculative" };
+  const wardleyMap = { "Custom": "Custom", "Custom\u2192Product": "Custom\u2192Product", "Genesis": "Genesis", "Genesis\u2192Custom": "Genesis\u2192Custom", "\u2014": "\u2014" };
+
+  const establishedCards = [
+    { name: "Prompt Engineering", color: "#7c3aed", wardley: "Custom\u2192Product", status: "Established",
+      def: "Systematically control LLM input/output through templates, constrained grammars, and programmatic interfaces",
+      features: ["Prompt templating and version management","Structured output constraints","Programmable optimization (DSPy paradigm)"],
+      anchors: "DSPy (32.8k), guidance (21.3k), langfuse (23.1k)",
+      confuse: "vs Context Engineering: Prompt eng focuses on single interactions; CE manages the full context lifecycle" },
+    { name: "RAG & Retrieval", color: "#2563eb", wardley: "Custom\u2192Product", status: "Established",
+      def: "Retrieve relevant information from external knowledge sources and inject it into LLM context",
+      features: ["Vector/graph retrieval","Multimodal document understanding","Integration with agent workflows"],
+      anchors: "ragflow (75k), llama_index (47.7k), graphrag (31.5k)",
+      confuse: "vs Memory: RAG retrieves external knowledge; Memory persists the agent's own experience" },
+    { name: "Memory Layer", color: "#d97706", wardley: "Custom", status: "Established",
+      def: "Provide agents with persistent, searchable memory across sessions",
+      features: ["Conversation summarization and knowledge extraction","Lossless semantic compression","Cross-task skill reuse"],
+      anchors: "mem0 (49.8k), claude-mem (34.9k), letta (21.6k)",
+      confuse: "vs RAG: Memory is the agent's internal state; RAG is external knowledge retrieval" },
+    { name: "MCP Protocol", color: "#059669", wardley: "Custom", status: "Established",
+      def: "Standardized protocol and tool interfaces for LLM context access",
+      features: ["Unified tool/resource/prompt interfaces","Multi-language SDKs","Community server ecosystem"],
+      anchors: "servers (81k), context7 (49k), python-sdk (22.1k)",
+      confuse: "vs Context Engineering: MCP is the protocol layer; CE is the methodology layer" },
+    { name: "Compression", color: "#0284c7", wardley: "Custom", status: "Established",
+      def: "Reduce context token consumption through KV Cache compression, semantic caching, and other techniques",
+      features: ["KV Cache compression/eviction","Prompt compression","Semantic caching"],
+      anchors: "GPTCache (8k), LLMLingua (5.9k), claw-compactor (1.6k)",
+      confuse: "vs Long Context: Compression reduces usage; Long Context increases capacity \u2014 they're complementary" }
+  ];
+
+  const futureCards = [
+    { name: "Context Engineering", color: "#0891b2", wardley: "Genesis\u2192Custom", status: "Emerging",
+      def: "Systematic management of the agent context lifecycle \u2014 from acquisition, compression, orchestration to persistence \u2014 as a unified discipline",
+      features: ["Unified methodology integrating RAG + memory + compression + protocol","Context lifecycle management","Agent autonomous context engineering"],
+      anchors: "get-shit-done (30k), parlant (17.8k), Agent-Skills-for-CE (13.9k)",
+      confuse: "vs Prompt Engineering: Prompt eng is a subset of CE; CE covers the entire context lifecycle" },
+    { name: "Code Context", color: "#db2777", wardley: "Genesis", status: "Emerging",
+      def: "Package code repositories into structured, AI-consumable context",
+      features: ["Codebase \u2192 single-file packaging","Proactive context awareness","Code-specialized context engineering"],
+      anchors: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k)",
+      confuse: "vs generic RAG: Code context understands code structure, not just text retrieval" },
+    { name: "Agent Self-Context", color: "#64748b", wardley: "Genesis", status: "Speculative",
+      def: "Agents autonomously engineering their own context \u2014 not humans designing context for agents, but agents managing it themselves",
+      features: ["Agents autonomously decide what context they need","Runtime context strategy self-evolution","Context quality self-assessment"],
+      anchors: "ace (787), context-space (805), gsd-2 (1.1k)",
+      confuse: "vs Context Engineering: CE is human-led; Self-Context is agent-autonomous" },
+    { name: "CLI / Agent Runtime", color: "#e11d48", wardley: "Custom\u2192Product", status: "Emerging",
+      def: "Terminal-native agents use file-level context (CLAUDE.md/SKILL.md) and CLI tool calls instead of MCP protocol, achieving 10-32x token efficiency gains",
+      features: ["File-level context (CLAUDE.md, SOUL.md, rules)","CLI tool calls (--help replaces schema)","Unix pipe composability"],
+      anchors: "OpenClaw (302k), OpenCode (122k), Gemini CLI (98k), Claude Code (78k)",
+      confuse: "vs MCP: CLI uses files and terminal for context, MCP uses protocol; they're moving from opposition toward coexistence" }
+  ];
+
+  function renderCardGroup(cards, container) {
+    cards.forEach(cc => {
+      const el = document.createElement("details");
+      el.className = "class-card";
+      const sLabel = statusMap[cc.status] || cc.status;
+      const wLabel = wardleyMap[cc.wardley] || cc.wardley;
+      const sColor = cc.status === "Speculative" ? "#94a3b8" : cc.status === "Emerging" ? "#d97706" : "#6b7280";
+      el.innerHTML =
+        '<summary><span style="color:' + cc.color + '">' + cc.name + '</span>' +
+        ' <span class="cc-wardley" style="background:' + sColor + '">' + sLabel + '</span>' +
+        ' <span class="cc-wardley">' + wLabel + '</span></summary>' +
+        '<div class="cc-def">' + cc.def + '</div>' +
+        '<div class="cc-row"><span class="cc-label">Traits:</span><span>' + cc.features.join('; ') + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">Anchors:</span><span>' + cc.anchors + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">Confuse:</span><span>' + cc.confuse + '</span></div>';
+      container.appendChild(el);
+    });
+  }
+
+  const ccContainer = document.getElementById("class-cards");
+  const g1Title = document.createElement("div");
+  g1Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#6b7280;margin-top:4px;border-bottom:1px solid #e5e7eb;padding-bottom:4px;";
+  g1Title.textContent = "Established Categories (inductively generalized from project clustering)";
+  ccContainer.appendChild(g1Title);
+  renderCardGroup(establishedCards, ccContainer);
+  const g2Title = document.createElement("div");
+  g2Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#d97706;margin-top:8px;border-bottom:1px solid #fde68a;padding-bottom:4px;";
+  g2Title.textContent = "Speculative Categories (extrapolated from technology evolution paths)";
+  ccContainer.appendChild(g2Title);
+  renderCardGroup(futureCards, ccContainer);
+
+  // ====== LANDSCAPE TIERS ======
+  const laneCounts = {};
+  projects.forEach(p => { const l = getLane(p.paradigm); laneCounts[l.id] = (laneCounts[l.id]||0) + 1; });
+
+  const tiers = [
+    { title: "Mature Lanes", note: "Many projects, many approaches, dominant players have emerged. Tools and infrastructure have been building since 2022.",
+      color: "#059669", lanes: ["prompt-eng","rag","memory"] },
+    { title: "Explosive Lanes", note: "Concentrated emergence in 2024-2025, fastest growth. CLI runtimes saw explosive growth in 2026 Q1, challenging MCP as the primary context interface.",
+      color: "#0284c7", lanes: ["mcp","cli","compress","codectx"] },
+    { title: "Nascent Lanes", note: "Discipline just named (2025), integration just beginning.",
+      color: "#b45309", lanes: ["ce","longctx"] }
+  ];
+
+  const tiersContainer = document.getElementById("landscape-tiers");
+  tiers.forEach(tier => {
+    const div = document.createElement("div");
+    div.className = "landscape-tier";
+    const lanesHtml = tier.lanes.map(lid => {
+      const lane = laneConfig.find(l => l.id === lid);
+      if (!lane) return '';
+      const cnt = laneCounts[lid] || 0;
+      return '<span class="tier-lane"><span class="legend-dot" style="background:' + lane.color + '"></span>' + lane.label + ' <span class="count">(' + cnt + ')</span></span>';
+    }).join('');
+    div.innerHTML =
+      '<div class="tier-header"><span style="color:' + tier.color + '">' + tier.title + '</span><span class="tier-bar" style="background:' + tier.color + '20"></span></div>' +
+      '<div class="tier-lanes">' + lanesHtml + '</div>' +
+      '<div class="tier-note">' + tier.note + '</div>';
+    tiersContainer.appendChild(div);
+  });
+
+  // ====== FUTUROLOGY ANALYSIS ======
+  const futuroContainer = document.getElementById("futurology-analysis");
+
+  function futuroSection(num, title, contentHtml) {
+    const section = document.createElement("div");
+    section.className = "futuro-section";
+    section.innerHTML =
+      '<div class="futuro-section-title"><span class="num">' + num + '</span>' + title + '</div>' +
+      contentHtml;
+    futuroContainer.appendChild(section);
+  }
+
+  // — 1. Phase Diagnosis —
+  const yearCounts = {};
+  projects.forEach(p => { const yr = p.created.slice(0,4); yearCounts[yr] = (yearCounts[yr]||0) + 1; });
+
+  const phaseData = [
+    { id: "irruption", label: "Irruption", sublabel: "2019\u20132023", css: "past",
+      summary: "The tool era. Each sub-domain evolved independently \u2014 RAG, prompt templates, basic memory \u2014 nobody called it 'context engineering'.",
+      narrative: "The defining characteristic of this period was <strong>fragmentation</strong>. Each tool solved one sub-problem of context \u2014 retrieval, compression, formatting, persistence \u2014 but nobody saw them as the same domain. Like the blind men and the elephant: the RAG team did retrieval, the prompt team did templates, the memory team did persistence, but they were all solving different facets of the same problem.",
+      events: [
+        { date: "2019 Q4", text: "haystack: earliest context-driven LLM application framework" },
+        { date: "2022 Q4", text: "guidance + LMQL + llama_index emerged simultaneously" },
+        { date: "2023 Q1", text: "DSPy: programmable prompt optimization, turning prompts from craft to engineering" },
+        { date: "2023 Q2", text: "mem0 + GPTCache + Zep: memory and caching infrastructure appeared" },
+        { date: "2023 Q3", text: "streaming-llm + LLMLingua: long context and compression dual tracks emerged" },
+        { date: "2023 Q4", text: "ragflow: RAG engine, early context-layer concept" }
+      ] },
+    { id: "diffusion", label: "Diffusion", sublabel: "2024", css: "past",
+      summary: "The infrastructure era. MCP protocol released, GraphRAG upgraded retrieval, KV Cache optimization became a sub-domain.",
+      narrative: "The key event of 2024 was the release of MCP. Anthropic defined a protocol standard \u2014 this meant context was no longer just 'stuff shoved in', but an engineering object with formal interfaces. Meanwhile GraphRAG upgraded retrieval from 'finding similar paragraphs' to 'understanding knowledge structures'. The infrastructure layer was in place, setting the stage for the 2025 conceptual explosion.",
+      events: [
+        { date: "2024 Q1", text: "graphrag + parlant: knowledge graph RAG + context control layer" },
+        { date: "2024 Q2", text: "HippoRAG + KVCache-Factory: retrieval and compression evolved" },
+        { date: "2024 Q3", text: "MCP spec released: context got a formal protocol interface" },
+        { date: "2024 Q4", text: "LightRAG + MCP servers (81k): ecosystem explosion" }
+      ] },
+    { id: "frenzy", label: "Frenzy", sublabel: "2025\u2013now", css: "current",
+      summary: "The naming era. Karpathy coined 'Context Engineering' mid-2025. CE projects, memory frameworks, and MCP ecosystem exploded simultaneously.",
+      narrative: "Karpathy used the term 'Context Engineering' in mid-2025, and suddenly the entire field had a name. The power of naming is immense \u2014 a name creates a category, a category attracts investment and attention. From late 2025, memory frameworks emerged in clusters (memU/Memori/MemOS/MemMachine all appeared within 2 months), and context engineering tutorials and guides proliferated. This wasn't driven by a technical breakthrough \u2014 it was driven by a <strong>cognitive shift</strong>.",
+      events: [
+        { date: "2025 Q1", text: "MoBA + chonkie: long context and RAG chunking continued to evolve" },
+        { date: "2025 Q2", text: "memvid + fenic + CE concept born: naming changes everything" },
+        { date: "2025 Q3", text: "Memory framework Cambrian explosion: memU/Memori/MemOS/MemMachine" },
+        { date: "2025 Q4", text: "ace + beads + OpenCE: CE projects emerged in rapid succession" },
+        { date: "2025 Q4", text: "get-shit-done (30k): CE-driven development goes viral" },
+        { date: "2026 Q1", text: "OpenClaw (302k) ignites the CLI vs MCP debate" },
+        { date: "2026 Q1", text: "OpenViking + SimpleMem + gsd-2: integration begins" }
+      ] },
+    { id: "turning", label: "Turning Point", sublabel: "2026H2?", css: "future",
+      summary: "Predicted: MCP becomes the de facto standard or gets challenged. CE shifts from 'concept' to 'engineering practice'. The compression vs long context debate sees initial conclusions.",
+      narrative: "Predicted: MCP either becomes the de facto standard or gets displaced by a challenger. Context Engineering shifts from 'concept' to 'engineering practice', with the first dedicated CE platforms emerging (not cobbled-together memory+RAG, but natively designed CE). The compression vs long context debate will see preliminary resolution.",
+      events: [] },
+    { id: "deployment", label: "Integration", sublabel: "2027+", css: "future",
+      summary: "Endgame: context engineering gets absorbed into the standard agent toolchain, much like 'frontend engineering' is now a default part of web development.",
+      narrative: "Endgame: context engineering is no longer a standalone discipline \u2014 it gets absorbed into the standard agent development toolchain, just as 'frontend engineering' is already a default part of web development today. MCP or its successor becomes the infrastructure layer, and developers no longer need to manually manage context.",
+      events: [] }
+  ];
+
+  let phaseHtml = '<div class="futuro-phase">' +
+    '<div class="phase-track" id="phase-track">';
+  const currentPhaseIdx = phaseData.findIndex(p => p.css === "current");
+  phaseData.forEach((ph, i) => {
+    const nowMark = (ph.css === "current") ? '<span class="now-dot"></span>' : '';
+    phaseHtml += '<div class="phase-step' + (i === currentPhaseIdx ? ' active' : '') + '" data-phase="' + i + '">' +
+      ph.label + nowMark + '<br><span style="font-weight:400;font-size:11px">' + ph.sublabel + '</span></div>';
+  });
+  phaseHtml += '</div>' +
+    '<div class="phase-events" id="phase-events"></div></div>';
+
+  futuroSection(1, "Phase Diagnosis \u2014 Click to explore milestones by phase", phaseHtml);
+
+  function showPhase(idx) {
+    const ph = phaseData[idx];
+    const eventsEl = document.getElementById("phase-events");
+    const steps = document.querySelectorAll("#phase-track .phase-step");
+    steps.forEach((s, i) => { s.classList.toggle("active", i === idx); });
+    let html = '';
+    if (ph.events.length > 0) {
+      ph.events.forEach(ev => {
+        html += '<div class="pe-item"><span class="pe-date">' + ev.date + '</span><span class="pe-text">' + ev.text + '</span></div>';
+      });
+    }
+    html += '<div class="pe-summary" style="margin-top:' + (ph.events.length > 0 ? '10' : '0') + 'px">' + ph.narrative + '</div>';
+    eventsEl.innerHTML = html;
+  }
+
+  document.querySelectorAll("#phase-track .phase-step").forEach((step, i) => {
+    step.addEventListener("click", () => showPhase(i));
+  });
+  showPhase(currentPhaseIdx);
+
+  // — 2. Driving Forces —
+  const forces = [
+    { title: "Context Window Expansion", tag: "Technology-Driven", tagColor: "#2563eb",
+      text: "From GPT-4's 4K to Claude's 200K to Gemini's 1M+ tokens \u2014 context windows double every 12 months. More context requires more engineering to manage. But it also creates an illusion: 'just stuff everything in'. This illusion is CE's greatest enemy and best catalyst \u2014 when developers discover that 'stuff everything in' doesn't work well, they need engineered context management.",
+      evidence: "Evidence: GPT-4 4K (2023) \u2192 Claude 200K (2024) \u2192 Gemini 1M (2025)" },
+    { title: "Rise of Agents", tag: "Demand-Driven", tagColor: "#059669",
+      text: "One-off conversations don't need context engineering; agents do. Agents run across sessions, call tools, manage tasks \u2014 every step is a context management problem. In 2023 there were fewer than 10 agent frameworks; by 2025 there were over 100. The agent explosion directly created hard demand for systematic context management.",
+      evidence: "Evidence: Agent frameworks <10 in 2023, >100 in 2025" },
+    { title: "MCP's Catalytic Effect", tag: "Protocol-Driven", tagColor: "#7c3aed",
+      text: "A protocol standardized how context is served to LLMs. MCP servers went from 0 to 81k stars in just 15 months. When context has a standard interface, 'context engineering' transforms from metaphor to actionable engineering practice. MCP is to CE what HTTP was to web development \u2014 no protocol, no engineering.",
+      evidence: "Evidence: MCP servers 81k Stars, 2000+ community servers, 15 months" },
+    { title: "The CLI Runtime Rebellion", tag: "Efficiency-Driven", tagColor: "#e11d48",
+      text: "OpenClaw's founder declared 'MCP was a mistake. Bash is better', igniting the CLI vs MCP debate. The core argument is token efficiency: MCP's GitHub server burns 55,000 tokens on 93 tool definitions (before you even ask a question), while CLI's --help loads on demand at near-zero cost. Scalekit benchmarks confirmed CLI is 10-32x cheaper and 28% more reliable than MCP. But this isn't the endgame \u2014 Anthropic's own paper showed having agents write code to call MCP instead of using MCP tools directly saves 98.7% of tokens. The underlying logic: a battle over context delivery efficiency.",
+      evidence: "Evidence: OpenClaw 302k Stars (18 months), Scalekit benchmark CLI 100% vs MCP 72% reliability" }
+  ];
+
+  let forcesHtml = '<div class="futuro-grid-2">';
+  forces.forEach(f => {
+    forcesHtml += '<div class="futuro-card">' +
+      '<span class="fc-tag" style="background:' + f.tagColor + '">' + f.tag + '</span>' +
+      '<h3>' + f.title + '</h3>' +
+      '<p>' + f.text + '</p>' +
+      '<div class="fc-evidence">' + f.evidence + '</div></div>';
+  });
+  forcesHtml += '</div>';
+  futuroSection(2, "Driving Forces \u2014 What's propelling the entire field?", forcesHtml);
+
+  // — 3. Convergence Patterns —
+  const convergences = [
+    { formula: "RAG \u00d7 Memory", result: "Unified Context Store",
+      text: "RAG retrieves external knowledge; Memory persists agent experience. HippoRAG and cognee are already merging both. The external vs internal knowledge distinction is dissolving \u2014 for agents, all useful information is context.",
+      projects: "HippoRAG (3.3k), cognee (13.5k), Acontext (3.2k)" },
+    { formula: "Prompt Engineering \u2192 Context Engineering", result: "Single-shot \u2192 Full Lifecycle",
+      text: "From hand-writing individual prompts to systematically managing the entire context pipeline. DSPy is the bridge (programmable prompts). Evolution path: handwritten prompts \u2192 programmable prompts \u2192 context pipeline \u2192 context engineering.",
+      projects: "DSPy (32.8k) \u2192 promptflow (11.1k) \u2192 parlant (17.8k) \u2192 OpenCE (335)" },
+    { formula: "Compression \u00d7 Long Context", result: "Opposing or Complementary?",
+      text: "Compression fits context into smaller windows; Long Context makes windows bigger. Seemingly contradictory, but actually complementary: even with a 1M token window, you still need to decide what goes in. Cost optimization always needs compression.",
+      projects: "LLMLingua (5.9k) vs MoBA (2.1k), claw-compactor (1.6k) vs streaming-llm (7.2k)" },
+    { formula: "MCP \u00d7 Memory", result: "Context-as-a-Service",
+      text: "MCP provides the protocol; Memory provides the state. Combined, they enable 'Context-as-a-Service' \u2014 agents request context through standard interfaces and receive relevant, persistent information in return. cipher is already an MCP-compatible memory layer.",
+      projects: "MCP servers (81k), mem0 (49.8k), cipher (3.6k, MCP-compatible memory)" },
+    { formula: "CLI \u00d7 MCP", result: "From Opposition to Coexistence",
+      text: "CLI uses files and terminal for context (10-32x more token-efficient); MCP standardizes interfaces via protocol. Scalekit benchmark: CLI 100% reliability vs MCP 72%. But after MCP introduced progressive discovery in early 2026, the gap is narrowing. The endgame isn't either/or, but Skills as a unified abstraction layer \u2014 the underlying implementation can be CLI or MCP.",
+      projects: "OpenClaw (302k, CLI-first) vs MCP servers (81k, protocol-first). Codex/Gemini CLI support both" }
+  ];
+
+  let convHtml = '<div class="futuro-grid-2">';
+  convergences.forEach(c => {
+    convHtml += '<div class="futuro-convergence-item">' +
+      '<div class="conv-formula">' + c.formula + ' <span class="conv-arrow">\u2192</span> ' + c.result + '</div>' +
+      '<p>' + c.text + '</p>' +
+      '<div class="conv-projects">' + c.projects + '</div></div>';
+  });
+  convHtml += '</div>';
+  futuroSection(3, "Convergence Trajectories \u2014 What's happening between lanes?", convHtml);
+
+  // — 4. Inevitable vs Contingent —
+  const inevitables = [
+    { fact: "Context becomes a first-class engineering object", why: "Every lane points to this. Context is no longer an afterthought \u2014 it's an engineering artifact that requires dedicated design, testing, and optimization." },
+    { fact: "Protocol standardization (MCP or successor)", why: "Fragmentation is unsustainable. MCP has first-mover advantage with 81k stars and 2000+ community servers, but even if MCP fails, some form of protocol standardization is inevitable." },
+    { fact: "Memory becomes standard for agents", why: "Stateless agents can't handle real-world tasks. Five memory frameworks emerging simultaneously in July-August 2025 proved: this isn't opinion, it's consensus." },
+    { fact: "Retrieval + Memory convergence", why: "The external vs internal knowledge distinction is artificial. For agents, all useful information is context. HippoRAG/cognee are already blurring this boundary." }
+  ];
+
+  const contingents = [
+    { fact: "Whether MCP or CLI wins the context interface battle", why: "OpenClaw's 302k stars prove CLI has efficiency advantages (10-32x token savings), but MCP has enterprise governance advantages. Perplexity CTO dropping MCP is a strong signal, but MCP's progressive discovery might turn things around. The winner may be an abstraction layer above both \u2014 Skills." },
+    { fact: "Whether Context Engineering becomes an independent discipline", why: "It might get absorbed into 'Agent Engineering' as a sub-domain rather than a standalone discipline. Depends on whether dedicated CE platforms and CE engineer job titles emerge." },
+    { fact: "Whether Long Context kills compression demand", why: "Depends on model architecture evolution. If 10M+ token windows become cheap, the compression lane may shrink \u2014 but cost optimization always has a market." },
+    { fact: "Who defines CE best practices", why: "Anthropic? OpenAI? Open-source community? Academia? The battle for definitional authority determines the entire field's direction and standards." }
+  ];
+
+  let splitHtml = '<div class="futuro-grid-2">' +
+    '<div class="futuro-split-col futuro-card" style="border-left:3px solid #059669">' +
+    '<h4 style="color:#059669">Inevitable Trends</h4><ul>';
+  inevitables.forEach(i => {
+    splitHtml += '<li><strong>' + i.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + i.why + '</span></li>';
+  });
+  splitHtml += '</ul></div>' +
+    '<div class="futuro-split-col futuro-card" style="border-left:3px solid #d97706">' +
+    '<h4 style="color:#d97706">Contingent Variables</h4><ul>';
+  contingents.forEach(c => {
+    splitHtml += '<li><strong>' + c.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + c.why + '</span></li>';
+  });
+  splitHtml += '</ul></div></div>';
+  futuroSection(4, "Inevitable vs Contingent", splitHtml);
+
+  // — 5. Scenario Sketch —
+  const scenarios = [
+    { title: "Discipline Established", tag: "Optimistic", prob: "30%", tagColor: "#059669", css: "scenario-optimistic",
+      text: "Context Engineering becomes a recognized engineering discipline, with textbooks, certifications, and dedicated tools. 'CE Engineer' becomes a job title. A major CE framework achieves dominant adoption, and cloud providers offer CE-as-a-Service.",
+      trigger: "Trigger: A major CE framework achieves dominant adoption + cloud providers offer CE-as-a-Service" },
+    { title: "Framework Absorption", tag: "Baseline", prob: "50%", tagColor: "#2563eb", css: "scenario-base",
+      text: "CE capabilities get absorbed by existing agent frameworks (LangChain, CrewAI, etc.). No independent CE discipline \u2014 just better context handling within agent tools. Natural evolution, no disruptive events.",
+      trigger: "Trigger: Natural evolution, no disruptive events" },
+    { title: "Window Overflow", tag: "Risk", prob: "20%", tagColor: "#dc2626", css: "scenario-risk",
+      text: "Context windows become large enough (10M+ tokens) and cheap enough that engineered management seems unnecessary. 'Just stuff everything in' actually works. CE tools lose their reason to exist beyond cost optimization.",
+      trigger: "Trigger: Model architecture breakthrough achieves near-infinite, low-cost context" }
+  ];
+
+  let scenarioHtml = '<div class="futuro-grid-3">';
+  scenarios.forEach(s => {
+    scenarioHtml += '<div class="futuro-card ' + s.css + '">' +
+      '<span class="fc-tag" style="background:' + s.tagColor + '">' + s.tag + ' \u00b7 ' + s.prob + '</span>' +
+      '<h3>' + s.title + '</h3>' +
+      '<p>' + s.text + '</p>' +
+      '<div class="fc-evidence">' + s.trigger + '</div></div>';
+  });
+  scenarioHtml += '</div>';
+  futuroSection(5, "Scenario Sketches \u2014 Three landscapes in 12 months", scenarioHtml);
+
+  // — 6. Weak Signals —
+  const weakSignals = [
+    { title: "Academic Naming Emerges",
+      text: "GAIR-NLP's 'Context Engineering 2.0' marks academic formalization. When academia names something, institutionalization follows \u2014 courses, papers, journals. This is the critical inflection signal from 'tool collection' to 'discipline'.",
+      evidence: "Signal: Context-Engineering-2.0 (Shanghai Jiao Tong University, 2025-10)" },
+    { title: "Memory Framework Cambrian Explosion",
+      text: "In July-August 2025, memvid/memU/Memori/MemOS/MemMachine all emerged within 2 months. This density means 'agents need memory' has shifted from opinion to consensus. Memory is the core infrastructure of context engineering \u2014 when memory explodes, CE demand is also exploding.",
+      evidence: "Signal: 5 projects launched within 60 days, combined 50k+ Stars" },
+    { title: "Code Context Specialization",
+      text: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k) \u2014 codebase-specialized context packaging has become an independent sub-lane. This suggests: different types of agents need different types of context engineering. Generalized CE frameworks may not be enough; domain-specific CE may be more valuable.",
+      evidence: "Signal: 3 projects > 5k Stars, all code-specialized" },
+    { title: "The Compression vs Extension Race",
+      text: "Compression (LLMLingua, KV Cache tools) and Long Context (MoBA, streaming-llm) are evolving in parallel. If context windows grow faster than content volume, compression loses relevance; if content grows faster than windows, compression wins. The outcome of this race shapes the entire field.",
+      evidence: "Signal: KV Cache compression has 6+ active projects, while window sizes double every 12 months" },
+    { title: "Perplexity CTO Drops MCP",
+      text: "On March 11, 2026, Perplexity CTO Denis Yarats announced they're switching from MCP to API + CLI internally. Ironically, Perplexity's website still hosts MCP server documentation. When early adopters of MCP start leaving, it's a very strong directional signal. Whether MCP's progressive discovery update (2026-01) can turn things around is a key variable.",
+      evidence: "Signal: Perplexity CTO public statement (Ask 2026 conference, 2026-03-11)" }
+  ];
+
+  let signalHtml = '<div class="futuro-grid-2">';
+  weakSignals.forEach(s => {
+    signalHtml += '<div class="futuro-signal">' +
+      '<div class="sig-title">' + s.title + '</div>' +
+      '<p>' + s.text + '</p>' +
+      '<div class="sig-evidence">' + s.evidence + '</div></div>';
+  });
+  signalHtml += '</div>';
+  futuroSection(6, "Weak Signals \u2014 Underestimated but potentially game-changing", signalHtml);
+
+  // ====== EPILOGUE ======
+  (function() {
+    const yrBuckets = {};
+    projects.forEach(p => { const yr = p.created.slice(0, 4); yrBuckets[yr] = (yrBuckets[yr] || 0) + 1; });
+    const years = Object.keys(yrBuckets).sort();
+    const yrLine = years.map(y => y + ': ' + yrBuckets[y]).join(' \u2192 ');
+    const newCount = projects.filter(p => p.status === 'new').length;
+
+    const epiContainer = document.getElementById('epilogue-dims');
+    epiContainer.innerHTML =
+      '<div class="epi-dim dim-past">' +
+        '<div class="dim-label">Looking Back</div>' +
+        '<h3>What patterns keep repeating?</h3>' +
+        '<p>The data reveals a clear wave rhythm: <strong>tool fragmentation \u2192 infrastructure protocol \u2192 conceptual naming \u2192 disciplinary integration</strong>. 2019-2023 was the fragmented tools era (haystack, RAG, prompt templates, basic memory \u2014 each solving one piece); 2024 was protocol infrastructure (MCP released, providing a unified interface); 2025 was the naming era (Karpathy coined \'context engineering\', tutorials/guides exploded); 2026 marks the beginning of integration (OpenViking, CE toolkits emerging).</p>' +
+        '<p>Each phase builds on the previous one. Without MCP (protocol), naming would have nothing concrete to point to. Without naming, integration would have no direction.</p>' +
+        '<p><strong>What does this pattern predict?</strong> After naming comes standardization. The next wave should be \'CE platforms\' \u2014 not toolkits, but integrated platforms managing the full context lifecycle. This hasn\'t happened yet.</p>' +
+        '<div class="epi-data">' +
+          '<span style="font-weight:600">2019-2023</span> Fragmentation: sub-domains evolved independently<br>' +
+          '<span style="font-weight:600">2024</span> Protocol: MCP released<br>' +
+          '<span style="font-weight:600">2025</span> Naming: Karpathy + tutorial explosion<br>' +
+          '<span style="font-weight:600">2026 Q1</span> CLI Rebellion: OpenClaw 302k, CLI vs MCP debate<br>' +
+          '<span style="font-weight:600">?</span> Convergence: Skills as unified abstraction, dedicated CE platforms \u2014 not yet here' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="epi-dim dim-future">' +
+        '<div class="dim-label">Looking Ahead</div>' +
+        '<h3>What structural tensions must be resolved, regardless of the future?</h3>' +
+        '<p><strong>Tension 1: Compression vs Expansion \u2014 CE\'s existential question.</strong> If context windows become infinite and cheap, does CE still matter? The answer determines whether CE is a permanent discipline or a transitional technology. In all scenarios, this tension must be faced.</p>' +
+        '<p><strong>Tension 2: Human Orchestration vs Agent Autonomy \u2014 Who engineers the context?</strong> Currently, humans design context pipelines. But agents are increasingly managing their own context autonomously (ace, Acontext). The shift from \'humans engineer context for agents\' to \'agents engineer their own context\' is a structural tension. If agents win, CE as a human discipline disappears; if humans remain necessary, CE solidifies.</p>' +
+        '<p><strong>Tension 3: Protocol vs Terminal \u2014 The MCP vs CLI efficiency battle.</strong> MCP bets on a protocol standardizing context interfaces. The CLI camp (OpenClaw\'s 302k stars) counterattacks with token efficiency data: same task, CLI 1,365 tokens vs MCP 44,026 tokens. But efficiency isn\'t the only dimension \u2014 enterprise governance, auditing, and permissions need MCP\'s structure. Skills may become the unified abstraction layer above both.</p>' +
+        '<div class="epi-data">' +
+          'Structural tensions are not predictions \u2014 they are problems that must be faced regardless of which scenario unfolds.<br>How they get resolved determines which scenario ultimately materializes.' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="epi-dim dim-now">' +
+        '<div class="dim-label">Looking at Now</div>' +
+        '<h3>What decisions have a closing window?</h3>' +
+        '<p><strong>The Naming Window.</strong> Context engineering\'s definition is still fluid. Whoever writes the best CE textbook/framework now defines the discipline. In 2025, \'Context Engineering\' went from 0 to 20+ projects \u2014 this velocity means the window is closing fast.</p>' +
+        '<p><strong>The MCP vs CLI Alignment Window.</strong> MCP is still young (15 months), and the CLI camp just emerged (OpenClaw reached 302k stars in 18 months). Perplexity\'s CTO has already publicly shifted to CLI. Now is the last window to influence the \'context interface standard\' \u2014 once major players collectively take sides, the landscape will solidify.</p>' +
+        '<p><strong>Report Scope Boundaries.</strong> Data sourced from GitHub open-source projects. Internal context management capabilities at Anthropic/OpenAI/Google are outside the scope. Stars measure popularity, not importance.</p>' +
+        '<div class="epi-data">' +
+          'Project distribution: ' + yrLine + '<br>' +
+          '2026 new projects: ' + newCount + ' (Q1 only)<br>' +
+          'Data source: GitHub open-source projects (excludes closed-source research, academic papers, patents)' +
+        '</div>' +
+      '</div>';
+  })();
+
+  // ====== TIMELINE (D3) ======
+  const margin = { top: 40, right: 30, bottom: 80, left: 195 };
+  const fullWidth = 1440;
+  const laneHeight = 72;
+  const numLanes = laneConfig.length;
+  const chartHeight = numLanes * laneHeight;
+  const fullHeight = chartHeight + margin.top + margin.bottom;
+
+  const svg = d3.select("#timeline-svg")
+    .attr("width", fullWidth)
+    .attr("height", fullHeight)
+    .attr("viewBox", `0 0 ${fullWidth} ${fullHeight}`);
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const chartWidth = fullWidth - margin.left - margin.right;
+
+  const timeStart = new Date("2019-07-01");
+  const timeEnd = new Date("2026-06-01");
+  const futureStart = new Date("2026-04-01");
+
+  const x = d3.scaleTime().domain([timeStart, timeEnd]).range([0, chartWidth]);
+  const y = d3.scaleBand().domain(laneConfig.map(l => l.id)).range([0, chartHeight]).padding(0.06);
+
+  const futureX = x(futureStart);
+  g.append("rect")
+    .attr("x", futureX).attr("y", 0)
+    .attr("width", chartWidth - futureX).attr("height", chartHeight)
+    .attr("fill", "#f8fafc").attr("stroke", "#e2e8f0")
+    .attr("stroke-dasharray", "6,4").attr("stroke-width", 1).attr("rx", 4);
+  g.append("text")
+    .attr("x", futureX + (chartWidth - futureX) / 2).attr("y", 20)
+    .attr("text-anchor", "middle").attr("font-size", 12)
+    .attr("fill", "#cbd5e1").attr("font-weight", 600).text("Future");
+
+  // Year grid
+  const yearMarks = [];
+  for (let yr = 2020; yr <= 2026; yr++) {
+    const d = new Date(yr, 0, 1);
+    if (d >= timeStart && d <= timeEnd) yearMarks.push(d);
+  }
+  g.selectAll(".grid-line").data(yearMarks).join("line")
+    .attr("x1", d => x(d)).attr("x2", d => x(d))
+    .attr("y1", 0).attr("y2", chartHeight)
+    .attr("stroke", "#f0f0f0").attr("stroke-width", 1);
+
+  g.selectAll(".yr-label").data(yearMarks).join("text")
+    .attr("x", d => x(d)).attr("y", chartHeight + 18)
+    .attr("text-anchor", "middle").attr("font-size", 11).attr("fill", "#9ca3af")
+    .text(d => d.getFullYear());
+
+  // Lane backgrounds & labels
+  laneConfig.forEach((lane, i) => {
+    const ly = y(lane.id); const lh = y.bandwidth();
+    if (i % 2 === 0) {
+      g.append("rect").attr("x", 0).attr("y", ly)
+        .attr("width", chartWidth).attr("height", lh).attr("fill", "#f9fafb");
+    }
+    g.append("line").attr("x1", 0).attr("x2", chartWidth)
+      .attr("y1", ly).attr("y2", ly).attr("stroke", "#e5e7eb").attr("stroke-width", 0.5);
+    g.append("text").attr("x", -12).attr("y", ly + lh / 2)
+      .attr("text-anchor", "end").attr("dominant-baseline", "middle")
+      .attr("font-size", 11).attr("font-weight", 600).attr("fill", lane.color)
+      .text(lane.label);
+  });
+  g.append("line").attr("x1", 0).attr("x2", chartWidth)
+    .attr("y1", chartHeight).attr("y2", chartHeight).attr("stroke", "#e5e7eb").attr("stroke-width", 0.5);
+
+  // Event annotations
+  const eventAnnotations = [
+    { date: "2019-11-01", label: "haystack", lane: "rag" },
+    { date: "2023-01-01", label: "DSPy", lane: "prompt-eng" },
+    { date: "2023-06-01", label: "mem0", lane: "memory" },
+    { date: "2024-09-01", label: "MCP", lane: "mcp" },
+    { date: "2024-07-01", label: "repomix", lane: "codectx" },
+    { date: "2025-06-01", label: "CE Named", lane: "ce" },
+    { date: "2025-07-01", label: "Memory Boom", lane: "memory" },
+    { date: "2026-01-01", label: "OpenViking", lane: "ce" },
+    { date: "2024-09-01", label: "OpenClaw", lane: "cli" },
+    { date: "2025-06-01", label: "Gemini CLI", lane: "cli" }
+  ];
+  eventAnnotations.forEach(ann => {
+    const ax = x(new Date(ann.date));
+    const lane = laneConfig.find(l => l.id === ann.lane);
+    if (!lane) return;
+    const ay = y(lane.id);
+    g.append("line").attr("x1", ax).attr("x2", ax).attr("y1", ay - 4).attr("y2", ay + 6)
+      .attr("stroke", "#2563eb").attr("stroke-width", 1.5).attr("stroke-dasharray", "3,2");
+    g.append("text").attr("x", ax).attr("y", ay - 8)
+      .attr("text-anchor", "middle").attr("font-size", 10)
+      .attr("fill", "#2563eb").attr("font-weight", 600).text(ann.label);
+  });
+
+  // Project nodes
+  const tooltip = d3.select("#tooltip");
+  const starExtent = d3.extent(projects, d => d.stars);
+  const rScale = d3.scaleSqrt()
+    .domain([Math.log10(starExtent[0] + 1), Math.log10(starExtent[1] + 1)])
+    .range([4, 20]);
+
+  const laneProjects = {};
+  projects.forEach(p => {
+    const lane = getLane(p.paradigm);
+    if (!laneProjects[lane.id]) laneProjects[lane.id] = [];
+    laneProjects[lane.id].push(p);
+  });
+
+  projects.forEach(p => {
+    const lane = getLane(p.paradigm);
+    const siblings = laneProjects[lane.id];
+    const idx = siblings.indexOf(p);
+    const count = siblings.length;
+    const laneY = y(lane.id); const laneH = y.bandwidth();
+    const yPos = laneY + laneH * (0.2 + 0.6 * (idx / Math.max(count - 1, 1)));
+    p._x = x(new Date(p.created));
+    p._y = count === 1 ? laneY + laneH / 2 : yPos;
+    p._r = rScale(Math.log10(p.stars + 1));
+    p._lane = lane;
+  });
+
+  // 8-pass collision resolution
+  for (let pass = 0; pass < 8; pass++) {
+    for (const laneId in laneProjects) {
+      const lps = laneProjects[laneId].sort((a, b) => a._x - b._x);
+      const lane = laneConfig.find(l => l.id === laneId);
+      const laneY = y(lane.id); const laneH = y.bandwidth();
+      for (let i = 1; i < lps.length; i++) {
+        for (let j = 0; j < i; j++) {
+          const dx = lps[i]._x - lps[j]._x;
+          const dy = lps[i]._y - lps[j]._y;
+          const minDist = lps[i]._r + lps[j]._r + 3;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < minDist && dist > 0) {
+            const push = (minDist - dist) / 2;
+            lps[i]._y = Math.min(laneY + laneH - lps[i]._r - 2, lps[i]._y + push * 0.7);
+            lps[j]._y = Math.max(laneY + lps[j]._r + 2, lps[j]._y - push * 0.7);
+            if (Math.abs(dx) < minDist * 0.3) {
+              lps[i]._x = Math.min(chartWidth - lps[i]._r, lps[i]._x + push * 0.3);
+              lps[j]._x = Math.max(lps[j]._r, lps[j]._x - push * 0.3);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function statusStroke(s) { return s === "new" ? "#ef4444" : s === "stable" ? "#9ca3af" : "none"; }
+  function statusStrokeWidth(s) { return s === "new" ? 2.5 : s === "stable" ? 1.5 : 0; }
+
+  const nodes = g.selectAll(".node").data(projects).join("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d._x},${d._y})`)
+    .style("cursor", "pointer");
+
+  nodes.append("circle")
+    .attr("r", d => d._r)
+    .attr("fill", d => paradigmColors[d.paradigm] || "#6b7280")
+    .attr("fill-opacity", d => d.status === "new" ? 0.85 : 0.65)
+    .attr("stroke", d => statusStroke(d.status))
+    .attr("stroke-width", d => statusStrokeWidth(d.status));
+
+  nodes.filter(d => d.stars > 3000)
+    .append("text")
+    .attr("y", d => d._r + 12)
+    .attr("text-anchor", "middle").attr("font-size", 10)
+    .attr("font-weight", 600).attr("fill", "#374151")
+    .text(d => d.name.length > 14 ? d.name.slice(0, 12) + ".." : d.name);
+
+  nodes.filter(d => d._r > 12)
+    .append("text")
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("font-size", 9).attr("font-weight", 700).attr("fill", "#fff")
+    .text(d => d.stars >= 1000 ? (d.stars / 1000).toFixed(1) + "k" : d.stars);
+
+  // Tooltip
+  nodes.on("mouseenter", function(event, d) {
+    const color = paradigmColors[d.paradigm] || "#6b7280";
+    const statusLabel = d.status === "new" ? "New" : d.status === "active" ? "Active" : "Stable";
+    tooltip.html(`
+      <div class="tt-name" style="color:${color}">${d.name}</div>
+      <div class="tt-org">${d.org}</div>
+      <div class="tt-desc">${d.desc}</div>
+      <div class="tt-meta">
+        <span class="tt-stars">\u2605 ${d.stars.toLocaleString()}</span>
+        <span>${d.created}</span>
+        <span>${statusLabel}</span>
+      </div>
+      <span class="tt-paradigm-badge" style="background:${color}">${paradigmLabels[d.paradigm]||d.paradigm}</span>
+    `).style("opacity", 1);
+    d3.select(this).select("circle").transition().duration(150)
+      .attr("fill-opacity", 1).attr("r", d._r * 1.15);
+  })
+  .on("mousemove", function(event) {
+    let left = event.pageX + 16;
+    if (left + 340 > window.innerWidth - 20) left = event.pageX - 340 - 16;
+    tooltip.style("left", left + "px").style("top", (event.pageY - 10) + "px");
+  })
+  .on("mouseleave", function(event, d) {
+    tooltip.style("opacity", 0);
+    d3.select(this).select("circle").transition().duration(150)
+      .attr("fill-opacity", d.status === "new" ? 0.85 : 0.65).attr("r", d._r);
+  })
+  .on("click", function(event, d) {
+    window.open(`https://github.com/${d.org}/${d.name}`, '_blank');
+  });
+
+  // Bottom legends
+  const legendY = margin.top + chartHeight + 36;
+  const statusLegend = svg.append("g").attr("transform", `translate(${margin.left}, ${legendY})`);
+  const statuses = [
+    { label: "New", color: "#ef4444" },
+    { label: "Stable", color: "#9ca3af" },
+    { label: "Active", color: "none" }
+  ];
+  let sx = 0;
+  statuses.forEach(s => {
+    statusLegend.append("circle").attr("cx", sx).attr("cy", 0).attr("r", 5)
+      .attr("fill", s.color === "none" ? "#059669" : "none").attr("fill-opacity", 0.65)
+      .attr("stroke", s.color === "none" ? "none" : s.color)
+      .attr("stroke-width", s.color === "#ef4444" ? 2.5 : 1.5);
+    statusLegend.append("text").attr("x", sx + 9).attr("y", 4)
+      .attr("font-size", 11).attr("fill", "#9ca3af").text(s.label);
+    sx += s.label.length * 14 + 20;
+  });
+
+  const sizeLegend = svg.append("g").attr("transform", `translate(${fullWidth - 220}, ${legendY})`);
+  sizeLegend.append("text").attr("x", 0).attr("y", 4)
+    .attr("font-size", 11).attr("fill", "#9ca3af").text("Stars:");
+  const exampleStars = [100, 1000, 10000];
+  const exampleLabels = ["100", "1k", "10k"];
+  let cx = 50;
+  const maxR = rScale(Math.log10(10000 + 1));
+  exampleStars.forEach((s, i) => {
+    const r = rScale(Math.log10(s + 1));
+    const cy = maxR - r;
+    sizeLegend.append("circle").attr("cx", cx).attr("cy", cy).attr("r", r)
+      .attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-width", 1);
+    sizeLegend.append("text").attr("x", cx).attr("y", maxR + 14)
+      .attr("text-anchor", "middle").attr("font-size", 9).attr("fill", "#9ca3af")
+      .text(exampleLabels[i]);
+    cx += r * 2 + 16;
+  });
+
+  // Project index table
+  const sortedProjects = [...projects].sort((a, b) => b.stars - a.stars);
+  const tbody = document.getElementById("index-tbody");
+  sortedProjects.forEach(p => {
+    const url = `https://github.com/${p.org}/${p.name}`;
+    const color = paradigmColors[p.paradigm] || "#6b7280";
+    const lane = getLane(p.paradigm);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="idx-paradigm-dot" style="background:${color}"></span>${lane.label}</td>
+      <td><a href="${url}" target="_blank">${p.name}</a> <span class="idx-org">${p.org}</span></td>
+      <td class="idx-stars">\u2605 ${p.stars.toLocaleString()}</td>
+      <td style="font-size:13px;color:#6b7280;white-space:nowrap">${p.created}</td>
+      <td class="idx-desc">${p.desc}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

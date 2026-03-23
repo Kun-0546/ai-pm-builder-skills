@@ -50,5 +50,20 @@
       "Each selection includes reasoning",
       "Includes brief paradigm signal"
     ]
+  },
+  {
+    "id": "eval-5",
+    "mode": "evolution_timeline",
+    "prompt": "Map the evolution of context engineering",
+    "script": "python scripts/evolution_timeline.py \"context engineering\"",
+    "expectations": [
+      "Scope boundary defined with IN/OUT criteria",
+      "5-12 technology domains derived from evolution logic",
+      "At least 3 speculative domains with speculation logic and signal signatures",
+      "Each domain has Wardley maturity label and status (Established/Emerging/Speculative)",
+      "D3.js interactive timeline with swim-lane layout",
+      "Phase 6 evolution panorama with 6-dimension analysis",
+      "Phase 6-B afterword with retrospective, tensions, and action insights"
+    ]
   }
 ]

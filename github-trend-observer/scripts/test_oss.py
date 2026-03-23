@@ -56,6 +56,9 @@ class T1_SyntaxCheck(unittest.TestCase):
     def test_generate_report(self):
         self._check_compile("generate_report.py")
 
+    def test_evolution_timeline(self):
+        self._check_compile("evolution_timeline.py")
+
 
 class T2_ImportCheck(unittest.TestCase):
     """Each script should import successfully"""
@@ -96,6 +99,12 @@ class T2_ImportCheck(unittest.TestCase):
         import generate_report
         self.assertTrue(hasattr(generate_report, "main"))
         self.assertTrue(hasattr(generate_report, "render_simple"))
+
+    def test_import_evolution_timeline(self):
+        import evolution_timeline
+        self.assertTrue(hasattr(evolution_timeline, "main"))
+        self.assertTrue(hasattr(evolution_timeline, "search_topic"))
+        self.assertTrue(hasattr(evolution_timeline, "build_output"))
 
 
 class T3_UnitTests(unittest.TestCase):
@@ -215,6 +224,44 @@ class T3_UnitTests(unittest.TestCase):
             result = search(["test query"], min_stars=100, min_recall=1)
             self.assertGreater(result["total_found"], 0)
             self.assertEqual(result["repos"][0]["full_name"], "test/repo1")
+
+    def test_evolution_timeline_build_output(self):
+        """evolution_timeline.build_output structures data correctly"""
+        from evolution_timeline import build_output
+        projects = [
+            {"name": "test/repo1", "stars": 1000, "forks": 100,
+             "description": "Test repo", "language": "Python",
+             "created_at": "2025-06-15T00:00:00Z", "updated_at": "2026-03-01T00:00:00Z",
+             "url": "https://github.com/test/repo1", "topics": ["ai"], "source_keyword": "test"},
+            {"name": "test/repo2", "stars": 500, "forks": 50,
+             "description": "Another repo", "language": "TypeScript",
+             "created_at": "2024-01-10T00:00:00Z", "updated_at": "2026-02-01T00:00:00Z",
+             "url": "https://github.com/test/repo2", "topics": [], "source_keyword": "test"}
+        ]
+        output = build_output("test topic", projects, round_num=1)
+        self.assertEqual(output["meta"]["topic"], "test topic")
+        self.assertEqual(output["meta"]["total_results"], 2)
+        self.assertEqual(output["meta"]["search_round"], 1)
+        self.assertIn("2025", output["meta"]["year_distribution"])
+        self.assertIn("2024", output["meta"]["year_distribution"])
+        self.assertIn("Python", output["meta"]["language_distribution"])
+        self.assertEqual(len(output["projects"]), 2)
+
+    def test_evolution_timeline_search_topic_mock(self):
+        """evolution_timeline.search_topic works with mocked gh_utils"""
+        from evolution_timeline import search_topic
+        mock_data = json.dumps([
+            {"nameWithOwner": "org/project", "stargazerCount": 2000, "forkCount": 200,
+             "description": "A context engineering tool", "primaryLanguage": {"name": "Python"},
+             "createdAt": "2025-03-01T00:00:00Z", "updatedAt": "2026-03-15T00:00:00Z",
+             "url": "https://github.com/org/project", "repositoryTopics": []}
+        ])
+        with patch("evolution_timeline.run_gh", return_value=mock_data):
+            results = search_topic("context engineering", min_stars=20, max_results=10)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]["name"], "org/project")
+            self.assertEqual(results[0]["stars"], 2000)
+            self.assertEqual(results[0]["language"], "Python")
 
 
 class T4_LightAPITests(unittest.TestCase):
@@ -352,9 +399,21 @@ class T5_IntegrationTests(unittest.TestCase):
         self.assertIn("repo", data)
         self.assertIn("total_stars", data)
 
+    def test_evolution_timeline_output_json(self):
+        """evolution_timeline.py 'cli tool' outputs valid JSON"""
+        result = self._run_script("evolution_timeline.py",
+                                  ["cli tool", "--min-stars", "500", "--max-results", "10"],
+                                  timeout=60)
+        self.assertEqual(result.returncode, 0, f"stderr: {result.stderr}")
+        data = json.loads(result.stdout)
+        self.assertIn("meta", data)
+        self.assertIn("projects", data)
+        self.assertEqual(data["meta"]["topic"], "cli tool")
+        self.assertIsInstance(data["projects"], list)
+
 
 class T6_ReportRenderTests(unittest.TestCase):
-    """generate_report.py template rendering tests -- full pipeline for all 4 modes"""
+    """generate_report.py template rendering tests -- full pipeline for modes 1-4, plus Mode 5 template check"""
 
     TEMPLATE_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "en", "templates")
 
@@ -525,6 +584,20 @@ class T6_ReportRenderTests(unittest.TestCase):
             self.assertTrue(html.strip().startswith("<!DOCTYPE html>"),
                             f"{mode} template output does not start with DOCTYPE")
             self.assertIn("</html>", html, f"{mode} template missing closing </html>")
+
+    def test_evolution_timeline_template_exists(self):
+        """evolution-timeline template files exist and contain D3.js setup"""
+        template_dir = os.path.join(os.path.dirname(SCRIPT_DIR), "templates")
+        for suffix in ["evolution-timeline.html", "evolution-timeline_cn.html"]:
+            path = os.path.join(template_dir, suffix)
+            self.assertTrue(os.path.exists(path), f"Template not found: {suffix}")
+            with open(path, encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("<!DOCTYPE html>", content, f"{suffix} missing DOCTYPE")
+            self.assertIn("d3.v7.min.js", content, f"{suffix} missing D3.js")
+            self.assertIn("timeline-svg", content, f"{suffix} missing timeline SVG")
+            self.assertIn("MODE 5", content, f"{suffix} missing Mode 5 badge")
+            self.assertIn("</html>", content, f"{suffix} missing closing html")
 
     def test_generate_report_e2e(self):
         """generate_report.py end-to-end: JSON file -> HTML file"""

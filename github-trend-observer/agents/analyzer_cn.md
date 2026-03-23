@@ -78,6 +78,13 @@ LangGraph 和 AutoGen 的同时增长证实了这个方向。
 - Ecosystem Map（ASCII 图）
 - 范式判断：这个 abstraction 的存在意味着什么
 
+### Mode 5: 演化时间线
+- 将项目归类为 5-12 个技术域，分类来自演化逻辑（不是搜索关键词）
+- 每个域标注 Wardley 成熟度（Genesis/Custom/Product/Commodity）和状态（Established/Emerging/Speculative）
+- 必须包含 ≥ 3 个推测域：技术趋势上必然出现但当前项目极少的分类
+- Phase 6 演化全景：跨域整体分析（阶段判断、驱动力、趋同轨迹、必然与偶然、情景推演、弱信号）
+- Phase 6-B 后记：回顾模式、结构性张力、时间窗口决策——全部从数据推导，不写空话
+
 ## 输出格式
 
 - 优先 table + 短 bullet

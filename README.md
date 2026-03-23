@@ -25,14 +25,14 @@ Today I'm open-sourcing one of my tech observation skills. It helps you see not 
 
 | # | Skill | Description | Preview |
 |---|-------|-------------|---------|
-| 1 | [GitHub Trend Observer](./github-trend-observer/) | Tech trend observation engine. 4 modes to scan GitHub for emerging AI projects. | [Live Examples →](https://kun-0546.github.io/ai-pm-builder-skills/examples/) |
+| 1 | [GitHub Trend Observer](./github-trend-observer/) | Tech trend observation engine. 5 modes to scan GitHub for emerging AI projects. | [Live Examples →](https://kun-0546.github.io/ai-pm-builder-skills/examples/) |
 | 2 | Coming soon | | |
 
 ---
 
 ## Skill 1: GitHub Trend Observer
 
-Scans GitHub for emerging AI projects, detects growth signals, and produces paradigm-level insights across four modes.
+Scans GitHub for emerging AI projects, detects growth signals, and produces paradigm-level insights across five modes.
 
 ### Report Preview
 
@@ -46,7 +46,12 @@ Scans GitHub for emerging AI projects, detects growth signals, and produces para
 | ![Signal Watch](docs/images/signal-watch-preview.png) | ![Deep Link](docs/images/deep-link-preview.png) |
 | Global abnormal growth detection | Single repo deep analysis |
 
-### Four Modes
+| Evolution Timeline |
+|:------------------:|
+| ![Evolution Timeline](docs/images/evolution-timeline-preview.png) |
+| Map the full evolution landscape of a tech topic with D3.js interactive timeline |
+
+### Five Modes
 
 | Mode | Name | Purpose | Command |
 |------|------|---------|---------|
@@ -54,6 +59,7 @@ Scans GitHub for emerging AI projects, detects growth signals, and produces para
 | 2 | **Direction Search** | Multi-keyword search for a tech direction | `search_repos.py "agent memory"` |
 | 3 | **Signal Watch** | Detect abnormal growth signals (triple-window scan) | `watch_signals.py` |
 | 4 | **Deep Link** | Single repo deep analysis: ecosystem, competitors, adoption | `deep_link.py owner/repo` |
+| 5 | **Evolution Timeline** | Map the full evolution landscape of a tech topic | `evolution_timeline.py "context engineering"` |
 
 ### How It Works
 
@@ -113,6 +119,7 @@ python scripts/radar_pulse.py --days 7              # Mode 1
 python scripts/search_repos.py "agent memory"       # Mode 2
 python scripts/watch_signals.py                      # Mode 3
 python scripts/deep_link.py langchain-ai/langgraph   # Mode 4
+python scripts/evolution_timeline.py "context engineering"  # Mode 5
 
 # Generate report (EN or CN)
 python scripts/generate_report.py analysis.json --mode radar-pulse --lang en
@@ -129,10 +136,11 @@ github-trend-observer/
 │   ├── search_repos.py          # Mode 2: direction search
 │   ├── watch_signals.py         # Mode 3: signal detection
 │   ├── deep_link.py             # Mode 4: deep analysis
+│   ├── evolution_timeline.py   # Mode 5: topic evolution data collector
 │   ├── fetch_star_history.py    # Star growth timeline
 │   ├── generate_report.py       # Report generation (--lang en/cn)
 │   ├── check_rate_limit.py      # API rate limit check
-│   └── test_oss.py              # Automated tests (6 tiers, 33 tests)
+│   └── test_oss.py              # Automated tests (6 tiers, 48 tests)
 ├── en/                          # English: skill.md, templates, references
 ├── cn/                          # 中文: skill.md, 模板, 参考文档
 ├── config/                      # seed_list.json, domain_keywords.json
