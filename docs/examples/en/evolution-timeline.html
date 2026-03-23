@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Engineering: 开源演化时间线</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --text: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #2563eb;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 10px;
+    --c-prompt: #7c3aed;
+    --c-rag: #2563eb;
+    --c-memory: #d97706;
+    --c-mcp: #059669;
+    --c-compress: #0284c7;
+    --c-longctx: #b45309;
+    --c-codectx: #db2777;
+    --c-ce: #0891b2;
+    --c-cli: #e11d48;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 1480px; margin: 0 auto; padding: 32px 24px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .mode-badge {
+    display: inline-block; background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 600; padding: 2px 10px;
+    border-radius: 10px; margin-bottom: 8px; letter-spacing: 0.5px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+  .legend-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .legend-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b5563; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .lane-defs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 20px; font-size: 13px; line-height: 1.5; }
+  .lane-defs b { font-weight: 600; }
+  .lane-tag {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 0 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle;
+  }
+  .class-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .class-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; background: #fafbfc; font-size: 13px;
+  }
+  .class-card summary {
+    cursor: pointer; font-weight: 600; font-size: 14px;
+    list-style: none; display: flex; align-items: center; gap: 6px;
+  }
+  .class-card summary::before { content: "▸"; font-size: 11px; color: var(--text-muted); }
+  .class-card[open] summary::before { content: "▾"; }
+  .class-card .cc-def { color: var(--text-secondary); margin: 6px 0 4px; }
+  .class-card .cc-row { display: flex; gap: 4px; margin: 2px 0; }
+  .class-card .cc-label { font-weight: 600; color: var(--text-secondary); min-width: 52px; flex-shrink: 0; }
+  .cc-wardley {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 0 5px; border-radius: 3px; background: #94a3b8;
+  }
+  .timeline-card { overflow-x: auto; }
+  #timeline-svg { display: block; margin: 0 auto; }
+  .tooltip {
+    position: absolute; pointer-events: none;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+    box-shadow: var(--shadow-md); font-size: 14px;
+    line-height: 1.5; z-index: 100; max-width: 340px;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .tooltip .tt-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .tooltip .tt-org { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+  .tooltip .tt-desc { font-size: 13px; color: #4b5563; margin-bottom: 6px; }
+  .tooltip .tt-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 12px; }
+  .tooltip .tt-stars { font-weight: 600; color: #d97706; }
+  .tooltip .tt-paradigm-badge {
+    display: inline-block; padding: 1px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; color: #fff; margin-top: 4px;
+  }
+  .event-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .event-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
+  .event-date { flex-shrink: 0; font-weight: 600; color: var(--accent); font-size: 13px; min-width: 72px; }
+  .event-text { color: #4b5563; }
+  .paradigm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 1100px) { .paradigm-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 900px) { .paradigm-grid { grid-template-columns: 1fr; } .event-list { grid-template-columns: 1fr; } .class-cards { grid-template-columns: 1fr; } .lane-defs { grid-template-columns: 1fr; } }
+  .paradigm-box {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; background: #fafbfc;
+  }
+  .paradigm-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .paradigm-box .pb-label {
+    font-size: 11px; font-weight: 600; color: #fff;
+    padding: 1px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px;
+  }
+  .paradigm-box p { font-size: 13px; color: #4b5563; line-height: 1.55; }
+  .paradigm-box .rep { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .index-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .index-table th {
+    text-align: left; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    border-bottom: 2px solid var(--border); padding: 6px 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .index-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .index-table tr:hover { background: #f9fafb; }
+  .index-table a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .index-table a:hover { text-decoration: underline; }
+  .index-table .idx-org { color: var(--text-secondary); font-size: 13px; }
+  .index-table .idx-stars { color: #d97706; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .index-table .idx-desc { color: #4b5563; font-size: 13px; }
+  .idx-paradigm-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .footer { text-align: center; font-size: 13px; color: var(--text-muted); padding: 16px 0 8px; border-top: 1px solid var(--border); }
+  .header .lead {
+    font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+    max-width: 720px; margin: 10px auto 0; text-align: center;
+  }
+  .header .lead strong { color: var(--text); font-weight: 600; }
+  .timeline-hint {
+    text-align: center; font-size: 12px; color: var(--text-muted);
+    margin-top: 8px; letter-spacing: 0.3px;
+  }
+  .timeline-hint span { margin: 0 8px; }
+  .landscape-tier {
+    margin-bottom: 14px; padding: 12px 16px;
+    border-radius: 8px; background: #fafbfc; border: 1px solid var(--border);
+  }
+  .landscape-tier:last-child { margin-bottom: 0; }
+  .tier-header {
+    font-size: 14px; font-weight: 600; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tier-bar { flex: 1; height: 2px; border-radius: 1px; }
+  .tier-lanes { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 4px; }
+  .tier-lane {
+    display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 600;
+  }
+  .tier-lane .count { font-weight: 400; color: var(--text-secondary); font-size: 13px; }
+  .tier-note { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .direction-section-title {
+    font-size: 13px; font-weight: 600; color: var(--text-secondary);
+    margin: 16px 0 10px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .direction-section-title.emerging { color: #b45309; border-color: #fde68a; }
+  .paradigm-box.emerging-box { background: #fffbeb; border-color: #fde68a; }
+  .paradigm-box .logic {
+    font-size: 12px; color: #92400e; margin-top: 6px;
+    padding: 4px 8px; background: #fef3c7; border-radius: 4px;
+  }
+  .futuro-section { margin-bottom: 22px; }
+  .futuro-section:last-child { margin-bottom: 0; }
+  .futuro-section-title {
+    font-size: 15px; font-weight: 600; color: var(--text);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .futuro-section-title .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .futuro-phase {
+    padding: 16px; background: #f0f9ff; border: 1px solid #bfdbfe;
+    border-radius: 8px; font-size: 14px; line-height: 1.7;
+  }
+  .futuro-phase .phase-track {
+    display: flex; align-items: center; gap: 0; margin-bottom: 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .futuro-phase .phase-step {
+    flex: 1; text-align: center; padding: 6px 0 5px;
+    border-bottom: 3px solid #e2e8f0; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s; border-radius: 4px 4px 0 0;
+    user-select: none; font-size: 12px;
+  }
+  .futuro-phase .phase-step:hover { background: #f8fafc; color: var(--text-secondary); }
+  .futuro-phase .phase-step.active {
+    border-color: var(--accent); color: var(--accent);
+    background: #eff6ff; font-weight: 700;
+  }
+  .futuro-phase .phase-step .now-dot {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); margin-left: 3px; vertical-align: middle;
+  }
+  .futuro-phase .phase-events {
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid #bfdbfe;
+    min-height: 44px;
+  }
+  .futuro-phase .phase-events .pe-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 5px 0;
+    font-size: 14px; line-height: 1.5;
+  }
+  .futuro-phase .phase-events .pe-date {
+    flex-shrink: 0; font-weight: 600; color: var(--accent); font-size: 13px; min-width: 62px;
+  }
+  .futuro-phase .phase-events .pe-text { color: #4b5563; }
+  .futuro-phase .phase-events .pe-summary {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .futuro-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .futuro-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 1100px) { .futuro-grid-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 900px) { .futuro-grid-3, .futuro-grid-2 { grid-template-columns: 1fr; } }
+  .futuro-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; background: #fafbfc; font-size: 13px; line-height: 1.6;
+  }
+  .futuro-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .futuro-card .fc-tag {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fff;
+    padding: 1px 8px; border-radius: 4px; margin-bottom: 6px;
+  }
+  .futuro-card .fc-evidence {
+    font-size: 12px; color: var(--text-secondary); margin-top: 8px;
+    padding-top: 6px; border-top: 1px solid var(--border-light);
+  }
+  .futuro-convergence-item {
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: #fafbfc; font-size: 13px; line-height: 1.6;
+  }
+  .futuro-convergence-item .conv-formula {
+    font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text);
+  }
+  .futuro-convergence-item .conv-arrow { color: var(--accent); }
+  .futuro-convergence-item .conv-projects {
+    font-size: 12px; color: var(--text-secondary); margin-top: 6px;
+  }
+  .futuro-split-col h4 {
+    font-size: 13px; font-weight: 600; margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .futuro-split-col ul { list-style: none; padding: 0; }
+  .futuro-split-col li {
+    font-size: 13px; line-height: 1.6; padding: 6px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .futuro-split-col li:last-child { border-bottom: none; }
+  .futuro-signal {
+    padding: 10px 12px; border-radius: 6px;
+    border: 1px solid #fde68a; background: #fffbeb;
+    font-size: 13px; line-height: 1.55;
+  }
+  .futuro-signal .sig-title { font-weight: 600; color: #92400e; margin-bottom: 3px; }
+  .futuro-signal .sig-evidence { font-size: 12px; color: #b45309; margin-top: 6px; }
+  .scenario-optimistic { border-left: 3px solid #059669; }
+  .scenario-base { border-left: 3px solid var(--accent); }
+  .scenario-risk { border-left: 3px solid #dc2626; }
+  .epilogue { padding-top: 0; }
+  .epilogue h2 { font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+  .epilogue-dims { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 1100px) { .epilogue-dims { grid-template-columns: 1fr; } }
+  .epi-dim {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; background: var(--surface);
+    border-top: 3px solid #e2e8f0;
+  }
+  .epi-dim.dim-past { border-top-color: #93c5fd; }
+  .epi-dim.dim-future { border-top-color: #059669; }
+  .epi-dim.dim-now { border-top-color: #f59e0b; }
+  .epi-dim .dim-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .epi-dim.dim-past .dim-label { color: #3b82f6; }
+  .epi-dim.dim-future .dim-label { color: #059669; }
+  .epi-dim.dim-now .dim-label { color: #d97706; }
+  .epi-dim h3 {
+    font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--text);
+  }
+  .epi-dim p {
+    font-size: 13px; line-height: 1.7; color: #374151; margin-bottom: 8px;
+  }
+  .epi-dim p:last-child { margin-bottom: 0; }
+  .epi-dim .epi-data {
+    font-size: 12px; color: var(--text-secondary); margin-top: 10px;
+    padding-top: 8px; border-top: 1px solid var(--border-light);
+    line-height: 1.6;
+  }
+  .method-section { margin-top: 0; }
+  .method-section summary {
+    cursor: pointer; font-size: 16px; font-weight: 600;
+    list-style: none; padding: 4px 0;
+  }
+  .method-section summary::before { content: "▸ "; color: var(--text-muted); }
+  .method-section[open] summary::before { content: "▾ "; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="mode-badge">MODE 5</div>
+    <h1>Context Engineering: 开源演化时间线</h1>
+    <div class="subtitle">92 个项目 &middot; 9 条演化路径 &middot; 2019&ndash;2026</div>
+    <p class="lead">从手写 Prompt 到工程化管理上下文，<strong>Context Engineering 正从碎片化工具走向统一学科</strong>。2026 Q1 最大变量：CLI 运行时挑战 MCP 成为上下文主要接口。</p>
+  </div>
+
+  <div class="card timeline-card">
+    <svg id="timeline-svg"></svg>
+    <div class="timeline-hint">
+      <span>圆圈大小 = Stars 规模</span>
+      <span>红边 = 2026 新项目</span>
+      <span>点击圆圈 → GitHub</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>演化格局速览</h2>
+    <div id="landscape-tiers"></div>
+  </div>
+
+  <div class="card">
+    <h2>演化全景 — 未来学视角</h2>
+    <div id="futurology-analysis"></div>
+  </div>
+
+  <div class="card">
+    <details class="method-section">
+      <summary>分类方法论</summary>
+      <p style="font-size:13px;color:#6b7280;margin:8px 0 12px;">分类体系基于上下文生命周期 + 技术演化路径双向推导，从项目聚类和功能演化方向归纳。</p>
+      <div class="class-cards" id="class-cards"></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>项目索引（按 Stars 降序）</h2>
+    <table class="index-table">
+      <thead><tr><th>泳道</th><th>项目</th><th>Stars</th><th>创建</th><th>描述</th></tr></thead>
+      <tbody id="index-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card epilogue">
+    <h2>写给读者</h2>
+    <div class="epilogue-dims" id="epilogue-dims"></div>
+  </div>
+
+  <div class="footer">GitHub Trend Observer &middot; Mode 5 &middot; 生成于 2026-03-14</div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function() {
+  const projects = [
+    // === Prompt Engineering 提示工程 (12) ===
+    {"name":"LMQL","org":"eth-sri","stars":4200,"created":"2022-11-01","paradigm":"prompt-eng","desc":"约束引导的高效 LLM 编程语言","status":"stable"},
+    {"name":"guidance","org":"microsoft","stars":21300,"created":"2022-11-01","paradigm":"prompt-eng","desc":"用约束语法控制大语言模型输出","status":"stable"},
+    {"name":"Promptify","org":"promptslab","stars":4600,"created":"2022-12-01","paradigm":"prompt-eng","desc":"提示工程与版本管理库","status":"stable"},
+    {"name":"DSPy","org":"stanfordnlp","stars":32800,"created":"2023-01-01","paradigm":"prompt-eng","desc":"可编程提示优化框架，用代码替代手写 Prompt","status":"active"},
+    {"name":"outlines","org":"dottxt-ai","stars":13600,"created":"2023-03-01","paradigm":"prompt-eng","desc":"结构化输出生成框架","status":"active"},
+    {"name":"promptfoo","org":"promptfoo","stars":15900,"created":"2023-04-01","paradigm":"prompt-eng","desc":"Prompt/Agent/RAG 测试与评估框架","status":"active"},
+    {"name":"langfuse","org":"langfuse","stars":23100,"created":"2023-05-01","paradigm":"prompt-eng","desc":"开源 LLM 工程平台：可观测性+提示管理","status":"active"},
+    {"name":"instructor","org":"567-labs","stars":12500,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Pydantic 驱动的 LLM 结构化输出库","status":"active"},
+    {"name":"promptflow","org":"microsoft","stars":11100,"created":"2023-06-01","paradigm":"prompt-eng","desc":"微软 Prompt 编排与部署平台","status":"active"},
+    {"name":"baml","org":"BoundaryML","stars":7800,"created":"2023-10-01","paradigm":"prompt-eng","desc":"将软件工程思维注入提示工程的框架","status":"active"},
+    {"name":"ell","org":"MadcowD","stars":5900,"created":"2024-07-01","paradigm":"prompt-eng","desc":"语言模型编程库：Prompt 即函数","status":"active"},
+    {"name":"poml","org":"microsoft","stars":4900,"created":"2024-11-01","paradigm":"prompt-eng","desc":"提示编排标记语言 (POML)","status":"active"},
+    // === RAG & Retrieval 检索上下文 (10) ===
+    {"name":"haystack","org":"deepset-ai","stars":24500,"created":"2019-11-01","paradigm":"rag","desc":"开源 AI 编排框架：构建上下文驱动的 LLM 应用","status":"active"},
+    {"name":"llama_index","org":"run-llama","stars":47700,"created":"2022-11-01","paradigm":"rag","desc":"领先的数据索引与文档 Agent 平台","status":"active"},
+    {"name":"ragflow","org":"infiniflow","stars":75000,"created":"2023-12-01","paradigm":"rag","desc":"开源 RAG 引擎，融合 RAG+Agent 提供上下文层","status":"active"},
+    {"name":"graphrag","org":"microsoft","stars":31500,"created":"2024-03-01","paradigm":"rag","desc":"微软模块化知识图谱 RAG 系统","status":"active"},
+    {"name":"HippoRAG","org":"OSU-NLP-Group","stars":3300,"created":"2024-05-01","paradigm":"rag","desc":"受海马体启发的 RAG 框架","status":"active"},
+    {"name":"nano-graphrag","org":"gusye1234","stars":3700,"created":"2024-07-01","paradigm":"rag","desc":"简洁易用的 GraphRAG 实现","status":"active"},
+    {"name":"LightRAG","org":"HKUDS","stars":29400,"created":"2024-10-01","paradigm":"rag","desc":"简洁快速的检索增强生成框架","status":"active"},
+    {"name":"fast-graphrag","org":"circlemind-ai","stars":3700,"created":"2024-10-01","paradigm":"rag","desc":"自适应 GraphRAG 实现","status":"active"},
+    {"name":"chonkie","org":"chonkie-inc","stars":3800,"created":"2025-03-01","paradigm":"rag","desc":"轻量级 RAG 分块摄入库","status":"active"},
+    {"name":"RAG-Anything","org":"HKUDS","stars":14300,"created":"2025-06-01","paradigm":"rag","desc":"全能多模态 RAG 框架","status":"active"},
+    // === Memory 记忆层 (15) ===
+    {"name":"Zep","org":"getzep","stars":4200,"created":"2023-04-01","paradigm":"memory","desc":"Agent 长期记忆服务：对话摘要与知识提取","status":"active"},
+    {"name":"mem0","org":"mem0ai","stars":49800,"created":"2023-06-01","paradigm":"memory","desc":"AI Agent 的通用记忆层","status":"active"},
+    {"name":"generative_agents","org":"joonspk-research","stars":20900,"created":"2023-07-01","paradigm":"memory","desc":"Stanford 生成式智能体：交互记忆架构","status":"stable"},
+    {"name":"cognee","org":"topoteretes","stars":13500,"created":"2023-08-01","paradigm":"memory","desc":"6 行代码实现 AI Agent 知识引擎记忆","status":"active"},
+    {"name":"letta","org":"letta-ai","stars":21600,"created":"2023-10-01","paradigm":"memory","desc":"构建有状态 Agent 的平台 (原 MemGPT)","status":"active"},
+    {"name":"memvid","org":"memvid","stars":13400,"created":"2025-05-01","paradigm":"memory","desc":"无服务器单文件记忆层，替代复杂 RAG 管道","status":"active"},
+    {"name":"cipher","org":"campfirein","stars":3600,"created":"2025-06-01","paradigm":"memory","desc":"编程 Agent 专属开源记忆层 (MCP 兼容)","status":"active"},
+    {"name":"Acontext","org":"memodb-io","stars":3200,"created":"2025-07-01","paradigm":"memory","desc":"将 Agent 技能作为记忆层","status":"active"},
+    {"name":"memU","org":"NevaMind-AI","stars":12900,"created":"2025-07-01","paradigm":"memory","desc":"24/7 主动 Agent 的持久记忆系统","status":"active"},
+    {"name":"Memori","org":"MemoriLabs","stars":12400,"created":"2025-07-01","paradigm":"memory","desc":"SQL 原生 Agent 记忆层","status":"active"},
+    {"name":"MemOS","org":"MemTensor","stars":6900,"created":"2025-07-01","paradigm":"memory","desc":"AI 记忆操作系统，跨任务技能复用","status":"active"},
+    {"name":"MemMachine","org":"MemMachine","stars":4900,"created":"2025-08-01","paradigm":"memory","desc":"通用 Agent 记忆层：可扩展可互操作","status":"active"},
+    {"name":"claude-mem","org":"thedotmack","stars":34900,"created":"2025-08-01","paradigm":"memory","desc":"Claude Code 自动捕获压缩注入 Agent 上下文","status":"new"},
+    {"name":"beads","org":"steveyegge","stars":19000,"created":"2025-10-01","paradigm":"memory","desc":"编程 Agent 记忆升级方案","status":"new"},
+    {"name":"SimpleMem","org":"aiming-lab","stars":3200,"created":"2026-01-01","paradigm":"memory","desc":"高效终身记忆系统 (语义无损压缩)","status":"new"},
+    // === MCP & Protocol MCP 协议层 (11) ===
+    {"name":"modelcontextprotocol","org":"modelcontextprotocol","stars":7500,"created":"2024-09-01","paradigm":"mcp","desc":"Model Context Protocol 规范与文档","status":"active"},
+    {"name":"python-sdk","org":"modelcontextprotocol","stars":22100,"created":"2024-09-01","paradigm":"mcp","desc":"MCP 官方 Python SDK","status":"active"},
+    {"name":"typescript-sdk","org":"modelcontextprotocol","stars":11800,"created":"2024-09-01","paradigm":"mcp","desc":"MCP 官方 TypeScript SDK","status":"active"},
+    {"name":"servers","org":"modelcontextprotocol","stars":81000,"created":"2024-11-01","paradigm":"mcp","desc":"MCP 官方服务器集合","status":"active"},
+    {"name":"mcp-go","org":"mark3labs","stars":8400,"created":"2024-11-01","paradigm":"mcp","desc":"MCP Go 语言实现","status":"active"},
+    {"name":"mcp-agent","org":"lastmile-ai","stars":8100,"created":"2024-12-01","paradigm":"mcp","desc":"用 MCP 和工作流模式构建高效 Agent","status":"active"},
+    {"name":"context7","org":"upstash","stars":49000,"created":"2025-03-01","paradigm":"mcp","desc":"为 AI 编辑器提供最新代码文档的 MCP 平台","status":"active"},
+    {"name":"fastapi_mcp","org":"tadata-org","stars":11700,"created":"2025-03-01","paradigm":"mcp","desc":"将 FastAPI 端点暴露为 MCP 工具","status":"active"},
+    {"name":"go-sdk","org":"modelcontextprotocol","stars":4100,"created":"2025-04-01","paradigm":"mcp","desc":"MCP 官方 Go SDK (与 Google 合作)","status":"active"},
+    {"name":"mcp-context-forge","org":"IBM","stars":3400,"created":"2025-05-01","paradigm":"mcp","desc":"IBM AI 网关：MCP/A2A/REST 统一端点","status":"active"},
+    {"name":"docs-mcp-server","org":"arabold","stars":1100,"created":"2025-03-01","paradigm":"mcp","desc":"文档 MCP Server (Context7 开源替代品)","status":"active"},
+    // === Compression 上下文压缩 (9) ===
+    {"name":"GPTCache","org":"zilliztech","stars":8000,"created":"2023-03-01","paradigm":"compress","desc":"LLM 语义缓存","status":"stable"},
+    {"name":"LLMLingua","org":"microsoft","stars":5900,"created":"2023-07-01","paradigm":"compress","desc":"Prompt/KV-Cache 压缩，最高 20x 压缩率","status":"active"},
+    {"name":"GEAR","org":"opengear-project","stars":180,"created":"2023-11-01","paradigm":"compress","desc":"近无损 KV Cache 压缩方案","status":"stable"},
+    {"name":"KVCache-Factory","org":"Zefan-Cai","stars":1300,"created":"2024-06-01","paradigm":"compress","desc":"统一 KV Cache 压缩方法库","status":"active"},
+    {"name":"kvpress","org":"NVIDIA","stars":960,"created":"2024-11-01","paradigm":"compress","desc":"简化 KV Cache 压缩工具库","status":"active"},
+    {"name":"ShadowKV","org":"ByteDance-Seed","stars":284,"created":"2024-10-01","paradigm":"compress","desc":"KV Cache 影子投射，3-4x 内存缩减","status":"active"},
+    {"name":"R-KV","org":"Zefan-Cai","stars":1200,"created":"2025-05-01","paradigm":"compress","desc":"推理模型冗余感知 KV Cache 压缩 (NeurIPS'25)","status":"active"},
+    {"name":"KVzip","org":"snu-mllab","stars":209,"created":"2025-05-01","paradigm":"compress","desc":"查询无关 KV Cache 驱逐 (NeurIPS'25 Oral)","status":"active"},
+    {"name":"claw-compactor","org":"aeromomo","stars":1600,"created":"2026-02-01","paradigm":"compress","desc":"6 层确定性上下文压缩，最高省 97% token","status":"new"},
+    // === Long Context 长上下文 (9) ===
+    {"name":"RWKV-LM","org":"BlinkDL","stars":14400,"created":"2021-08-01","paradigm":"longctx","desc":"RNN+Transformer 融合，线性时间无限上下文","status":"active"},
+    {"name":"YaRN","org":"jquesnelle","stars":1700,"created":"2023-06-01","paradigm":"longctx","desc":"高效上下文窗口扩展方法","status":"stable"},
+    {"name":"LongLLaMA","org":"CStanKonrad","stars":1500,"created":"2023-07-01","paradigm":"longctx","desc":"基于 FoT 的长上下文大语言模型","status":"stable"},
+    {"name":"streaming-llm","org":"mit-han-lab","stars":7200,"created":"2023-09-01","paradigm":"longctx","desc":"注意力 Sink 流式推理 (ICLR'24)","status":"stable"},
+    {"name":"ring-flash-attention","org":"zhuzilin","stars":1000,"created":"2024-02-01","paradigm":"longctx","desc":"分布式长序列 Ring+Flash Attention","status":"active"},
+    {"name":"RULER","org":"NVIDIA","stars":1500,"created":"2024-04-01","paradigm":"longctx","desc":"长上下文模型真实上下文大小评估基准","status":"active"},
+    {"name":"MInference","org":"microsoft","stars":1200,"created":"2024-05-01","paradigm":"longctx","desc":"动态稀疏注意力加速长上下文预填充","status":"active"},
+    {"name":"duo-attention","org":"mit-han-lab","stars":530,"created":"2024-10-01","paradigm":"longctx","desc":"检索头+流式头双注意力 (ICLR'25)","status":"active"},
+    {"name":"MoBA","org":"MoonshotAI","stars":2100,"created":"2025-02-01","paradigm":"longctx","desc":"月之暗面混合块注意力机制","status":"active"},
+    // === Code Context 代码上下文 (5) ===
+    {"name":"code2prompt","org":"mufeedvh","stars":7200,"created":"2024-03-01","paradigm":"codectx","desc":"CLI 将代码库转为单个 LLM 提示","status":"active"},
+    {"name":"prompt-tower","org":"backnotprop","stars":366,"created":"2024-05-01","paradigm":"codectx","desc":"长上下文 Agent 的上下文管理器","status":"active"},
+    {"name":"repomix","org":"yamadashy","stars":22400,"created":"2024-07-01","paradigm":"codectx","desc":"将代码仓库打包为 AI 友好的单一文件","status":"active"},
+    {"name":"kit","org":"cased","stars":1300,"created":"2025-04-01","paradigm":"codectx","desc":"AI 开发工具的上下文工程工具包","status":"active"},
+    {"name":"MineContext","org":"volcengine","stars":5100,"created":"2025-06-01","paradigm":"codectx","desc":"字节主动式上下文感知 AI 伙伴","status":"active"},
+    // === Context Engineering 上下文工程 (14) ===
+    {"name":"parlant","org":"emcie-co","stars":17800,"created":"2024-02-01","paradigm":"ce","desc":"AI Agent 上下文工程控制层框架","status":"active"},
+    {"name":"Context-Engineering","org":"davidkimai","stars":8600,"created":"2025-06-01","paradigm":"ce","desc":"上下文工程第一性原理手册 (受 Karpathy 启发)","status":"active"},
+    {"name":"fenic","org":"typedef-ai","stars":444,"created":"2025-06-01","paradigm":"ce","desc":"声明式上下文工程框架","status":"active"},
+    {"name":"context-engineering-intro","org":"coleam00","stars":12700,"created":"2025-07-01","paradigm":"ce","desc":"Claude Code 上下文工程入门教程","status":"active"},
+    {"name":"Awesome-Context-Engineering","org":"Meirtz","stars":3000,"created":"2025-07-01","paradigm":"ce","desc":"上下文工程综述","status":"active"},
+    {"name":"context-space","org":"context-space","stars":805,"created":"2025-07-01","paradigm":"ce","desc":"终极上下文工程基建：MCP + 集成","status":"active"},
+    {"name":"OpenCE","org":"sci-m-wang","stars":335,"created":"2025-10-01","paradigm":"ce","desc":"开放上下文工程工具包","status":"active"},
+    {"name":"Context-Engineering-2.0","org":"GAIR-NLP","stars":278,"created":"2025-10-01","paradigm":"ce","desc":"上下文工程 2.0 (上海交大研究)","status":"active"},
+    {"name":"ace","org":"ace-agent","stars":787,"created":"2025-11-01","paradigm":"ce","desc":"Agentic Context Engineering 自进化","status":"active"},
+    {"name":"context-engineering-kit","org":"NeoLabHQ","stars":638,"created":"2025-11-01","paradigm":"ce","desc":"手工 Claude Code Skills 提升上下文质量","status":"active"},
+    {"name":"get-shit-done","org":"gsd-build","stars":30000,"created":"2025-12-01","paradigm":"ce","desc":"轻量级元提示词+上下文工程驱动开发系统","status":"new"},
+    {"name":"Agent-Skills-for-CE","org":"muratcankoylan","stars":13900,"created":"2025-12-01","paradigm":"ce","desc":"Agent 技能集合：上下文工程+多 Agent","status":"new"},
+    {"name":"OpenViking","org":"volcengine","stars":10500,"created":"2026-01-01","paradigm":"ce","desc":"字节 Agent 上下文数据库","status":"new"},
+    {"name":"gsd-2","org":"gsd-build","stars":1100,"created":"2026-03-01","paradigm":"ce","desc":"GSD 第二代：Agent 长时自主不丢上下文","status":"new"},
+    // === CLI / Agent Runtime CLI 运行时 (7) ===
+    {"name":"aider","org":"Aider-AI","stars":42000,"created":"2023-06-01","paradigm":"cli","desc":"CLI 结对编程先驱：终端内 AI 协作编辑代码","status":"active"},
+    {"name":"OpenClaw","org":"openclaw","stars":302000,"created":"2024-09-01","paradigm":"cli","desc":"史上增长最快开源项目，CLI-first「Bash > MCP」哲学","status":"active"},
+    {"name":"OpenCode","org":"opencode-ai","stars":122000,"created":"2024-06-01","paradigm":"cli","desc":"终端原生编程 Agent，隐私优先 + LSP 集成","status":"active"},
+    {"name":"Claude Code","org":"anthropics","stars":78000,"created":"2025-02-01","paradigm":"cli","desc":"Anthropic 终端 Agent：CLAUDE.md + Skills 文件级上下文工程","status":"active"},
+    {"name":"Codex CLI","org":"openai","stars":65000,"created":"2025-05-01","paradigm":"cli","desc":"OpenAI 轻量终端 Agent，Rust 构建，支持 MCP + CLI","status":"active"},
+    {"name":"Gemini CLI","org":"google-gemini","stars":98000,"created":"2025-06-01","paradigm":"cli","desc":"Google 终端 Agent，MCP + CLI 双模式","status":"active"},
+    {"name":"Copilot CLI","org":"github","stars":9300,"created":"2025-09-01","paradigm":"cli","desc":"GitHub 终端 Agent：多模型 + 技能系统 + Autopilot 模式","status":"active"}
+  ];
+
+  const laneConfig = [
+    { id: "prompt-eng", label: "提示工程 Prompt Eng", color: "#7c3aed", paradigms: ["prompt-eng"],
+      def: "通过模板、约束、编程接口控制 LLM 输入输出", wardley: "Custom→Product" },
+    { id: "rag", label: "检索上下文 RAG", color: "#2563eb", paradigms: ["rag"],
+      def: "检索外部知识注入 LLM 上下文", wardley: "Custom→Product" },
+    { id: "memory", label: "记忆层 Memory", color: "#d97706", paradigms: ["memory"],
+      def: "为 Agent 提供跨 session 可持久化记忆", wardley: "Custom" },
+    { id: "mcp", label: "MCP 协议层", color: "#059669", paradigms: ["mcp"],
+      def: "标准化上下文服务的协议与基础设施", wardley: "Custom" },
+    { id: "compress", label: "上下文压缩 Compression", color: "#0284c7", paradigms: ["compress"],
+      def: "通过缓存、压缩、蒸馏减少上下文 token 消耗", wardley: "Custom" },
+    { id: "longctx", label: "长上下文 Long Context", color: "#b45309", paradigms: ["longctx"],
+      def: "扩展模型可处理的上下文窗口长度", wardley: "Custom" },
+    { id: "codectx", label: "代码上下文 Code Context", color: "#db2777", paradigms: ["codectx"],
+      def: "将代码库转为 AI 可消费的上下文", wardley: "Genesis" },
+    { id: "ce", label: "上下文工程 Context Eng", color: "#0891b2", paradigms: ["ce"],
+      def: "系统化管理 Agent 上下文的整合学科", wardley: "Genesis→Custom", tags: ["Emerging"] },
+    { id: "cli", label: "CLI / Agent Runtime", color: "#e11d48", paradigms: ["cli"],
+      def: "终端原生 Agent 运行时：文件级上下文 (CLAUDE.md/Skills) 替代协议级 (MCP)", wardley: "Custom→Product", tags: ["Emerging"] }
+  ];
+
+  const paradigmColors = {};
+  const paradigmToLane = {};
+  laneConfig.forEach(lane => {
+    lane.paradigms.forEach(p => {
+      paradigmColors[p] = lane.color;
+      paradigmToLane[p] = lane.id;
+    });
+  });
+
+  const paradigmLabels = {
+    "prompt-eng":"提示工程","rag":"检索上下文","memory":"记忆层",
+    "mcp":"MCP 协议","compress":"上下文压缩","longctx":"长上下文",
+    "codectx":"代码上下文","ce":"上下文工程","cli":"CLI 运行时"
+  };
+
+  function getLane(paradigm) {
+    const lid = paradigmToLane[paradigm];
+    return laneConfig.find(l => l.id === lid) || laneConfig[laneConfig.length - 1];
+  }
+
+  // ====== CLASSIFICATION CARDS ======
+  const statusMap = { "Established": "已确立", "Emerging": "萌芽中", "Speculative": "纯推测" };
+  const wardleyMap = { "Custom": "定制化", "Custom\u2192Product": "定制\u2192产品", "Genesis": "萌芽期", "Genesis\u2192Custom": "萌芽\u2192定制", "\u2014": "\u2014" };
+
+  const establishedCards = [
+    { name: "提示工程 Prompt Engineering", color: "#7c3aed", wardley: "Custom\u2192Product", status: "Established",
+      def: "通过模板、约束语法、编程接口系统化控制 LLM 输入输出",
+      features: ["Prompt 模板化与版本管理","结构化输出约束","可编程优化 (DSPy 范式)"],
+      anchors: "DSPy (32.8k), guidance (21.3k), langfuse (23.1k)",
+      confuse: "vs 上下文工程: 提示工程关注单次交互，上下文工程关注全生命周期" },
+    { name: "检索上下文 RAG", color: "#2563eb", wardley: "Custom\u2192Product", status: "Established",
+      def: "从外部知识源检索相关信息注入 LLM 上下文",
+      features: ["向量/图谱检索","多模态文档理解","与 Agent 工作流集成"],
+      anchors: "ragflow (75k), llama_index (47.7k), graphrag (31.5k)",
+      confuse: "vs 记忆: RAG 检索外部知识，记忆持久化 Agent 自身经验" },
+    { name: "记忆层 Memory", color: "#d97706", wardley: "Custom", status: "Established",
+      def: "为 Agent 提供跨 session 可持久化、可检索的记忆",
+      features: ["对话摘要与知识提取","语义无损压缩","跨任务技能复用"],
+      anchors: "mem0 (49.8k), claude-mem (34.9k), letta (21.6k)",
+      confuse: "vs RAG: 记忆是 Agent 内部状态，RAG 是外部知识检索" },
+    { name: "MCP 协议层", color: "#059669", wardley: "Custom", status: "Established",
+      def: "标准化 LLM 获取上下文的协议与工具接口",
+      features: ["统一的工具/资源/提示接口","多语言 SDK","社区服务器生态"],
+      anchors: "servers (81k), context7 (49k), python-sdk (22.1k)",
+      confuse: "vs 上下文工程: MCP 是协议层，CE 是方法论层" },
+    { name: "上下文压缩 Compression", color: "#0284c7", wardley: "Custom", status: "Established",
+      def: "通过 KV Cache 压缩、语义缓存等技术减少上下文 token 消耗",
+      features: ["KV Cache 压缩/驱逐","Prompt 压缩","语义缓存"],
+      anchors: "GPTCache (8k), LLMLingua (5.9k), claw-compactor (1.6k)",
+      confuse: "vs 长上下文: 压缩减少用量，长上下文增加容量，二者互补" }
+  ];
+
+  const futureCards = [
+    { name: "上下文工程 Context Engineering", color: "#0891b2", wardley: "Genesis\u2192Custom", status: "Emerging",
+      def: "系统化管理 Agent 上下文的全生命周期——从获取、压缩、编排到持久化的整合学科",
+      features: ["整合 RAG+记忆+压缩+协议的统一方法论","上下文生命周期管理","Agent 自主上下文工程"],
+      anchors: "get-shit-done (30k), parlant (17.8k), Agent-Skills-for-CE (13.9k)",
+      confuse: "vs 提示工程: 提示工程是 CE 的子集，CE 覆盖整个上下文生命周期" },
+    { name: "代码上下文 Code Context", color: "#db2777", wardley: "Genesis", status: "Emerging",
+      def: "将代码仓库打包为 AI 可消费的结构化上下文",
+      features: ["代码库 → 单文件打包","主动式上下文感知","代码特化的上下文工程"],
+      anchors: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k)",
+      confuse: "vs 通用 RAG: 代码上下文理解代码结构，不只是文本检索" },
+    { name: "Agent 自上下文 Self-Context", color: "#64748b", wardley: "Genesis", status: "Speculative",
+      def: "Agent 自主工程化自身上下文——不是人为 Agent 设计上下文，而是 Agent 自己管理",
+      features: ["Agent 自动决定需要什么上下文","运行时上下文策略自进化","上下文质量自评估"],
+      anchors: "ace (787), context-space (805), gsd-2 (1.1k)",
+      confuse: "vs 上下文工程: CE 由人主导，Self-Context 由 Agent 自主完成" },
+    { name: "CLI / Agent Runtime 终端运行时", color: "#e11d48", wardley: "Custom\u2192Product", status: "Emerging",
+      def: "终端原生 Agent 通过文件级上下文 (CLAUDE.md/SKILL.md) 和 CLI 工具调用替代 MCP 协议，Token 效率提升 10-32x",
+      features: ["文件级上下文 (CLAUDE.md, SOUL.md, rules)","CLI 工具调用 (--help 替代 schema)","Unix 管道组合性"],
+      anchors: "OpenClaw (302k), OpenCode (122k), Gemini CLI (98k), Claude Code (78k)",
+      confuse: "vs MCP: CLI 用文件和终端提供上下文，MCP 用协议；二者正在从对立走向共存" }
+  ];
+
+  function renderCardGroup(cards, container) {
+    cards.forEach(cc => {
+      const el = document.createElement("details");
+      el.className = "class-card";
+      const sLabel = statusMap[cc.status] || cc.status;
+      const wLabel = wardleyMap[cc.wardley] || cc.wardley;
+      const sColor = cc.status === "Speculative" ? "#94a3b8" : cc.status === "Emerging" ? "#d97706" : "#6b7280";
+      el.innerHTML =
+        '<summary><span style="color:' + cc.color + '">' + cc.name + '</span>' +
+        ' <span class="cc-wardley" style="background:' + sColor + '">' + sLabel + '</span>' +
+        ' <span class="cc-wardley">' + wLabel + '</span></summary>' +
+        '<div class="cc-def">' + cc.def + '</div>' +
+        '<div class="cc-row"><span class="cc-label">特征:</span><span>' + cc.features.join('；') + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">锚点:</span><span>' + cc.anchors + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">易混淆:</span><span>' + cc.confuse + '</span></div>';
+      container.appendChild(el);
+    });
+  }
+
+  const ccContainer = document.getElementById("class-cards");
+  const g1Title = document.createElement("div");
+  g1Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#6b7280;margin-top:4px;border-bottom:1px solid #e5e7eb;padding-bottom:4px;";
+  g1Title.textContent = "已确立分类（从项目聚类归纳）";
+  ccContainer.appendChild(g1Title);
+  renderCardGroup(establishedCards, ccContainer);
+  const g2Title = document.createElement("div");
+  g2Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#d97706;margin-top:8px;border-bottom:1px solid #fde68a;padding-bottom:4px;";
+  g2Title.textContent = "演化推测分类（从技术发展路径推导）";
+  ccContainer.appendChild(g2Title);
+  renderCardGroup(futureCards, ccContainer);
+
+  // ====== LANDSCAPE TIERS ======
+  const laneCounts = {};
+  projects.forEach(p => { const l = getLane(p.paradigm); laneCounts[l.id] = (laneCounts[l.id]||0) + 1; });
+
+  const tiers = [
+    { title: "成熟赛道", note: "项目多、方案多，已出现头部玩家，工具与基础设施自 2022 年起持续建设",
+      color: "#059669", lanes: ["prompt-eng","rag","memory"] },
+    { title: "爆发赛道", note: "2024-2025 年集中涌现，增长最快；CLI 运行时 2026 年 Q1 爆发式增长，挑战 MCP 作为上下文主要接口",
+      color: "#0284c7", lanes: ["mcp","cli","compress","codectx"] },
+    { title: "萌芽赛道", note: "学科刚命名 (2025)，整合刚开始",
+      color: "#b45309", lanes: ["ce","longctx"] }
+  ];
+
+  const tiersContainer = document.getElementById("landscape-tiers");
+  tiers.forEach(tier => {
+    const div = document.createElement("div");
+    div.className = "landscape-tier";
+    const lanesHtml = tier.lanes.map(lid => {
+      const lane = laneConfig.find(l => l.id === lid);
+      if (!lane) return '';
+      const cnt = laneCounts[lid] || 0;
+      return '<span class="tier-lane"><span class="legend-dot" style="background:' + lane.color + '"></span>' + lane.label + ' <span class="count">(' + cnt + ')</span></span>';
+    }).join('');
+    div.innerHTML =
+      '<div class="tier-header"><span style="color:' + tier.color + '">' + tier.title + '</span><span class="tier-bar" style="background:' + tier.color + '20"></span></div>' +
+      '<div class="tier-lanes">' + lanesHtml + '</div>' +
+      '<div class="tier-note">' + tier.note + '</div>';
+    tiersContainer.appendChild(div);
+  });
+
+  // ====== FUTUROLOGY ANALYSIS ======
+  const futuroContainer = document.getElementById("futurology-analysis");
+
+  function futuroSection(num, title, contentHtml) {
+    const section = document.createElement("div");
+    section.className = "futuro-section";
+    section.innerHTML =
+      '<div class="futuro-section-title"><span class="num">' + num + '</span>' + title + '</div>' +
+      contentHtml;
+    futuroContainer.appendChild(section);
+  }
+
+  // — 1. Phase Diagnosis —
+  const yearCounts = {};
+  projects.forEach(p => { const yr = p.created.slice(0,4); yearCounts[yr] = (yearCounts[yr]||0) + 1; });
+
+  const phaseData = [
+    { id: "irruption", label: "萌芽", sublabel: "2019\u20132023", css: "past",
+      summary: "工具时代。各子领域独立发展——RAG、Prompt 模板、基础记忆——没有人把它们叫做「上下文工程」。",
+      narrative: "这个时期的关键特征是<strong>碎片化</strong>。每个工具解决上下文的一个子问题——检索、压缩、格式化、持久化——但没人把它们看作同一个领域。就像盲人摸象：RAG 团队在做检索，prompt 团队在做模板，memory 团队在做持久化，但他们都在解决同一个问题的不同切面。",
+      events: [
+        { date: "2019 Q4", text: "haystack: 最早的上下文驱动 LLM 应用框架" },
+        { date: "2022 Q4", text: "guidance + LMQL + llama_index 同时涌现" },
+        { date: "2023 Q1", text: "DSPy: 可编程提示优化，Prompt 从手艺变为工程" },
+        { date: "2023 Q2", text: "mem0 + GPTCache + Zep: 记忆与缓存基建出现" },
+        { date: "2023 Q3", text: "streaming-llm + LLMLingua: 长上下文与压缩双路线萌芽" },
+        { date: "2023 Q4", text: "ragflow: RAG 引擎化，上下文层概念雏形" }
+      ] },
+    { id: "diffusion", label: "扩散", sublabel: "2024", css: "past",
+      summary: "基础设施时代。MCP 协议发布，GraphRAG 升级检索，KV Cache 优化成为子领域。",
+      narrative: "2024 年的关键事件是 MCP 的发布。Anthropic 定义了一个协议标准——这意味着上下文不再只是「塞进去的东西」，而是有正式接口的工程对象。同时 GraphRAG 把检索从「找相似段落」升级为「理解知识结构」。基础设施层的就位，为 2025 年的概念爆发做了铺垫。",
+      events: [
+        { date: "2024 Q1", text: "graphrag + parlant: 知识图谱 RAG + 上下文控制层" },
+        { date: "2024 Q2", text: "HippoRAG + KVCache-Factory: 检索与压缩进化" },
+        { date: "2024 Q3", text: "MCP 规范发布: 上下文有了正式协议接口" },
+        { date: "2024 Q4", text: "LightRAG + MCP servers (81k): 生态爆发" }
+      ] },
+    { id: "frenzy", label: "狂热", sublabel: "2025\u2013now", css: "current",
+      summary: "命名时代。Karpathy 2025 年中提出「Context Engineering」。CE 项目、记忆框架、MCP 生态同时爆发。",
+      narrative: "Karpathy 在 2025 年中用了「Context Engineering」这个词，整个领域突然有了名字。命名的力量不可小觑——有了名字就有了品类，有了品类就有了投资和关注。从 2025 年下半年开始，记忆框架密集涌现（memU/Memori/MemOS/MemMachine 在 2 个月内同时出现），上下文工程教程和指南爆发。这不是技术突破驱动的，是<strong>认知转变驱动的</strong>。",
+      events: [
+        { date: "2025 Q1", text: "MoBA + chonkie: 长上下文与 RAG 分块持续进化" },
+        { date: "2025 Q2", text: "memvid + fenic + CE 概念诞生: 命名改变一切" },
+        { date: "2025 Q3", text: "记忆框架寒武纪爆发: memU/Memori/MemOS/MemMachine" },
+        { date: "2025 Q4", text: "ace + beads + OpenCE: 上下文工程项目密集涌现" },
+        { date: "2025 Q4", text: "get-shit-done (30k): CE 驱动开发成为爆款" },
+        { date: "2026 Q1", text: "OpenClaw (302k) 引爆 CLI vs MCP 之争" },
+        { date: "2026 Q1", text: "OpenViking + SimpleMem + gsd-2: 整合开始" }
+      ] },
+    { id: "turning", label: "转折", sublabel: "2026H2?", css: "future",
+      summary: "预测：MCP 成为事实标准或被挑战。CE 从「概念」变为「工程实践」。压缩 vs 长上下文路线之争有初步结论。",
+      narrative: "预测：MCP 成为事实标准或被挑战者替代。上下文工程从「概念」变为「工程实践」，出现第一批专门的 CE 平台（不是记忆+RAG 的拼凑，而是原生 CE 设计）。压缩和长上下文的路线之争会有初步结论。",
+      events: [] },
+    { id: "deployment", label: "整合", sublabel: "2027+", css: "future",
+      summary: "终局：上下文工程被吸收进 Agent 标准工具链，就像「前端工程」已是 Web 开发的默认组成部分。",
+      narrative: "终局：上下文工程不再是独立学科——它被吸收进 Agent 开发的标准工具链，就像今天的「前端工程」已经是 Web 开发的默认组成部分。MCP 或其后继者成为基础设施层，开发者不再需要手动管理上下文。",
+      events: [] }
+  ];
+
+  let phaseHtml = '<div class="futuro-phase">' +
+    '<div class="phase-track" id="phase-track">';
+  const currentPhaseIdx = phaseData.findIndex(p => p.css === "current");
+  phaseData.forEach((ph, i) => {
+    const nowMark = (ph.css === "current") ? '<span class="now-dot"></span>' : '';
+    phaseHtml += '<div class="phase-step' + (i === currentPhaseIdx ? ' active' : '') + '" data-phase="' + i + '">' +
+      ph.label + nowMark + '<br><span style="font-weight:400;font-size:11px">' + ph.sublabel + '</span></div>';
+  });
+  phaseHtml += '</div>' +
+    '<div class="phase-events" id="phase-events"></div></div>';
+
+  futuroSection(1, "阶段判断 — 点击查看各阶段里程碑", phaseHtml);
+
+  function showPhase(idx) {
+    const ph = phaseData[idx];
+    const eventsEl = document.getElementById("phase-events");
+    const steps = document.querySelectorAll("#phase-track .phase-step");
+    steps.forEach((s, i) => { s.classList.toggle("active", i === idx); });
+    let html = '';
+    if (ph.events.length > 0) {
+      ph.events.forEach(ev => {
+        html += '<div class="pe-item"><span class="pe-date">' + ev.date + '</span><span class="pe-text">' + ev.text + '</span></div>';
+      });
+    }
+    html += '<div class="pe-summary" style="margin-top:' + (ph.events.length > 0 ? '10' : '0') + 'px">' + ph.narrative + '</div>';
+    eventsEl.innerHTML = html;
+  }
+
+  document.querySelectorAll("#phase-track .phase-step").forEach((step, i) => {
+    step.addEventListener("click", () => showPhase(i));
+  });
+  showPhase(currentPhaseIdx);
+
+  // — 2. Driving Forces —
+  const forces = [
+    { title: "上下文窗口的膨胀", tag: "技术驱动", tagColor: "#2563eb",
+      text: "从 GPT-4 的 4K 到 Claude 的 200K 再到 Gemini 的 1M+ token——上下文窗口每 12 个月翻倍。更多上下文需要更多工程来管理。但同时也制造了一个幻觉：「把所有东西都塞进去就行了」。这个幻觉是 CE 最大的敌人，也是最好的催化剂——当开发者发现「全塞进去」效果不好时，就需要工程化管理。",
+      evidence: "证据: GPT-4 4K (2023) → Claude 200K (2024) → Gemini 1M (2025)" },
+    { title: "Agent 的普及", tag: "需求驱动", tagColor: "#059669",
+      text: "一次性对话不需要上下文工程，Agent 需要。Agent 跨 session 运行、调用工具、管理任务——每一步都是上下文管理问题。2023 年 Agent 框架不到 10 个，2025 年超过 100 个。Agent 的爆发直接催生了对系统化上下文管理的刚需。",
+      evidence: "证据: 2023 年 Agent 框架 <10 个, 2025 年 >100 个" },
+    { title: "MCP 的催化效应", tag: "协议驱动", tagColor: "#7c3aed",
+      text: "一个协议标准化了上下文如何被服务给 LLM。MCP servers 从 0 到 81k Stars 只用了 15 个月。当上下文有了标准接口，「上下文工程」才从隐喻变成可操作的工程实践。MCP 之于 CE，就像 HTTP 之于 Web 开发——没有协议就没有工程。",
+      evidence: "证据: MCP servers 81k Stars, 2000+ 社区服务器, 15 个月" },
+    { title: "CLI 运行时的反叛", tag: "效率驱动", tagColor: "#e11d48",
+      text: "OpenClaw 创始人一句「MCP was a mistake. Bash is better」引爆了 CLI vs MCP 之争。核心论据是 Token 效率：MCP 的 GitHub server 93 个工具定义消耗 55,000 token（还没开始提问），而 CLI 的 --help 按需加载近乎 0 成本。Scalekit 基准测试证实 CLI 比 MCP 便宜 10-32x、可靠性高 28%。但这不是终局——Anthropic 自己也在论文中展示了让 Agent 写代码调 MCP 而非直接用 MCP tool，token 省 98.7%。底层逻辑：上下文交付的效率之战。",
+      evidence: "证据: OpenClaw 302k Stars (18 个月), Scalekit 基准 CLI 100% vs MCP 72% 可靠性" }
+  ];
+
+  let forcesHtml = '<div class="futuro-grid-2">';
+  forces.forEach(f => {
+    forcesHtml += '<div class="futuro-card">' +
+      '<span class="fc-tag" style="background:' + f.tagColor + '">' + f.tag + '</span>' +
+      '<h3>' + f.title + '</h3>' +
+      '<p>' + f.text + '</p>' +
+      '<div class="fc-evidence">' + f.evidence + '</div></div>';
+  });
+  forcesHtml += '</div>';
+  futuroSection(2, "驱动力 — 什么在推动整个领域？", forcesHtml);
+
+  // — 3. Convergence Patterns —
+  const convergences = [
+    { formula: "RAG \u00d7 Memory", result: "统一上下文存储",
+      text: "RAG 检索外部知识，Memory 持久化 Agent 经验。HippoRAG 和 cognee 已经在合并两者。外部知识 vs 内部知识的区分正在消融——对 Agent 来说，所有有用的信息都是上下文。",
+      projects: "HippoRAG (3.3k), cognee (13.5k), Acontext (3.2k)" },
+    { formula: "Prompt Engineering \u2192 Context Engineering", result: "单次 → 全生命周期",
+      text: "从手工编写单条 Prompt 到系统化管理整个上下文流水线。DSPy 是桥梁（可编程 Prompt）。演化路径：手工 Prompt → 可编程 Prompt → 上下文管道 → 上下文工程。",
+      projects: "DSPy (32.8k) → promptflow (11.1k) → parlant (17.8k) → OpenCE (335)" },
+    { formula: "Compression \u00d7 Long Context", result: "对立还是互补？",
+      text: "压缩让上下文适配更小的窗口，长上下文让窗口变大。看似矛盾但实际互补：即便有 1M token 窗口，你仍然需要决定什么该放进去。成本优化永远需要压缩。",
+      projects: "LLMLingua (5.9k) vs MoBA (2.1k), claw-compactor (1.6k) vs streaming-llm (7.2k)" },
+    { formula: "MCP \u00d7 Memory", result: "上下文即服务",
+      text: "MCP 提供协议，Memory 提供状态。二者结合实现「Context-as-a-Service」——Agent 通过标准接口请求上下文，获得相关且持久的信息返回。cipher 已经是 MCP 兼容的记忆层。",
+      projects: "MCP servers (81k), mem0 (49.8k), cipher (3.6k, MCP 兼容记忆)" },
+    { formula: "CLI \u00d7 MCP", result: "从对立到共存",
+      text: "CLI 用文件和终端提供上下文（10-32x 更省 token），MCP 用协议标准化接口。Scalekit 基准测试：CLI 100% 可靠性 vs MCP 72%。但 MCP 2026 年初引入 progressive discovery 后差距正在缩小。终局不是二选一，而是 Skills 作为统一抽象层——底层可以是 CLI 也可以是 MCP。",
+      projects: "OpenClaw (302k, CLI-first) vs MCP servers (81k, 协议优先). Codex/Gemini CLI 同时支持两者" }
+  ];
+
+  let convHtml = '<div class="futuro-grid-2">';
+  convergences.forEach(c => {
+    convHtml += '<div class="futuro-convergence-item">' +
+      '<div class="conv-formula">' + c.formula + ' <span class="conv-arrow">\u2192</span> ' + c.result + '</div>' +
+      '<p>' + c.text + '</p>' +
+      '<div class="conv-projects">' + c.projects + '</div></div>';
+  });
+  convHtml += '</div>';
+  futuroSection(3, "趋同轨迹 — 泳道之间正在发生什么？", convHtml);
+
+  // — 4. Inevitable vs Contingent —
+  const inevitables = [
+    { fact: "上下文成为一等工程对象", why: "每条泳道都在指向这一点。上下文不再是 afterthought，而是需要专门设计、测试、优化的工程产物。" },
+    { fact: "协议标准化 (MCP 或后继者)", why: "碎片化不可持续。MCP 已有 81k Stars 和 2000+ 社区服务器的先发优势，但即便 MCP 失败，某种协议标准化是必然的。" },
+    { fact: "记忆成为 Agent 标配", why: "无状态 Agent 无法处理真实任务。2025 年 7-8 月 5 个记忆框架同时涌现已经证明：这不是观点，是共识。" },
+    { fact: "检索 + 记忆合流", why: "外部知识 vs 内部知识的区分是人为的。对 Agent 来说，所有有用的信息都是上下文。HippoRAG/cognee 已经在模糊这条线。" }
+  ];
+
+  const contingents = [
+    { fact: "MCP 还是 CLI 赢得上下文接口之争", why: "OpenClaw 302k Stars 证明 CLI 有效率优势（10-32x 省 token），但 MCP 有企业治理优势。Perplexity CTO 弃 MCP 是强信号，但 MCP progressive discovery 可能扳回。赢家可能是两者之上的抽象层——Skills。" },
+    { fact: "上下文工程是否成为独立学科", why: "可能被吸收进「Agent 工程」，成为子领域而非独立学科。取决于是否出现专门的 CE 平台和 CE 工程师岗位。" },
+    { fact: "长上下文是否消灭压缩需求", why: "取决于模型架构演化。如果 10M+ token 窗口变得廉价，压缩赛道可能萎缩——但成本优化永远有市场。" },
+    { fact: "谁定义 CE 最佳实践", why: "Anthropic? OpenAI? 开源社区? 学术界? 定义权之争决定了整个领域的走向和标准。" }
+  ];
+
+  let splitHtml = '<div class="futuro-grid-2">' +
+    '<div class="futuro-split-col futuro-card" style="border-left:3px solid #059669">' +
+    '<h4 style="color:#059669">必然趋势 (Inevitable)</h4><ul>';
+  inevitables.forEach(i => {
+    splitHtml += '<li><strong>' + i.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + i.why + '</span></li>';
+  });
+  splitHtml += '</ul></div>' +
+    '<div class="futuro-split-col futuro-card" style="border-left:3px solid #d97706">' +
+    '<h4 style="color:#d97706">偶然变量 (Contingent)</h4><ul>';
+  contingents.forEach(c => {
+    splitHtml += '<li><strong>' + c.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + c.why + '</span></li>';
+  });
+  splitHtml += '</ul></div></div>';
+  futuroSection(4, "必然与偶然", splitHtml);
+
+  // — 5. Scenario Sketch —
+  const scenarios = [
+    { title: "学科确立", tag: "乐观", prob: "30%", tagColor: "#059669", css: "scenario-optimistic",
+      text: "Context Engineering 成为公认的工程学科，出现教科书、认证、专门工具。「CE 工程师」成为职位头衔。主要 CE 框架获得主导采纳，云厂商提供 CE-as-a-Service。",
+      trigger: "触发条件: 一个主要 CE 框架获得主导采纳 + 云厂商提供 CE-as-a-Service" },
+    { title: "框架吸收", tag: "基准", prob: "50%", tagColor: "#2563eb", css: "scenario-base",
+      text: "CE 能力被现有 Agent 框架（LangChain、CrewAI 等）吸收。没有独立的 CE 学科，只是 Agent 工具中更好的上下文处理。自然演化，无颠覆性事件。",
+      trigger: "触发条件: 自然演化，无颠覆性事件" },
+    { title: "窗口溢出", tag: "风险", prob: "20%", tagColor: "#dc2626", css: "scenario-risk",
+      text: "上下文窗口变得足够大（10M+ token）且足够便宜，工程化管理显得不必要。「全塞进去」真的可行了。CE 工具除成本优化外失去存在意义。",
+      trigger: "触发条件: 模型架构突破，实现近乎无限且低成本的上下文" }
+  ];
+
+  let scenarioHtml = '<div class="futuro-grid-3">';
+  scenarios.forEach(s => {
+    scenarioHtml += '<div class="futuro-card ' + s.css + '">' +
+      '<span class="fc-tag" style="background:' + s.tagColor + '">' + s.tag + ' \u00b7 ' + s.prob + '</span>' +
+      '<h3>' + s.title + '</h3>' +
+      '<p>' + s.text + '</p>' +
+      '<div class="fc-evidence">' + s.trigger + '</div></div>';
+  });
+  scenarioHtml += '</div>';
+  futuroSection(5, "情景推演 — 12 个月后的三种图景", scenarioHtml);
+
+  // — 6. Weak Signals —
+  const weakSignals = [
+    { title: "学术命名的出现",
+      text: "GAIR-NLP 的「Context Engineering 2.0」标志着学术形式化。当学术界命名一个东西时，制度化随之而来——课程、论文、期刊。这是从「工具集合」到「学科」的关键转折信号。",
+      evidence: "信号: Context-Engineering-2.0 (上海交大, 2025-10)" },
+    { title: "记忆框架的寒武纪大爆发",
+      text: "2025 年 7-8 月，memvid/memU/Memori/MemOS/MemMachine 在 2 个月内同时涌现。这种密度意味着「Agent 需要记忆」已从观点变为共识。记忆是上下文工程的核心基建——当记忆爆发时，CE 的需求也在爆发。",
+      evidence: "信号: 5 个项目在 60 天内发布，合计 50k+ Stars" },
+    { title: "代码上下文的专门化",
+      text: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k) —— 代码库特化的上下文打包已成为独立子赛道。这暗示：不同类型的 Agent 需要不同类型的上下文工程。泛化的 CE 框架可能不够，垂直领域的 CE 可能更有价值。",
+      evidence: "信号: 3 个项目 > 5k Stars，全部代码特化" },
+    { title: "压缩与扩展的赛跑",
+      text: "压缩 (LLMLingua, KV Cache 工具) 和长上下文 (MoBA, streaming-llm) 在并行进化。如果上下文窗口增长快于内容体量，压缩失去意义；如果内容增长快于窗口，压缩赢。这场赛跑的结果塑造整个领域的形态。",
+      evidence: "信号: KV Cache 压缩有 6+ 活跃项目，同时窗口大小每 12 个月翻倍" },
+    { title: "Perplexity CTO 弃用 MCP",
+      text: "2026 年 3 月 11 日，Perplexity CTO Denis Yarats 宣布内部从 MCP 转向 API + CLI。讽刺的是 Perplexity 官网还挂着 MCP server 文档。当 MCP 的早期采用者开始离开，这是一个极强的方向信号。MCP 的 progressive discovery 更新（2026-01）能否挽回局面是关键变量。",
+      evidence: "信号: Perplexity CTO 公开表态 (Ask 2026 大会, 2026-03-11)" }
+  ];
+
+  let signalHtml = '<div class="futuro-grid-2">';
+  weakSignals.forEach(s => {
+    signalHtml += '<div class="futuro-signal">' +
+      '<div class="sig-title">' + s.title + '</div>' +
+      '<p>' + s.text + '</p>' +
+      '<div class="sig-evidence">' + s.evidence + '</div></div>';
+  });
+  signalHtml += '</div>';
+  futuroSection(6, "弱信号 — 被低估但可能改变格局", signalHtml);
+
+  // ====== EPILOGUE ======
+  (function() {
+    const yrBuckets = {};
+    projects.forEach(p => { const yr = p.created.slice(0, 4); yrBuckets[yr] = (yrBuckets[yr] || 0) + 1; });
+    const years = Object.keys(yrBuckets).sort();
+    const yrLine = years.map(y => y + ': ' + yrBuckets[y]).join(' \u2192 ');
+    const newCount = projects.filter(p => p.status === 'new').length;
+
+    const epiContainer = document.getElementById('epilogue-dims');
+    epiContainer.innerHTML =
+      '<div class="epi-dim dim-past">' +
+        '<div class="dim-label">来时路</div>' +
+        '<h3>什么模式在重复？</h3>' +
+        '<p>数据中藏着一个清晰的波浪节奏：<strong>工具碎片化 → 基建协议化 → 概念命名 → 学科整合</strong>。2019-2023 年碎片化工具期（haystack, RAG, prompt templates, basic memory —— 每个解决一块）；2024 年协议化（MCP 发布，提供统一接口）；2025 年命名期（Karpathy 命名「context engineering」，教程/指南爆发）；2026 年整合开始（OpenViking, CE toolkits 涌现）。</p>' +
+        '<p>每个阶段都建立在前一阶段的基础上。没有 MCP（协议），命名就没有具体的东西可以指向。没有命名，整合就没有方向。</p>' +
+        '<p><strong>这个模式预示了什么？</strong>命名之后是标准化。下一波应该是「CE 平台」——不是工具包，而是管理完整上下文生命周期的集成平台。这还没有发生。</p>' +
+        '<div class="epi-data">' +
+          '<span style="font-weight:600">2019-2023</span> 碎片化: 各子领域独立发展<br>' +
+          '<span style="font-weight:600">2024</span> 协议化: MCP 发布<br>' +
+          '<span style="font-weight:600">2025</span> 命名: Karpathy + 教程爆发<br>' +
+          '<span style="font-weight:600">2026 Q1</span> CLI 反叛: OpenClaw 302k, CLI vs MCP 之争<br>' +
+          '<span style="font-weight:600">?</span> 收敛: Skills 统一抽象层、专门 CE 平台——尚未到来' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="epi-dim dim-future">' +
+        '<div class="dim-label">未来观</div>' +
+        '<h3>无论哪种未来，什么张力必须被解决？</h3>' +
+        '<p><strong>张力一：压缩 vs 扩展——上下文工程的存在性问题。</strong>如果上下文窗口变得无限且廉价，CE 还重要吗？答案决定了 CE 是永久学科还是过渡技术。在所有情景中，这个张力都必须被面对。</p>' +
+        '<p><strong>张力二：人工编排 vs Agent 自治——谁工程化上下文？</strong>目前是人设计上下文管道。但 Agent 越来越自主管理自己的上下文（ace, Acontext）。从「人为 Agent 工程化上下文」到「Agent 自己工程化上下文」的转变是结构性张力。如果 Agent 赢，CE 作为人类学科消失；如果人类仍然必要，CE 稳固。</p>' +
+        '<p><strong>张力三：协议 vs 终端——MCP 与 CLI 的效率之争。</strong>MCP 押注一个协议标准化上下文接口。CLI 阵营（OpenClaw 302k Stars）用 Token 效率数据反击：同一任务 CLI 1,365 tokens vs MCP 44,026 tokens。但效率不是唯一维度——企业治理、审计、权限需要 MCP 的结构化。Skills 可能成为二者之上的统一抽象层。</p>' +
+        '<div class="epi-data">' +
+          '结构性张力不是预测，而是无论哪种情景发生都必须面对的问题。<br>它们的解决方式决定了最终走向哪个情景。' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="epi-dim dim-now">' +
+        '<div class="dim-label">看当下</div>' +
+        '<h3>什么决策是有时间窗口的？</h3>' +
+        '<p><strong>命名窗口。</strong>上下文工程的定义还在流动期。谁现在写出最好的 CE 教科书/框架，谁就定义这个学科。2025 年「Context Engineering」从 0 到 20+ 项目——这个速度意味着窗口正在快速关闭。</p>' +
+        '<p><strong>MCP vs CLI 站队窗口。</strong>MCP 协议还年轻（15 个月），CLI 阵营刚刚崛起（OpenClaw 18 个月内 302k Stars）。Perplexity CTO 已公开转向 CLI。现在是影响「上下文接口标准」的最后窗口——一旦大厂集体站队，格局将固化。</p>' +
+        '<p><strong>报告视野边界。</strong>数据来源为 GitHub 开源项目。Anthropic/OpenAI/Google 内部的上下文管理能力不在视野内。Stars 衡量流行度不是重要性。</p>' +
+        '<div class="epi-data">' +
+          '项目分布: ' + yrLine + '<br>' +
+          '2026 新项目: ' + newCount + ' 个 (仅 Q1)<br>' +
+          '数据来源: GitHub 开源项目 (不含闭源研究、学术论文、专利)' +
+        '</div>' +
+      '</div>';
+  })();
+
+  // ====== TIMELINE (D3) ======
+  const margin = { top: 40, right: 30, bottom: 80, left: 195 };
+  const fullWidth = 1440;
+  const laneHeight = 72;
+  const numLanes = laneConfig.length;
+  const chartHeight = numLanes * laneHeight;
+  const fullHeight = chartHeight + margin.top + margin.bottom;
+
+  const svg = d3.select("#timeline-svg")
+    .attr("width", fullWidth)
+    .attr("height", fullHeight)
+    .attr("viewBox", `0 0 ${fullWidth} ${fullHeight}`);
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const chartWidth = fullWidth - margin.left - margin.right;
+
+  const timeStart = new Date("2019-07-01");
+  const timeEnd = new Date("2026-06-01");
+  const futureStart = new Date("2026-04-01");
+
+  const x = d3.scaleTime().domain([timeStart, timeEnd]).range([0, chartWidth]);
+  const y = d3.scaleBand().domain(laneConfig.map(l => l.id)).range([0, chartHeight]).padding(0.06);
+
+  const futureX = x(futureStart);
+  g.append("rect")
+    .attr("x", futureX).attr("y", 0)
+    .attr("width", chartWidth - futureX).attr("height", chartHeight)
+    .attr("fill", "#f8fafc").attr("stroke", "#e2e8f0")
+    .attr("stroke-dasharray", "6,4").attr("stroke-width", 1).attr("rx", 4);
+  g.append("text")
+    .attr("x", futureX + (chartWidth - futureX) / 2).attr("y", 20)
+    .attr("text-anchor", "middle").attr("font-size", 12)
+    .attr("fill", "#cbd5e1").attr("font-weight", 600).text("Future");
+
+  // Year grid
+  const yearMarks = [];
+  for (let yr = 2020; yr <= 2026; yr++) {
+    const d = new Date(yr, 0, 1);
+    if (d >= timeStart && d <= timeEnd) yearMarks.push(d);
+  }
+  g.selectAll(".grid-line").data(yearMarks).join("line")
+    .attr("x1", d => x(d)).attr("x2", d => x(d))
+    .attr("y1", 0).attr("y2", chartHeight)
+    .attr("stroke", "#f0f0f0").attr("stroke-width", 1);
+
+  g.selectAll(".yr-label").data(yearMarks).join("text")
+    .attr("x", d => x(d)).attr("y", chartHeight + 18)
+    .attr("text-anchor", "middle").attr("font-size", 11).attr("fill", "#9ca3af")
+    .text(d => d.getFullYear());
+
+  // Lane backgrounds & labels
+  laneConfig.forEach((lane, i) => {
+    const ly = y(lane.id); const lh = y.bandwidth();
+    if (i % 2 === 0) {
+      g.append("rect").attr("x", 0).attr("y", ly)
+        .attr("width", chartWidth).attr("height", lh).attr("fill", "#f9fafb");
+    }
+    g.append("line").attr("x1", 0).attr("x2", chartWidth)
+      .attr("y1", ly).attr("y2", ly).attr("stroke", "#e5e7eb").attr("stroke-width", 0.5);
+    g.append("text").attr("x", -12).attr("y", ly + lh / 2)
+      .attr("text-anchor", "end").attr("dominant-baseline", "middle")
+      .attr("font-size", 11).attr("font-weight", 600).attr("fill", lane.color)
+      .text(lane.label);
+  });
+  g.append("line").attr("x1", 0).attr("x2", chartWidth)
+    .attr("y1", chartHeight).attr("y2", chartHeight).attr("stroke", "#e5e7eb").attr("stroke-width", 0.5);
+
+  // Event annotations
+  const eventAnnotations = [
+    { date: "2019-11-01", label: "haystack", lane: "rag" },
+    { date: "2023-01-01", label: "DSPy", lane: "prompt-eng" },
+    { date: "2023-06-01", label: "mem0", lane: "memory" },
+    { date: "2024-09-01", label: "MCP", lane: "mcp" },
+    { date: "2024-07-01", label: "repomix", lane: "codectx" },
+    { date: "2025-06-01", label: "CE 命名", lane: "ce" },
+    { date: "2025-07-01", label: "记忆爆发", lane: "memory" },
+    { date: "2026-01-01", label: "OpenViking", lane: "ce" },
+    { date: "2024-09-01", label: "OpenClaw", lane: "cli" },
+    { date: "2025-06-01", label: "Gemini CLI", lane: "cli" }
+  ];
+  eventAnnotations.forEach(ann => {
+    const ax = x(new Date(ann.date));
+    const lane = laneConfig.find(l => l.id === ann.lane);
+    if (!lane) return;
+    const ay = y(lane.id);
+    g.append("line").attr("x1", ax).attr("x2", ax).attr("y1", ay - 4).attr("y2", ay + 6)
+      .attr("stroke", "#2563eb").attr("stroke-width", 1.5).attr("stroke-dasharray", "3,2");
+    g.append("text").attr("x", ax).attr("y", ay - 8)
+      .attr("text-anchor", "middle").attr("font-size", 10)
+      .attr("fill", "#2563eb").attr("font-weight", 600).text(ann.label);
+  });
+
+  // Project nodes
+  const tooltip = d3.select("#tooltip");
+  const starExtent = d3.extent(projects, d => d.stars);
+  const rScale = d3.scaleSqrt()
+    .domain([Math.log10(starExtent[0] + 1), Math.log10(starExtent[1] + 1)])
+    .range([4, 20]);
+
+  const laneProjects = {};
+  projects.forEach(p => {
+    const lane = getLane(p.paradigm);
+    if (!laneProjects[lane.id]) laneProjects[lane.id] = [];
+    laneProjects[lane.id].push(p);
+  });
+
+  projects.forEach(p => {
+    const lane = getLane(p.paradigm);
+    const siblings = laneProjects[lane.id];
+    const idx = siblings.indexOf(p);
+    const count = siblings.length;
+    const laneY = y(lane.id); const laneH = y.bandwidth();
+    const yPos = laneY + laneH * (0.2 + 0.6 * (idx / Math.max(count - 1, 1)));
+    p._x = x(new Date(p.created));
+    p._y = count === 1 ? laneY + laneH / 2 : yPos;
+    p._r = rScale(Math.log10(p.stars + 1));
+    p._lane = lane;
+  });
+
+  // 8-pass collision resolution
+  for (let pass = 0; pass < 8; pass++) {
+    for (const laneId in laneProjects) {
+      const lps = laneProjects[laneId].sort((a, b) => a._x - b._x);
+      const lane = laneConfig.find(l => l.id === laneId);
+      const laneY = y(lane.id); const laneH = y.bandwidth();
+      for (let i = 1; i < lps.length; i++) {
+        for (let j = 0; j < i; j++) {
+          const dx = lps[i]._x - lps[j]._x;
+          const dy = lps[i]._y - lps[j]._y;
+          const minDist = lps[i]._r + lps[j]._r + 3;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < minDist && dist > 0) {
+            const push = (minDist - dist) / 2;
+            lps[i]._y = Math.min(laneY + laneH - lps[i]._r - 2, lps[i]._y + push * 0.7);
+            lps[j]._y = Math.max(laneY + lps[j]._r + 2, lps[j]._y - push * 0.7);
+            if (Math.abs(dx) < minDist * 0.3) {
+              lps[i]._x = Math.min(chartWidth - lps[i]._r, lps[i]._x + push * 0.3);
+              lps[j]._x = Math.max(lps[j]._r, lps[j]._x - push * 0.3);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function statusStroke(s) { return s === "new" ? "#ef4444" : s === "stable" ? "#9ca3af" : "none"; }
+  function statusStrokeWidth(s) { return s === "new" ? 2.5 : s === "stable" ? 1.5 : 0; }
+
+  const nodes = g.selectAll(".node").data(projects).join("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d._x},${d._y})`)
+    .style("cursor", "pointer");
+
+  nodes.append("circle")
+    .attr("r", d => d._r)
+    .attr("fill", d => paradigmColors[d.paradigm] || "#6b7280")
+    .attr("fill-opacity", d => d.status === "new" ? 0.85 : 0.65)
+    .attr("stroke", d => statusStroke(d.status))
+    .attr("stroke-width", d => statusStrokeWidth(d.status));
+
+  nodes.filter(d => d.stars > 3000)
+    .append("text")
+    .attr("y", d => d._r + 12)
+    .attr("text-anchor", "middle").attr("font-size", 10)
+    .attr("font-weight", 600).attr("fill", "#374151")
+    .text(d => d.name.length > 14 ? d.name.slice(0, 12) + ".." : d.name);
+
+  nodes.filter(d => d._r > 12)
+    .append("text")
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("font-size", 9).attr("font-weight", 700).attr("fill", "#fff")
+    .text(d => d.stars >= 1000 ? (d.stars / 1000).toFixed(1) + "k" : d.stars);
+
+  // Tooltip
+  nodes.on("mouseenter", function(event, d) {
+    const color = paradigmColors[d.paradigm] || "#6b7280";
+    const statusLabel = d.status === "new" ? "新项目" : d.status === "active" ? "活跃" : "稳定";
+    tooltip.html(`
+      <div class="tt-name" style="color:${color}">${d.name}</div>
+      <div class="tt-org">${d.org}</div>
+      <div class="tt-desc">${d.desc}</div>
+      <div class="tt-meta">
+        <span class="tt-stars">\u2605 ${d.stars.toLocaleString()}</span>
+        <span>${d.created}</span>
+        <span>${statusLabel}</span>
+      </div>
+      <span class="tt-paradigm-badge" style="background:${color}">${paradigmLabels[d.paradigm]||d.paradigm}</span>
+    `).style("opacity", 1);
+    d3.select(this).select("circle").transition().duration(150)
+      .attr("fill-opacity", 1).attr("r", d._r * 1.15);
+  })
+  .on("mousemove", function(event) {
+    let left = event.pageX + 16;
+    if (left + 340 > window.innerWidth - 20) left = event.pageX - 340 - 16;
+    tooltip.style("left", left + "px").style("top", (event.pageY - 10) + "px");
+  })
+  .on("mouseleave", function(event, d) {
+    tooltip.style("opacity", 0);
+    d3.select(this).select("circle").transition().duration(150)
+      .attr("fill-opacity", d.status === "new" ? 0.85 : 0.65).attr("r", d._r);
+  })
+  .on("click", function(event, d) {
+    window.open(`https://github.com/${d.org}/${d.name}`, '_blank');
+  });
+
+  // Bottom legends
+  const legendY = margin.top + chartHeight + 36;
+  const statusLegend = svg.append("g").attr("transform", `translate(${margin.left}, ${legendY})`);
+  const statuses = [
+    { label: "新项目", color: "#ef4444" },
+    { label: "稳定", color: "#9ca3af" },
+    { label: "活跃", color: "none" }
+  ];
+  let sx = 0;
+  statuses.forEach(s => {
+    statusLegend.append("circle").attr("cx", sx).attr("cy", 0).attr("r", 5)
+      .attr("fill", s.color === "none" ? "#059669" : "none").attr("fill-opacity", 0.65)
+      .attr("stroke", s.color === "none" ? "none" : s.color)
+      .attr("stroke-width", s.color === "#ef4444" ? 2.5 : 1.5);
+    statusLegend.append("text").attr("x", sx + 9).attr("y", 4)
+      .attr("font-size", 11).attr("fill", "#9ca3af").text(s.label);
+    sx += s.label.length * 14 + 20;
+  });
+
+  const sizeLegend = svg.append("g").attr("transform", `translate(${fullWidth - 220}, ${legendY})`);
+  sizeLegend.append("text").attr("x", 0).attr("y", 4)
+    .attr("font-size", 11).attr("fill", "#9ca3af").text("Stars:");
+  const exampleStars = [100, 1000, 10000];
+  const exampleLabels = ["100", "1k", "10k"];
+  let cx = 50;
+  const maxR = rScale(Math.log10(10000 + 1));
+  exampleStars.forEach((s, i) => {
+    const r = rScale(Math.log10(s + 1));
+    const cy = maxR - r;
+    sizeLegend.append("circle").attr("cx", cx).attr("cy", cy).attr("r", r)
+      .attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-width", 1);
+    sizeLegend.append("text").attr("x", cx).attr("y", maxR + 14)
+      .attr("text-anchor", "middle").attr("font-size", 9).attr("fill", "#9ca3af")
+      .text(exampleLabels[i]);
+    cx += r * 2 + 16;
+  });
+
+  // Project index table
+  const sortedProjects = [...projects].sort((a, b) => b.stars - a.stars);
+  const tbody = document.getElementById("index-tbody");
+  sortedProjects.forEach(p => {
+    const url = `https://github.com/${p.org}/${p.name}`;
+    const color = paradigmColors[p.paradigm] || "#6b7280";
+    const lane = getLane(p.paradigm);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="idx-paradigm-dot" style="background:${color}"></span>${lane.label}</td>
+      <td><a href="${url}" target="_blank">${p.name}</a> <span class="idx-org">${p.org}</span></td>
+      <td class="idx-stars">\u2605 ${p.stars.toLocaleString()}</td>
+      <td style="font-size:13px;color:#6b7280;white-space:nowrap">${p.created}</td>
+      <td class="idx-desc">${p.desc}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

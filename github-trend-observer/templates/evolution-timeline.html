@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{topic}}: Open-Source Evolution Timeline</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root {
+    --bg: #fafafa; --surface: #ffffff; --border: #e5e7eb; --border-light: #f3f4f6;
+    --text: #1f2937; --text-secondary: #6b7280; --text-muted: #9ca3af;
+    --accent: #2563eb; --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08); --radius: 10px;
+    /* Domain colors — replace with actual domain colors */
+    {{#each domains}}--c-{{id}}: {{color}};{{/each}}
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1480px; margin: 0 auto; padding: 32px 24px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .mode-badge { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+
+  /* Legend */
+  .legend-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b5563; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Judgment Cards */
+  .class-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .class-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: #fafbfc; font-size: 13px; }
+  .class-card summary { cursor: pointer; font-weight: 600; font-size: 14px; list-style: none; display: flex; align-items: center; gap: 6px; }
+  .class-card summary::before { content: "▸"; font-size: 11px; color: var(--text-muted); }
+  .class-card[open] summary::before { content: "▾"; }
+
+  /* Timeline */
+  .timeline-card { overflow-x: auto; }
+  #timeline-svg { display: block; margin: 0 auto; }
+  .tooltip { position: absolute; pointer-events: none; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; box-shadow: var(--shadow-md); font-size: 14px; line-height: 1.5; z-index: 100; max-width: 340px; opacity: 0; transition: opacity 0.15s; }
+
+  /* Domain Analysis */
+  .paradigm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .paradigm-box { border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: #fafbfc; }
+  .paradigm-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+
+  /* Project Index */
+  .index-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .index-table th { text-align: left; font-size: 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border); padding: 6px 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .index-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .index-table tr:hover { background: #f9fafb; }
+  .index-table a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* Evolution Analysis */
+  .futuro-section { margin-bottom: 22px; }
+  .futuro-section-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .futuro-section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; }
+  .futuro-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: #fafbfc; font-size: 13px; line-height: 1.6; }
+  .futuro-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .futuro-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .futuro-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Epilogue */
+  .epilogue-dims { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .epi-dim { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; background: var(--surface); border-top: 3px solid #e2e8f0; }
+  .epi-dim.dim-past { border-top-color: #93c5fd; }
+  .epi-dim.dim-future { border-top-color: #059669; }
+  .epi-dim.dim-now { border-top-color: #f59e0b; }
+  .epi-dim .dim-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .epi-dim h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .epi-dim p { font-size: 13px; line-height: 1.7; color: #374151; margin-bottom: 8px; }
+
+  .footer { text-align: center; font-size: 13px; color: var(--text-muted); padding: 16px 0 8px; border-top: 1px solid var(--border); }
+
+  @media (max-width: 1100px) { .paradigm-grid, .futuro-grid-3 { grid-template-columns: 1fr 1fr; } .epilogue-dims { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .paradigm-grid, .futuro-grid-3, .futuro-grid-2 { grid-template-columns: 1fr; } .class-cards { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="mode-badge">MODE 5 · EVOLUTION TIMELINE</div>
+    <h1>{{topic}}: Open-Source Evolution Timeline</h1>
+    <p class="subtitle">{{total_projects}} projects · {{domain_count}} domains · {{date}}</p>
+  </div>
+
+  <!-- Evolution Positioning (Phase 2-A) -->
+  <div class="card">
+    <h2>Evolution Positioning</h2>
+    {{evolution_positioning}}
+  </div>
+
+  <!-- Domain Legend -->
+  <div class="card">
+    <h2>Domains</h2>
+    <div class="legend-bar">
+      {{#each domains}}
+      <div class="legend-item"><div class="legend-dot" style="background:{{color}}"></div>{{name}}</div>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Judgment Cards (Phase 3, collapsible) -->
+  <div class="card">
+    <h2>Domain Classification Cards</h2>
+    <div class="class-cards">
+      {{#each domains}}
+      <details class="class-card">
+        <summary><span style="color:{{color}}">●</span> {{name}}</summary>
+        <div class="cc-def">{{definition}}</div>
+        <div class="cc-row"><span class="cc-label">Wardley:</span> {{wardley}}</div>
+        <div class="cc-row"><span class="cc-label">Status:</span> {{status}}</div>
+        <div class="cc-row"><span class="cc-label">Anchors:</span> {{anchors}}</div>
+      </details>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- D3.js Interactive Timeline (Phase 4) -->
+  <div class="card timeline-card">
+    <h2>Evolution Timeline</h2>
+    <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+      Hover for details · Click to open on GitHub · Circle size = log(stars)
+    </p>
+    <svg id="timeline-svg"></svg>
+  </div>
+
+  <!-- Domain Analysis Cards -->
+  <div class="card">
+    <h2>Domain Analysis</h2>
+    <div class="paradigm-grid">
+      {{#each domains}}
+      <div class="paradigm-box">
+        <h3>{{name}}</h3>
+        <p>{{insight}}</p>
+        <div class="rep">Top: {{top_projects}}</div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Phase 6-A: Evolution Panorama -->
+  <div class="card">
+    <h2>Evolution Panorama</h2>
+    {{panorama_content}}
+  </div>
+
+  <!-- Phase 6-B: For the Reader -->
+  <div class="card epilogue">
+    <h2>For the Reader</h2>
+    <div class="epilogue-dims">
+      <div class="epi-dim dim-past">
+        <div class="dim-label">Looking Back</div>
+        <h3>{{retrospective_title}}</h3>
+        {{retrospective_content}}
+      </div>
+      <div class="epi-dim dim-future">
+        <div class="dim-label">Looking Forward</div>
+        <h3>{{forward_title}}</h3>
+        {{forward_content}}
+      </div>
+      <div class="epi-dim dim-now">
+        <div class="dim-label">Looking Now</div>
+        <h3>{{now_title}}</h3>
+        {{now_content}}
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Project Index -->
+  <div class="card">
+    <h2>Project Index</h2>
+    <div style="max-height:600px;overflow-y:auto;">
+      <table class="index-table">
+        <thead><tr><th>#</th><th>Project</th><th>Stars</th><th>Domain</th><th>Created</th><th>Description</th></tr></thead>
+        <tbody>
+          {{#each projects}}
+          <tr>
+            <td>{{index}}</td>
+            <td><a href="{{url}}" target="_blank">{{name}}</a></td>
+            <td class="idx-stars">{{stars}}</td>
+            <td><span class="idx-paradigm-dot" style="background:{{domain_color}}"></span>{{domain_name}}</td>
+            <td>{{created}}</td>
+            <td class="idx-desc">{{description}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by GitHub Radar · Mode 5: Evolution Timeline · {{date}}
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// D3.js Timeline Visualization
+// Data injected by agent:
+const projects = {{projects_json}};
+const domains = {{domains_json}};
+
+// --- Timeline rendering code ---
+const margin = {top: 30, right: 30, bottom: 40, left: 180};
+const svgEl = d3.select("#timeline-svg");
+const containerWidth = svgEl.node().parentElement.clientWidth;
+const laneHeight = 52;
+const height = margin.top + margin.bottom + domains.length * laneHeight;
+const width = Math.max(containerWidth - 20, 800);
+
+svgEl.attr("width", width).attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
+const g = svgEl.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+const innerW = width - margin.left - margin.right;
+const innerH = height - margin.top - margin.bottom;
+
+// Scales
+const dates = projects.map(p => new Date(p.created));
+const xScale = d3.scaleTime().domain(d3.extent(dates)).range([0, innerW]).nice();
+const yScale = d3.scaleBand().domain(domains.map(d => d.id)).range([0, innerH]).padding(0.15);
+
+// Axes
+g.append("g").attr("transform", `translate(0,${innerH})`).call(d3.axisBottom(xScale).ticks(d3.timeMonth.every(3)).tickFormat(d3.timeFormat("%Y-%m")));
+
+// Lanes
+domains.forEach(d => {
+  const y = yScale(d.id);
+  g.append("rect").attr("x", 0).attr("y", y).attr("width", innerW).attr("height", yScale.bandwidth()).attr("fill", d.color).attr("opacity", 0.06);
+  g.append("text").attr("x", -8).attr("y", y + yScale.bandwidth()/2).attr("text-anchor", "end").attr("dominant-baseline", "middle").attr("font-size", 12).attr("font-weight", 600).attr("fill", "#4b5563").text(d.name);
+});
+
+// Tooltip
+const tooltip = d3.select("#tooltip");
+
+// Circles
+g.selectAll("circle").data(projects).join("circle")
+  .attr("cx", p => xScale(new Date(p.created)))
+  .attr("cy", p => yScale(p.domain) + yScale.bandwidth()/2)
+  .attr("r", p => Math.max(3, Math.sqrt(Math.log2(p.stars + 1)) * 2.5))
+  .attr("fill", p => domains.find(d => d.id === p.domain)?.color || "#999")
+  .attr("opacity", 0.75).attr("cursor", "pointer")
+  .on("mouseover", (e, p) => {
+    tooltip.style("opacity", 1).html(`<div class="tt-name">${p.name}</div><div class="tt-desc">${p.desc || ''}</div><div class="tt-meta"><span class="tt-stars">★ ${p.stars.toLocaleString()}</span><span>${p.created}</span></div>`);
+  })
+  .on("mousemove", e => { tooltip.style("left", (e.pageX+12)+"px").style("top", (e.pageY-20)+"px"); })
+  .on("mouseout", () => { tooltip.style("opacity", 0); })
+  .on("click", (e, p) => { window.open(p.url, "_blank"); });
+</script>
+</body>
+</html>

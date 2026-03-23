@@ -50,5 +50,20 @@
       "每个精选有选择理由",
       "包含简短范式信号"
     ]
+  },
+  {
+    "id": "eval-5",
+    "mode": "evolution_timeline",
+    "prompt": "帮我梳理 context engineering 的演化脉络",
+    "script": "python scripts/evolution_timeline.py \"context engineering\"",
+    "expectations": [
+      "定义了 Scope 边界（IN/OUT 标准）",
+      "从演化逻辑推导出 5-12 个技术域",
+      "至少 3 个推测域，含推测逻辑和信号特征",
+      "每个域有 Wardley 成熟度标注和状态（Established/Emerging/Speculative）",
+      "D3.js 交互时间线，泳道布局",
+      "Phase 6 演化全景，6 维度分析",
+      "Phase 6-B 后记，含回顾、张力、行动洞察"
+    ]
   }
 ]
