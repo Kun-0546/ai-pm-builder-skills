@@ -79,7 +79,7 @@ Every project is tagged L1-L5. L2 (Agent Runtime) and L3 (Dev Frameworks) are th
 - "Analyze langchain-ai/langgraph" → Mode 4
 - "Map the evolution of context engineering" → Mode 5
 
-**Self-check result:** {Insert test results here, format: 41 tests, X passed / Y skipped / 0 failed}
+**Self-check result:** {Insert test results here, format: 48 tests, X passed / Y skipped / 0 failed}
 
 ---
 

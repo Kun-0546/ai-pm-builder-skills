@@ -140,7 +140,7 @@ github-trend-observer/
 │   ├── fetch_star_history.py    # Star growth timeline
 │   ├── generate_report.py       # Report generation (--lang en/cn)
 │   ├── check_rate_limit.py      # API rate limit check
-│   └── test_oss.py              # Automated tests (6 tiers, 33 tests)
+│   └── test_oss.py              # Automated tests (6 tiers, 48 tests)
 ├── en/                          # English: skill.md, templates, references
 ├── cn/                          # 中文: skill.md, 模板, 参考文档
 ├── config/                      # seed_list.json, domain_keywords.json

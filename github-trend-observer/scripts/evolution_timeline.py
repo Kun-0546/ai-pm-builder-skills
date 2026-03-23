@@ -179,7 +179,6 @@ def main():
         sys.exit(1)
 
     # Run search
-    all_keywords = [args.topic] + args.also if args.also else None
     results = search_topic(
         args.topic,
         keywords=args.also if args.also else None,

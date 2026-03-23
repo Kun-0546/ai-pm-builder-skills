@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Context Engineering: 开源演化时间线</title>
+<title>Context Engineering: Open-Source Evolution Timeline</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
   :root {
@@ -307,180 +307,180 @@
 <div class="container">
   <div class="header">
     <div class="mode-badge">MODE 5</div>
-    <h1>Context Engineering: 开源演化时间线</h1>
-    <div class="subtitle">92 个项目 &middot; 9 条演化路径 &middot; 2019&ndash;2026</div>
-    <p class="lead">从手写 Prompt 到工程化管理上下文，<strong>Context Engineering 正从碎片化工具走向统一学科</strong>。2026 Q1 最大变量：CLI 运行时挑战 MCP 成为上下文主要接口。</p>
+    <h1>Context Engineering: Open-Source Evolution Timeline</h1>
+    <div class="subtitle">92 projects &middot; 9 evolution lanes &middot; 2019&ndash;2026</div>
+    <p class="lead">From hand-written prompts to engineered context management, <strong>Context Engineering is evolving from fragmented tools into a unified discipline</strong>. The biggest variable in 2026 Q1: CLI runtimes challenging MCP as the primary context interface.</p>
   </div>
 
   <div class="card timeline-card">
     <svg id="timeline-svg"></svg>
     <div class="timeline-hint">
-      <span>圆圈大小 = Stars 规模</span>
-      <span>红边 = 2026 新项目</span>
-      <span>点击圆圈 → GitHub</span>
+      <span>Circle size = Stars count</span>
+      <span>Red border = 2026 new project</span>
+      <span>Click circle &rarr; GitHub</span>
     </div>
   </div>
 
   <div class="card">
-    <h2>演化格局速览</h2>
+    <h2>Evolution Landscape Overview</h2>
     <div id="landscape-tiers"></div>
   </div>
 
   <div class="card">
-    <h2>演化全景 — 未来学视角</h2>
+    <h2>Evolution Panorama &mdash; Futurology Perspective</h2>
     <div id="futurology-analysis"></div>
   </div>
 
   <div class="card">
     <details class="method-section">
-      <summary>分类方法论</summary>
-      <p style="font-size:13px;color:#6b7280;margin:8px 0 12px;">分类体系基于上下文生命周期 + 技术演化路径双向推导，从项目聚类和功能演化方向归纳。</p>
+      <summary>Classification Methodology</summary>
+      <p style="font-size:13px;color:#6b7280;margin:8px 0 12px;">The classification system is derived from a dual analysis of the context lifecycle and technology evolution paths, inductively generalized from project clustering and functional evolution trajectories.</p>
       <div class="class-cards" id="class-cards"></div>
     </details>
   </div>
 
   <div class="card">
-    <h2>项目索引（按 Stars 降序）</h2>
+    <h2>Project Index (sorted by Stars, descending)</h2>
     <table class="index-table">
-      <thead><tr><th>泳道</th><th>项目</th><th>Stars</th><th>创建</th><th>描述</th></tr></thead>
+      <thead><tr><th>Lane</th><th>Project</th><th>Stars</th><th>Created</th><th>Description</th></tr></thead>
       <tbody id="index-tbody"></tbody>
     </table>
   </div>
 
   <div class="card epilogue">
-    <h2>写给读者</h2>
+    <h2>Afterword</h2>
     <div class="epilogue-dims" id="epilogue-dims"></div>
   </div>
 
-  <div class="footer">GitHub Trend Observer &middot; Mode 5 &middot; 生成于 2026-03-14</div>
+  <div class="footer">GitHub Trend Observer &middot; Mode 5 &middot; Generated 2026-03-14</div>
 </div>
 <div class="tooltip" id="tooltip"></div>
 
 <script>
 (function() {
   const projects = [
-    // === Prompt Engineering 提示工程 (12) ===
-    {"name":"LMQL","org":"eth-sri","stars":4200,"created":"2022-11-01","paradigm":"prompt-eng","desc":"约束引导的高效 LLM 编程语言","status":"stable"},
-    {"name":"guidance","org":"microsoft","stars":21300,"created":"2022-11-01","paradigm":"prompt-eng","desc":"用约束语法控制大语言模型输出","status":"stable"},
-    {"name":"Promptify","org":"promptslab","stars":4600,"created":"2022-12-01","paradigm":"prompt-eng","desc":"提示工程与版本管理库","status":"stable"},
-    {"name":"DSPy","org":"stanfordnlp","stars":32800,"created":"2023-01-01","paradigm":"prompt-eng","desc":"可编程提示优化框架，用代码替代手写 Prompt","status":"active"},
-    {"name":"outlines","org":"dottxt-ai","stars":13600,"created":"2023-03-01","paradigm":"prompt-eng","desc":"结构化输出生成框架","status":"active"},
-    {"name":"promptfoo","org":"promptfoo","stars":15900,"created":"2023-04-01","paradigm":"prompt-eng","desc":"Prompt/Agent/RAG 测试与评估框架","status":"active"},
-    {"name":"langfuse","org":"langfuse","stars":23100,"created":"2023-05-01","paradigm":"prompt-eng","desc":"开源 LLM 工程平台：可观测性+提示管理","status":"active"},
-    {"name":"instructor","org":"567-labs","stars":12500,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Pydantic 驱动的 LLM 结构化输出库","status":"active"},
-    {"name":"promptflow","org":"microsoft","stars":11100,"created":"2023-06-01","paradigm":"prompt-eng","desc":"微软 Prompt 编排与部署平台","status":"active"},
-    {"name":"baml","org":"BoundaryML","stars":7800,"created":"2023-10-01","paradigm":"prompt-eng","desc":"将软件工程思维注入提示工程的框架","status":"active"},
-    {"name":"ell","org":"MadcowD","stars":5900,"created":"2024-07-01","paradigm":"prompt-eng","desc":"语言模型编程库：Prompt 即函数","status":"active"},
-    {"name":"poml","org":"microsoft","stars":4900,"created":"2024-11-01","paradigm":"prompt-eng","desc":"提示编排标记语言 (POML)","status":"active"},
-    // === RAG & Retrieval 检索上下文 (10) ===
-    {"name":"haystack","org":"deepset-ai","stars":24500,"created":"2019-11-01","paradigm":"rag","desc":"开源 AI 编排框架：构建上下文驱动的 LLM 应用","status":"active"},
-    {"name":"llama_index","org":"run-llama","stars":47700,"created":"2022-11-01","paradigm":"rag","desc":"领先的数据索引与文档 Agent 平台","status":"active"},
-    {"name":"ragflow","org":"infiniflow","stars":75000,"created":"2023-12-01","paradigm":"rag","desc":"开源 RAG 引擎，融合 RAG+Agent 提供上下文层","status":"active"},
-    {"name":"graphrag","org":"microsoft","stars":31500,"created":"2024-03-01","paradigm":"rag","desc":"微软模块化知识图谱 RAG 系统","status":"active"},
-    {"name":"HippoRAG","org":"OSU-NLP-Group","stars":3300,"created":"2024-05-01","paradigm":"rag","desc":"受海马体启发的 RAG 框架","status":"active"},
-    {"name":"nano-graphrag","org":"gusye1234","stars":3700,"created":"2024-07-01","paradigm":"rag","desc":"简洁易用的 GraphRAG 实现","status":"active"},
-    {"name":"LightRAG","org":"HKUDS","stars":29400,"created":"2024-10-01","paradigm":"rag","desc":"简洁快速的检索增强生成框架","status":"active"},
-    {"name":"fast-graphrag","org":"circlemind-ai","stars":3700,"created":"2024-10-01","paradigm":"rag","desc":"自适应 GraphRAG 实现","status":"active"},
-    {"name":"chonkie","org":"chonkie-inc","stars":3800,"created":"2025-03-01","paradigm":"rag","desc":"轻量级 RAG 分块摄入库","status":"active"},
-    {"name":"RAG-Anything","org":"HKUDS","stars":14300,"created":"2025-06-01","paradigm":"rag","desc":"全能多模态 RAG 框架","status":"active"},
-    // === Memory 记忆层 (15) ===
-    {"name":"Zep","org":"getzep","stars":4200,"created":"2023-04-01","paradigm":"memory","desc":"Agent 长期记忆服务：对话摘要与知识提取","status":"active"},
-    {"name":"mem0","org":"mem0ai","stars":49800,"created":"2023-06-01","paradigm":"memory","desc":"AI Agent 的通用记忆层","status":"active"},
-    {"name":"generative_agents","org":"joonspk-research","stars":20900,"created":"2023-07-01","paradigm":"memory","desc":"Stanford 生成式智能体：交互记忆架构","status":"stable"},
-    {"name":"cognee","org":"topoteretes","stars":13500,"created":"2023-08-01","paradigm":"memory","desc":"6 行代码实现 AI Agent 知识引擎记忆","status":"active"},
-    {"name":"letta","org":"letta-ai","stars":21600,"created":"2023-10-01","paradigm":"memory","desc":"构建有状态 Agent 的平台 (原 MemGPT)","status":"active"},
-    {"name":"memvid","org":"memvid","stars":13400,"created":"2025-05-01","paradigm":"memory","desc":"无服务器单文件记忆层，替代复杂 RAG 管道","status":"active"},
-    {"name":"cipher","org":"campfirein","stars":3600,"created":"2025-06-01","paradigm":"memory","desc":"编程 Agent 专属开源记忆层 (MCP 兼容)","status":"active"},
-    {"name":"Acontext","org":"memodb-io","stars":3200,"created":"2025-07-01","paradigm":"memory","desc":"将 Agent 技能作为记忆层","status":"active"},
-    {"name":"memU","org":"NevaMind-AI","stars":12900,"created":"2025-07-01","paradigm":"memory","desc":"24/7 主动 Agent 的持久记忆系统","status":"active"},
-    {"name":"Memori","org":"MemoriLabs","stars":12400,"created":"2025-07-01","paradigm":"memory","desc":"SQL 原生 Agent 记忆层","status":"active"},
-    {"name":"MemOS","org":"MemTensor","stars":6900,"created":"2025-07-01","paradigm":"memory","desc":"AI 记忆操作系统，跨任务技能复用","status":"active"},
-    {"name":"MemMachine","org":"MemMachine","stars":4900,"created":"2025-08-01","paradigm":"memory","desc":"通用 Agent 记忆层：可扩展可互操作","status":"active"},
-    {"name":"claude-mem","org":"thedotmack","stars":34900,"created":"2025-08-01","paradigm":"memory","desc":"Claude Code 自动捕获压缩注入 Agent 上下文","status":"new"},
-    {"name":"beads","org":"steveyegge","stars":19000,"created":"2025-10-01","paradigm":"memory","desc":"编程 Agent 记忆升级方案","status":"new"},
-    {"name":"SimpleMem","org":"aiming-lab","stars":3200,"created":"2026-01-01","paradigm":"memory","desc":"高效终身记忆系统 (语义无损压缩)","status":"new"},
-    // === MCP & Protocol MCP 协议层 (11) ===
-    {"name":"modelcontextprotocol","org":"modelcontextprotocol","stars":7500,"created":"2024-09-01","paradigm":"mcp","desc":"Model Context Protocol 规范与文档","status":"active"},
-    {"name":"python-sdk","org":"modelcontextprotocol","stars":22100,"created":"2024-09-01","paradigm":"mcp","desc":"MCP 官方 Python SDK","status":"active"},
-    {"name":"typescript-sdk","org":"modelcontextprotocol","stars":11800,"created":"2024-09-01","paradigm":"mcp","desc":"MCP 官方 TypeScript SDK","status":"active"},
-    {"name":"servers","org":"modelcontextprotocol","stars":81000,"created":"2024-11-01","paradigm":"mcp","desc":"MCP 官方服务器集合","status":"active"},
-    {"name":"mcp-go","org":"mark3labs","stars":8400,"created":"2024-11-01","paradigm":"mcp","desc":"MCP Go 语言实现","status":"active"},
-    {"name":"mcp-agent","org":"lastmile-ai","stars":8100,"created":"2024-12-01","paradigm":"mcp","desc":"用 MCP 和工作流模式构建高效 Agent","status":"active"},
-    {"name":"context7","org":"upstash","stars":49000,"created":"2025-03-01","paradigm":"mcp","desc":"为 AI 编辑器提供最新代码文档的 MCP 平台","status":"active"},
-    {"name":"fastapi_mcp","org":"tadata-org","stars":11700,"created":"2025-03-01","paradigm":"mcp","desc":"将 FastAPI 端点暴露为 MCP 工具","status":"active"},
-    {"name":"go-sdk","org":"modelcontextprotocol","stars":4100,"created":"2025-04-01","paradigm":"mcp","desc":"MCP 官方 Go SDK (与 Google 合作)","status":"active"},
-    {"name":"mcp-context-forge","org":"IBM","stars":3400,"created":"2025-05-01","paradigm":"mcp","desc":"IBM AI 网关：MCP/A2A/REST 统一端点","status":"active"},
-    {"name":"docs-mcp-server","org":"arabold","stars":1100,"created":"2025-03-01","paradigm":"mcp","desc":"文档 MCP Server (Context7 开源替代品)","status":"active"},
-    // === Compression 上下文压缩 (9) ===
-    {"name":"GPTCache","org":"zilliztech","stars":8000,"created":"2023-03-01","paradigm":"compress","desc":"LLM 语义缓存","status":"stable"},
-    {"name":"LLMLingua","org":"microsoft","stars":5900,"created":"2023-07-01","paradigm":"compress","desc":"Prompt/KV-Cache 压缩，最高 20x 压缩率","status":"active"},
-    {"name":"GEAR","org":"opengear-project","stars":180,"created":"2023-11-01","paradigm":"compress","desc":"近无损 KV Cache 压缩方案","status":"stable"},
-    {"name":"KVCache-Factory","org":"Zefan-Cai","stars":1300,"created":"2024-06-01","paradigm":"compress","desc":"统一 KV Cache 压缩方法库","status":"active"},
-    {"name":"kvpress","org":"NVIDIA","stars":960,"created":"2024-11-01","paradigm":"compress","desc":"简化 KV Cache 压缩工具库","status":"active"},
-    {"name":"ShadowKV","org":"ByteDance-Seed","stars":284,"created":"2024-10-01","paradigm":"compress","desc":"KV Cache 影子投射，3-4x 内存缩减","status":"active"},
-    {"name":"R-KV","org":"Zefan-Cai","stars":1200,"created":"2025-05-01","paradigm":"compress","desc":"推理模型冗余感知 KV Cache 压缩 (NeurIPS'25)","status":"active"},
-    {"name":"KVzip","org":"snu-mllab","stars":209,"created":"2025-05-01","paradigm":"compress","desc":"查询无关 KV Cache 驱逐 (NeurIPS'25 Oral)","status":"active"},
-    {"name":"claw-compactor","org":"aeromomo","stars":1600,"created":"2026-02-01","paradigm":"compress","desc":"6 层确定性上下文压缩，最高省 97% token","status":"new"},
-    // === Long Context 长上下文 (9) ===
-    {"name":"RWKV-LM","org":"BlinkDL","stars":14400,"created":"2021-08-01","paradigm":"longctx","desc":"RNN+Transformer 融合，线性时间无限上下文","status":"active"},
-    {"name":"YaRN","org":"jquesnelle","stars":1700,"created":"2023-06-01","paradigm":"longctx","desc":"高效上下文窗口扩展方法","status":"stable"},
-    {"name":"LongLLaMA","org":"CStanKonrad","stars":1500,"created":"2023-07-01","paradigm":"longctx","desc":"基于 FoT 的长上下文大语言模型","status":"stable"},
-    {"name":"streaming-llm","org":"mit-han-lab","stars":7200,"created":"2023-09-01","paradigm":"longctx","desc":"注意力 Sink 流式推理 (ICLR'24)","status":"stable"},
-    {"name":"ring-flash-attention","org":"zhuzilin","stars":1000,"created":"2024-02-01","paradigm":"longctx","desc":"分布式长序列 Ring+Flash Attention","status":"active"},
-    {"name":"RULER","org":"NVIDIA","stars":1500,"created":"2024-04-01","paradigm":"longctx","desc":"长上下文模型真实上下文大小评估基准","status":"active"},
-    {"name":"MInference","org":"microsoft","stars":1200,"created":"2024-05-01","paradigm":"longctx","desc":"动态稀疏注意力加速长上下文预填充","status":"active"},
-    {"name":"duo-attention","org":"mit-han-lab","stars":530,"created":"2024-10-01","paradigm":"longctx","desc":"检索头+流式头双注意力 (ICLR'25)","status":"active"},
-    {"name":"MoBA","org":"MoonshotAI","stars":2100,"created":"2025-02-01","paradigm":"longctx","desc":"月之暗面混合块注意力机制","status":"active"},
-    // === Code Context 代码上下文 (5) ===
-    {"name":"code2prompt","org":"mufeedvh","stars":7200,"created":"2024-03-01","paradigm":"codectx","desc":"CLI 将代码库转为单个 LLM 提示","status":"active"},
-    {"name":"prompt-tower","org":"backnotprop","stars":366,"created":"2024-05-01","paradigm":"codectx","desc":"长上下文 Agent 的上下文管理器","status":"active"},
-    {"name":"repomix","org":"yamadashy","stars":22400,"created":"2024-07-01","paradigm":"codectx","desc":"将代码仓库打包为 AI 友好的单一文件","status":"active"},
-    {"name":"kit","org":"cased","stars":1300,"created":"2025-04-01","paradigm":"codectx","desc":"AI 开发工具的上下文工程工具包","status":"active"},
-    {"name":"MineContext","org":"volcengine","stars":5100,"created":"2025-06-01","paradigm":"codectx","desc":"字节主动式上下文感知 AI 伙伴","status":"active"},
-    // === Context Engineering 上下文工程 (14) ===
-    {"name":"parlant","org":"emcie-co","stars":17800,"created":"2024-02-01","paradigm":"ce","desc":"AI Agent 上下文工程控制层框架","status":"active"},
-    {"name":"Context-Engineering","org":"davidkimai","stars":8600,"created":"2025-06-01","paradigm":"ce","desc":"上下文工程第一性原理手册 (受 Karpathy 启发)","status":"active"},
-    {"name":"fenic","org":"typedef-ai","stars":444,"created":"2025-06-01","paradigm":"ce","desc":"声明式上下文工程框架","status":"active"},
-    {"name":"context-engineering-intro","org":"coleam00","stars":12700,"created":"2025-07-01","paradigm":"ce","desc":"Claude Code 上下文工程入门教程","status":"active"},
-    {"name":"Awesome-Context-Engineering","org":"Meirtz","stars":3000,"created":"2025-07-01","paradigm":"ce","desc":"上下文工程综述","status":"active"},
-    {"name":"context-space","org":"context-space","stars":805,"created":"2025-07-01","paradigm":"ce","desc":"终极上下文工程基建：MCP + 集成","status":"active"},
-    {"name":"OpenCE","org":"sci-m-wang","stars":335,"created":"2025-10-01","paradigm":"ce","desc":"开放上下文工程工具包","status":"active"},
-    {"name":"Context-Engineering-2.0","org":"GAIR-NLP","stars":278,"created":"2025-10-01","paradigm":"ce","desc":"上下文工程 2.0 (上海交大研究)","status":"active"},
-    {"name":"ace","org":"ace-agent","stars":787,"created":"2025-11-01","paradigm":"ce","desc":"Agentic Context Engineering 自进化","status":"active"},
-    {"name":"context-engineering-kit","org":"NeoLabHQ","stars":638,"created":"2025-11-01","paradigm":"ce","desc":"手工 Claude Code Skills 提升上下文质量","status":"active"},
-    {"name":"get-shit-done","org":"gsd-build","stars":30000,"created":"2025-12-01","paradigm":"ce","desc":"轻量级元提示词+上下文工程驱动开发系统","status":"new"},
-    {"name":"Agent-Skills-for-CE","org":"muratcankoylan","stars":13900,"created":"2025-12-01","paradigm":"ce","desc":"Agent 技能集合：上下文工程+多 Agent","status":"new"},
-    {"name":"OpenViking","org":"volcengine","stars":10500,"created":"2026-01-01","paradigm":"ce","desc":"字节 Agent 上下文数据库","status":"new"},
-    {"name":"gsd-2","org":"gsd-build","stars":1100,"created":"2026-03-01","paradigm":"ce","desc":"GSD 第二代：Agent 长时自主不丢上下文","status":"new"},
-    // === CLI / Agent Runtime CLI 运行时 (7) ===
-    {"name":"aider","org":"Aider-AI","stars":42000,"created":"2023-06-01","paradigm":"cli","desc":"CLI 结对编程先驱：终端内 AI 协作编辑代码","status":"active"},
-    {"name":"OpenClaw","org":"openclaw","stars":302000,"created":"2024-09-01","paradigm":"cli","desc":"史上增长最快开源项目，CLI-first「Bash > MCP」哲学","status":"active"},
-    {"name":"OpenCode","org":"opencode-ai","stars":122000,"created":"2024-06-01","paradigm":"cli","desc":"终端原生编程 Agent，隐私优先 + LSP 集成","status":"active"},
-    {"name":"Claude Code","org":"anthropics","stars":78000,"created":"2025-02-01","paradigm":"cli","desc":"Anthropic 终端 Agent：CLAUDE.md + Skills 文件级上下文工程","status":"active"},
-    {"name":"Codex CLI","org":"openai","stars":65000,"created":"2025-05-01","paradigm":"cli","desc":"OpenAI 轻量终端 Agent，Rust 构建，支持 MCP + CLI","status":"active"},
-    {"name":"Gemini CLI","org":"google-gemini","stars":98000,"created":"2025-06-01","paradigm":"cli","desc":"Google 终端 Agent，MCP + CLI 双模式","status":"active"},
-    {"name":"Copilot CLI","org":"github","stars":9300,"created":"2025-09-01","paradigm":"cli","desc":"GitHub 终端 Agent：多模型 + 技能系统 + Autopilot 模式","status":"active"}
+    // === Prompt Engineering (12) ===
+    {"name":"LMQL","org":"eth-sri","stars":4200,"created":"2022-11-01","paradigm":"prompt-eng","desc":"Constraint-guided programming language for efficient LLM interaction","status":"stable"},
+    {"name":"guidance","org":"microsoft","stars":21300,"created":"2022-11-01","paradigm":"prompt-eng","desc":"Constrained grammar-based control of LLM outputs","status":"stable"},
+    {"name":"Promptify","org":"promptslab","stars":4600,"created":"2022-12-01","paradigm":"prompt-eng","desc":"Prompt engineering and version management library","status":"stable"},
+    {"name":"DSPy","org":"stanfordnlp","stars":32800,"created":"2023-01-01","paradigm":"prompt-eng","desc":"Programmable prompt optimization framework, replacing hand-written prompts with code","status":"active"},
+    {"name":"outlines","org":"dottxt-ai","stars":13600,"created":"2023-03-01","paradigm":"prompt-eng","desc":"Structured output generation framework","status":"active"},
+    {"name":"promptfoo","org":"promptfoo","stars":15900,"created":"2023-04-01","paradigm":"prompt-eng","desc":"Prompt/Agent/RAG testing and evaluation framework","status":"active"},
+    {"name":"langfuse","org":"langfuse","stars":23100,"created":"2023-05-01","paradigm":"prompt-eng","desc":"Open-source LLM engineering platform: observability + prompt management","status":"active"},
+    {"name":"instructor","org":"567-labs","stars":12500,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Pydantic-powered structured output library for LLMs","status":"active"},
+    {"name":"promptflow","org":"microsoft","stars":11100,"created":"2023-06-01","paradigm":"prompt-eng","desc":"Microsoft prompt orchestration and deployment platform","status":"active"},
+    {"name":"baml","org":"BoundaryML","stars":7800,"created":"2023-10-01","paradigm":"prompt-eng","desc":"Software engineering mindset applied to prompt engineering","status":"active"},
+    {"name":"ell","org":"MadcowD","stars":5900,"created":"2024-07-01","paradigm":"prompt-eng","desc":"Language model programming library: Prompts as functions","status":"active"},
+    {"name":"poml","org":"microsoft","stars":4900,"created":"2024-11-01","paradigm":"prompt-eng","desc":"Prompt Orchestration Markup Language (POML)","status":"active"},
+    // === RAG & Retrieval (10) ===
+    {"name":"haystack","org":"deepset-ai","stars":24500,"created":"2019-11-01","paradigm":"rag","desc":"Open-source AI orchestration framework for context-driven LLM apps","status":"active"},
+    {"name":"llama_index","org":"run-llama","stars":47700,"created":"2022-11-01","paradigm":"rag","desc":"Leading data indexing and document agent platform","status":"active"},
+    {"name":"ragflow","org":"infiniflow","stars":75000,"created":"2023-12-01","paradigm":"rag","desc":"Open-source RAG engine with RAG+Agent context layer","status":"active"},
+    {"name":"graphrag","org":"microsoft","stars":31500,"created":"2024-03-01","paradigm":"rag","desc":"Microsoft modular knowledge-graph RAG system","status":"active"},
+    {"name":"HippoRAG","org":"OSU-NLP-Group","stars":3300,"created":"2024-05-01","paradigm":"rag","desc":"Hippocampus-inspired RAG framework","status":"active"},
+    {"name":"nano-graphrag","org":"gusye1234","stars":3700,"created":"2024-07-01","paradigm":"rag","desc":"Concise and easy-to-use GraphRAG implementation","status":"active"},
+    {"name":"LightRAG","org":"HKUDS","stars":29400,"created":"2024-10-01","paradigm":"rag","desc":"Simple, fast retrieval-augmented generation framework","status":"active"},
+    {"name":"fast-graphrag","org":"circlemind-ai","stars":3700,"created":"2024-10-01","paradigm":"rag","desc":"Self-adaptive GraphRAG implementation","status":"active"},
+    {"name":"chonkie","org":"chonkie-inc","stars":3800,"created":"2025-03-01","paradigm":"rag","desc":"Lightweight RAG chunking and ingestion library","status":"active"},
+    {"name":"RAG-Anything","org":"HKUDS","stars":14300,"created":"2025-06-01","paradigm":"rag","desc":"Universal multimodal RAG framework","status":"active"},
+    // === Memory (15) ===
+    {"name":"Zep","org":"getzep","stars":4200,"created":"2023-04-01","paradigm":"memory","desc":"Agent long-term memory service: conversation summarization and knowledge extraction","status":"active"},
+    {"name":"mem0","org":"mem0ai","stars":49800,"created":"2023-06-01","paradigm":"memory","desc":"Universal memory layer for AI agents","status":"active"},
+    {"name":"generative_agents","org":"joonspk-research","stars":20900,"created":"2023-07-01","paradigm":"memory","desc":"Stanford generative agents: interactive memory architecture","status":"stable"},
+    {"name":"cognee","org":"topoteretes","stars":13500,"created":"2023-08-01","paradigm":"memory","desc":"AI agent knowledge engine memory in 6 lines of code","status":"active"},
+    {"name":"letta","org":"letta-ai","stars":21600,"created":"2023-10-01","paradigm":"memory","desc":"Platform for building stateful agents (formerly MemGPT)","status":"active"},
+    {"name":"memvid","org":"memvid","stars":13400,"created":"2025-05-01","paradigm":"memory","desc":"Serverless single-file memory layer, replacing complex RAG pipelines","status":"active"},
+    {"name":"cipher","org":"campfirein","stars":3600,"created":"2025-06-01","paradigm":"memory","desc":"Open-source memory layer for coding agents (MCP compatible)","status":"active"},
+    {"name":"Acontext","org":"memodb-io","stars":3200,"created":"2025-07-01","paradigm":"memory","desc":"Agent skills as memory layer","status":"active"},
+    {"name":"memU","org":"NevaMind-AI","stars":12900,"created":"2025-07-01","paradigm":"memory","desc":"Persistent memory system for 24/7 autonomous agents","status":"active"},
+    {"name":"Memori","org":"MemoriLabs","stars":12400,"created":"2025-07-01","paradigm":"memory","desc":"SQL-native agent memory layer","status":"active"},
+    {"name":"MemOS","org":"MemTensor","stars":6900,"created":"2025-07-01","paradigm":"memory","desc":"AI memory operating system for cross-task skill reuse","status":"active"},
+    {"name":"MemMachine","org":"MemMachine","stars":4900,"created":"2025-08-01","paradigm":"memory","desc":"Universal agent memory layer: extensible and interoperable","status":"active"},
+    {"name":"claude-mem","org":"thedotmack","stars":34900,"created":"2025-08-01","paradigm":"memory","desc":"Auto-capture, compress, and inject agent context for Claude Code","status":"new"},
+    {"name":"beads","org":"steveyegge","stars":19000,"created":"2025-10-01","paradigm":"memory","desc":"Memory upgrade solution for coding agents","status":"new"},
+    {"name":"SimpleMem","org":"aiming-lab","stars":3200,"created":"2026-01-01","paradigm":"memory","desc":"Efficient lifelong memory system (lossless semantic compression)","status":"new"},
+    // === MCP & Protocol (11) ===
+    {"name":"modelcontextprotocol","org":"modelcontextprotocol","stars":7500,"created":"2024-09-01","paradigm":"mcp","desc":"Model Context Protocol specification and documentation","status":"active"},
+    {"name":"python-sdk","org":"modelcontextprotocol","stars":22100,"created":"2024-09-01","paradigm":"mcp","desc":"MCP official Python SDK","status":"active"},
+    {"name":"typescript-sdk","org":"modelcontextprotocol","stars":11800,"created":"2024-09-01","paradigm":"mcp","desc":"MCP official TypeScript SDK","status":"active"},
+    {"name":"servers","org":"modelcontextprotocol","stars":81000,"created":"2024-11-01","paradigm":"mcp","desc":"MCP official server collection","status":"active"},
+    {"name":"mcp-go","org":"mark3labs","stars":8400,"created":"2024-11-01","paradigm":"mcp","desc":"MCP Go language implementation","status":"active"},
+    {"name":"mcp-agent","org":"lastmile-ai","stars":8100,"created":"2024-12-01","paradigm":"mcp","desc":"Build efficient agents with MCP and workflow patterns","status":"active"},
+    {"name":"context7","org":"upstash","stars":49000,"created":"2025-03-01","paradigm":"mcp","desc":"MCP platform delivering up-to-date code docs to AI editors","status":"active"},
+    {"name":"fastapi_mcp","org":"tadata-org","stars":11700,"created":"2025-03-01","paradigm":"mcp","desc":"Expose FastAPI endpoints as MCP tools","status":"active"},
+    {"name":"go-sdk","org":"modelcontextprotocol","stars":4100,"created":"2025-04-01","paradigm":"mcp","desc":"MCP official Go SDK (co-developed with Google)","status":"active"},
+    {"name":"mcp-context-forge","org":"IBM","stars":3400,"created":"2025-05-01","paradigm":"mcp","desc":"IBM AI gateway: unified MCP/A2A/REST endpoint","status":"active"},
+    {"name":"docs-mcp-server","org":"arabold","stars":1100,"created":"2025-03-01","paradigm":"mcp","desc":"Documentation MCP server (open-source Context7 alternative)","status":"active"},
+    // === Compression (9) ===
+    {"name":"GPTCache","org":"zilliztech","stars":8000,"created":"2023-03-01","paradigm":"compress","desc":"LLM semantic cache","status":"stable"},
+    {"name":"LLMLingua","org":"microsoft","stars":5900,"created":"2023-07-01","paradigm":"compress","desc":"Prompt/KV-Cache compression, up to 20x compression ratio","status":"active"},
+    {"name":"GEAR","org":"opengear-project","stars":180,"created":"2023-11-01","paradigm":"compress","desc":"Near-lossless KV Cache compression","status":"stable"},
+    {"name":"KVCache-Factory","org":"Zefan-Cai","stars":1300,"created":"2024-06-01","paradigm":"compress","desc":"Unified KV Cache compression methods library","status":"active"},
+    {"name":"kvpress","org":"NVIDIA","stars":960,"created":"2024-11-01","paradigm":"compress","desc":"Simplified KV Cache compression toolkit","status":"active"},
+    {"name":"ShadowKV","org":"ByteDance-Seed","stars":284,"created":"2024-10-01","paradigm":"compress","desc":"KV Cache shadow projection, 3-4x memory reduction","status":"active"},
+    {"name":"R-KV","org":"Zefan-Cai","stars":1200,"created":"2025-05-01","paradigm":"compress","desc":"Redundancy-aware KV Cache compression for reasoning models (NeurIPS'25)","status":"active"},
+    {"name":"KVzip","org":"snu-mllab","stars":209,"created":"2025-05-01","paradigm":"compress","desc":"Query-agnostic KV Cache eviction (NeurIPS'25 Oral)","status":"active"},
+    {"name":"claw-compactor","org":"aeromomo","stars":1600,"created":"2026-02-01","paradigm":"compress","desc":"6-layer deterministic context compression, up to 97% token savings","status":"new"},
+    // === Long Context (9) ===
+    {"name":"RWKV-LM","org":"BlinkDL","stars":14400,"created":"2021-08-01","paradigm":"longctx","desc":"RNN+Transformer hybrid, linear-time infinite context","status":"active"},
+    {"name":"YaRN","org":"jquesnelle","stars":1700,"created":"2023-06-01","paradigm":"longctx","desc":"Efficient context window extension method","status":"stable"},
+    {"name":"LongLLaMA","org":"CStanKonrad","stars":1500,"created":"2023-07-01","paradigm":"longctx","desc":"Long-context LLM based on Focused Transformer","status":"stable"},
+    {"name":"streaming-llm","org":"mit-han-lab","stars":7200,"created":"2023-09-01","paradigm":"longctx","desc":"Attention Sink streaming inference (ICLR'24)","status":"stable"},
+    {"name":"ring-flash-attention","org":"zhuzilin","stars":1000,"created":"2024-02-01","paradigm":"longctx","desc":"Distributed long-sequence Ring+Flash Attention","status":"active"},
+    {"name":"RULER","org":"NVIDIA","stars":1500,"created":"2024-04-01","paradigm":"longctx","desc":"Benchmark for evaluating real context size of long-context models","status":"active"},
+    {"name":"MInference","org":"microsoft","stars":1200,"created":"2024-05-01","paradigm":"longctx","desc":"Dynamic sparse attention to accelerate long-context prefill","status":"active"},
+    {"name":"duo-attention","org":"mit-han-lab","stars":530,"created":"2024-10-01","paradigm":"longctx","desc":"Retrieval heads + streaming heads dual attention (ICLR'25)","status":"active"},
+    {"name":"MoBA","org":"MoonshotAI","stars":2100,"created":"2025-02-01","paradigm":"longctx","desc":"Moonshot AI mixture-of-block attention mechanism","status":"active"},
+    // === Code Context (5) ===
+    {"name":"code2prompt","org":"mufeedvh","stars":7200,"created":"2024-03-01","paradigm":"codectx","desc":"CLI to convert codebases into a single LLM prompt","status":"active"},
+    {"name":"prompt-tower","org":"backnotprop","stars":366,"created":"2024-05-01","paradigm":"codectx","desc":"Context manager for long-context agents","status":"active"},
+    {"name":"repomix","org":"yamadashy","stars":22400,"created":"2024-07-01","paradigm":"codectx","desc":"Pack code repositories into AI-friendly single files","status":"active"},
+    {"name":"kit","org":"cased","stars":1300,"created":"2025-04-01","paradigm":"codectx","desc":"Context engineering toolkit for AI development tools","status":"active"},
+    {"name":"MineContext","org":"volcengine","stars":5100,"created":"2025-06-01","paradigm":"codectx","desc":"ByteDance proactive context-aware AI companion","status":"active"},
+    // === Context Engineering (14) ===
+    {"name":"parlant","org":"emcie-co","stars":17800,"created":"2024-02-01","paradigm":"ce","desc":"Context engineering control-layer framework for AI agents","status":"active"},
+    {"name":"Context-Engineering","org":"davidkimai","stars":8600,"created":"2025-06-01","paradigm":"ce","desc":"First-principles handbook for context engineering (inspired by Karpathy)","status":"active"},
+    {"name":"fenic","org":"typedef-ai","stars":444,"created":"2025-06-01","paradigm":"ce","desc":"Declarative context engineering framework","status":"active"},
+    {"name":"context-engineering-intro","org":"coleam00","stars":12700,"created":"2025-07-01","paradigm":"ce","desc":"Claude Code context engineering introductory tutorial","status":"active"},
+    {"name":"Awesome-Context-Engineering","org":"Meirtz","stars":3000,"created":"2025-07-01","paradigm":"ce","desc":"Context engineering curated list","status":"active"},
+    {"name":"context-space","org":"context-space","stars":805,"created":"2025-07-01","paradigm":"ce","desc":"Ultimate context engineering infra: MCP + integrations","status":"active"},
+    {"name":"OpenCE","org":"sci-m-wang","stars":335,"created":"2025-10-01","paradigm":"ce","desc":"Open context engineering toolkit","status":"active"},
+    {"name":"Context-Engineering-2.0","org":"GAIR-NLP","stars":278,"created":"2025-10-01","paradigm":"ce","desc":"Context Engineering 2.0 (Shanghai Jiao Tong University research)","status":"active"},
+    {"name":"ace","org":"ace-agent","stars":787,"created":"2025-11-01","paradigm":"ce","desc":"Agentic Context Engineering with self-evolution","status":"active"},
+    {"name":"context-engineering-kit","org":"NeoLabHQ","stars":638,"created":"2025-11-01","paradigm":"ce","desc":"Handcrafted Claude Code Skills to improve context quality","status":"active"},
+    {"name":"get-shit-done","org":"gsd-build","stars":30000,"created":"2025-12-01","paradigm":"ce","desc":"Lightweight meta-prompt + context engineering driven development system","status":"new"},
+    {"name":"Agent-Skills-for-CE","org":"muratcankoylan","stars":13900,"created":"2025-12-01","paradigm":"ce","desc":"Agent skill collection: context engineering + multi-agent","status":"new"},
+    {"name":"OpenViking","org":"volcengine","stars":10500,"created":"2026-01-01","paradigm":"ce","desc":"ByteDance agent context database","status":"new"},
+    {"name":"gsd-2","org":"gsd-build","stars":1100,"created":"2026-03-01","paradigm":"ce","desc":"GSD v2: Long-running autonomous agents without losing context","status":"new"},
+    // === CLI / Agent Runtime (7) ===
+    {"name":"aider","org":"Aider-AI","stars":42000,"created":"2023-06-01","paradigm":"cli","desc":"CLI pair-programming pioneer: AI-assisted code editing in the terminal","status":"active"},
+    {"name":"OpenClaw","org":"openclaw","stars":302000,"created":"2024-09-01","paradigm":"cli","desc":"Fastest-growing open-source project ever, CLI-first 'Bash > MCP' philosophy","status":"active"},
+    {"name":"OpenCode","org":"opencode-ai","stars":122000,"created":"2024-06-01","paradigm":"cli","desc":"Terminal-native coding agent, privacy-first + LSP integration","status":"active"},
+    {"name":"Claude Code","org":"anthropics","stars":78000,"created":"2025-02-01","paradigm":"cli","desc":"Anthropic terminal agent: CLAUDE.md + Skills file-level context engineering","status":"active"},
+    {"name":"Codex CLI","org":"openai","stars":65000,"created":"2025-05-01","paradigm":"cli","desc":"OpenAI lightweight terminal agent, Rust-built, supports MCP + CLI","status":"active"},
+    {"name":"Gemini CLI","org":"google-gemini","stars":98000,"created":"2025-06-01","paradigm":"cli","desc":"Google terminal agent, MCP + CLI dual mode","status":"active"},
+    {"name":"Copilot CLI","org":"github","stars":9300,"created":"2025-09-01","paradigm":"cli","desc":"GitHub terminal agent: multi-model + skill system + Autopilot mode","status":"active"}
   ];
 
   const laneConfig = [
-    { id: "prompt-eng", label: "提示工程 Prompt Eng", color: "#7c3aed", paradigms: ["prompt-eng"],
-      def: "通过模板、约束、编程接口控制 LLM 输入输出", wardley: "Custom→Product" },
-    { id: "rag", label: "检索上下文 RAG", color: "#2563eb", paradigms: ["rag"],
-      def: "检索外部知识注入 LLM 上下文", wardley: "Custom→Product" },
-    { id: "memory", label: "记忆层 Memory", color: "#d97706", paradigms: ["memory"],
-      def: "为 Agent 提供跨 session 可持久化记忆", wardley: "Custom" },
-    { id: "mcp", label: "MCP 协议层", color: "#059669", paradigms: ["mcp"],
-      def: "标准化上下文服务的协议与基础设施", wardley: "Custom" },
-    { id: "compress", label: "上下文压缩 Compression", color: "#0284c7", paradigms: ["compress"],
-      def: "通过缓存、压缩、蒸馏减少上下文 token 消耗", wardley: "Custom" },
-    { id: "longctx", label: "长上下文 Long Context", color: "#b45309", paradigms: ["longctx"],
-      def: "扩展模型可处理的上下文窗口长度", wardley: "Custom" },
-    { id: "codectx", label: "代码上下文 Code Context", color: "#db2777", paradigms: ["codectx"],
-      def: "将代码库转为 AI 可消费的上下文", wardley: "Genesis" },
-    { id: "ce", label: "上下文工程 Context Eng", color: "#0891b2", paradigms: ["ce"],
-      def: "系统化管理 Agent 上下文的整合学科", wardley: "Genesis→Custom", tags: ["Emerging"] },
+    { id: "prompt-eng", label: "Prompt Engineering", color: "#7c3aed", paradigms: ["prompt-eng"],
+      def: "Control LLM input/output via templates, constraints, and programmatic interfaces", wardley: "Custom\u2192Product" },
+    { id: "rag", label: "RAG & Retrieval", color: "#2563eb", paradigms: ["rag"],
+      def: "Retrieve external knowledge and inject it into LLM context", wardley: "Custom\u2192Product" },
+    { id: "memory", label: "Memory Layer", color: "#d97706", paradigms: ["memory"],
+      def: "Provide agents with persistent, cross-session memory", wardley: "Custom" },
+    { id: "mcp", label: "MCP Protocol", color: "#059669", paradigms: ["mcp"],
+      def: "Standardized protocol and infrastructure for context services", wardley: "Custom" },
+    { id: "compress", label: "Compression", color: "#0284c7", paradigms: ["compress"],
+      def: "Reduce context token consumption via caching, compression, and distillation", wardley: "Custom" },
+    { id: "longctx", label: "Long Context", color: "#b45309", paradigms: ["longctx"],
+      def: "Extend the context window length models can process", wardley: "Custom" },
+    { id: "codectx", label: "Code Context", color: "#db2777", paradigms: ["codectx"],
+      def: "Convert codebases into AI-consumable context", wardley: "Genesis" },
+    { id: "ce", label: "Context Engineering", color: "#0891b2", paradigms: ["ce"],
+      def: "Systematic management of agent context as a unified discipline", wardley: "Genesis\u2192Custom", tags: ["Emerging"] },
     { id: "cli", label: "CLI / Agent Runtime", color: "#e11d48", paradigms: ["cli"],
-      def: "终端原生 Agent 运行时：文件级上下文 (CLAUDE.md/Skills) 替代协议级 (MCP)", wardley: "Custom→Product", tags: ["Emerging"] }
+      def: "Terminal-native agent runtimes: file-level context (CLAUDE.md/Skills) replacing protocol-level (MCP)", wardley: "Custom\u2192Product", tags: ["Emerging"] }
   ];
 
   const paradigmColors = {};
@@ -493,9 +493,9 @@
   });
 
   const paradigmLabels = {
-    "prompt-eng":"提示工程","rag":"检索上下文","memory":"记忆层",
-    "mcp":"MCP 协议","compress":"上下文压缩","longctx":"长上下文",
-    "codectx":"代码上下文","ce":"上下文工程","cli":"CLI 运行时"
+    "prompt-eng":"Prompt Eng","rag":"RAG & Retrieval","memory":"Memory",
+    "mcp":"MCP Protocol","compress":"Compression","longctx":"Long Context",
+    "codectx":"Code Context","ce":"Context Eng","cli":"CLI Runtime"
   };
 
   function getLane(paradigm) {
@@ -504,58 +504,58 @@
   }
 
   // ====== CLASSIFICATION CARDS ======
-  const statusMap = { "Established": "已确立", "Emerging": "萌芽中", "Speculative": "纯推测" };
-  const wardleyMap = { "Custom": "定制化", "Custom\u2192Product": "定制\u2192产品", "Genesis": "萌芽期", "Genesis\u2192Custom": "萌芽\u2192定制", "\u2014": "\u2014" };
+  const statusMap = { "Established": "Established", "Emerging": "Emerging", "Speculative": "Speculative" };
+  const wardleyMap = { "Custom": "Custom", "Custom\u2192Product": "Custom\u2192Product", "Genesis": "Genesis", "Genesis\u2192Custom": "Genesis\u2192Custom", "\u2014": "\u2014" };
 
   const establishedCards = [
-    { name: "提示工程 Prompt Engineering", color: "#7c3aed", wardley: "Custom\u2192Product", status: "Established",
-      def: "通过模板、约束语法、编程接口系统化控制 LLM 输入输出",
-      features: ["Prompt 模板化与版本管理","结构化输出约束","可编程优化 (DSPy 范式)"],
+    { name: "Prompt Engineering", color: "#7c3aed", wardley: "Custom\u2192Product", status: "Established",
+      def: "Systematically control LLM input/output through templates, constrained grammars, and programmatic interfaces",
+      features: ["Prompt templating and version management","Structured output constraints","Programmable optimization (DSPy paradigm)"],
       anchors: "DSPy (32.8k), guidance (21.3k), langfuse (23.1k)",
-      confuse: "vs 上下文工程: 提示工程关注单次交互，上下文工程关注全生命周期" },
-    { name: "检索上下文 RAG", color: "#2563eb", wardley: "Custom\u2192Product", status: "Established",
-      def: "从外部知识源检索相关信息注入 LLM 上下文",
-      features: ["向量/图谱检索","多模态文档理解","与 Agent 工作流集成"],
+      confuse: "vs Context Engineering: Prompt eng focuses on single interactions; CE manages the full context lifecycle" },
+    { name: "RAG & Retrieval", color: "#2563eb", wardley: "Custom\u2192Product", status: "Established",
+      def: "Retrieve relevant information from external knowledge sources and inject it into LLM context",
+      features: ["Vector/graph retrieval","Multimodal document understanding","Integration with agent workflows"],
       anchors: "ragflow (75k), llama_index (47.7k), graphrag (31.5k)",
-      confuse: "vs 记忆: RAG 检索外部知识，记忆持久化 Agent 自身经验" },
-    { name: "记忆层 Memory", color: "#d97706", wardley: "Custom", status: "Established",
-      def: "为 Agent 提供跨 session 可持久化、可检索的记忆",
-      features: ["对话摘要与知识提取","语义无损压缩","跨任务技能复用"],
+      confuse: "vs Memory: RAG retrieves external knowledge; Memory persists the agent's own experience" },
+    { name: "Memory Layer", color: "#d97706", wardley: "Custom", status: "Established",
+      def: "Provide agents with persistent, searchable memory across sessions",
+      features: ["Conversation summarization and knowledge extraction","Lossless semantic compression","Cross-task skill reuse"],
       anchors: "mem0 (49.8k), claude-mem (34.9k), letta (21.6k)",
-      confuse: "vs RAG: 记忆是 Agent 内部状态，RAG 是外部知识检索" },
-    { name: "MCP 协议层", color: "#059669", wardley: "Custom", status: "Established",
-      def: "标准化 LLM 获取上下文的协议与工具接口",
-      features: ["统一的工具/资源/提示接口","多语言 SDK","社区服务器生态"],
+      confuse: "vs RAG: Memory is the agent's internal state; RAG is external knowledge retrieval" },
+    { name: "MCP Protocol", color: "#059669", wardley: "Custom", status: "Established",
+      def: "Standardized protocol and tool interfaces for LLM context access",
+      features: ["Unified tool/resource/prompt interfaces","Multi-language SDKs","Community server ecosystem"],
       anchors: "servers (81k), context7 (49k), python-sdk (22.1k)",
-      confuse: "vs 上下文工程: MCP 是协议层，CE 是方法论层" },
-    { name: "上下文压缩 Compression", color: "#0284c7", wardley: "Custom", status: "Established",
-      def: "通过 KV Cache 压缩、语义缓存等技术减少上下文 token 消耗",
-      features: ["KV Cache 压缩/驱逐","Prompt 压缩","语义缓存"],
+      confuse: "vs Context Engineering: MCP is the protocol layer; CE is the methodology layer" },
+    { name: "Compression", color: "#0284c7", wardley: "Custom", status: "Established",
+      def: "Reduce context token consumption through KV Cache compression, semantic caching, and other techniques",
+      features: ["KV Cache compression/eviction","Prompt compression","Semantic caching"],
       anchors: "GPTCache (8k), LLMLingua (5.9k), claw-compactor (1.6k)",
-      confuse: "vs 长上下文: 压缩减少用量，长上下文增加容量，二者互补" }
+      confuse: "vs Long Context: Compression reduces usage; Long Context increases capacity \u2014 they're complementary" }
   ];
 
   const futureCards = [
-    { name: "上下文工程 Context Engineering", color: "#0891b2", wardley: "Genesis\u2192Custom", status: "Emerging",
-      def: "系统化管理 Agent 上下文的全生命周期——从获取、压缩、编排到持久化的整合学科",
-      features: ["整合 RAG+记忆+压缩+协议的统一方法论","上下文生命周期管理","Agent 自主上下文工程"],
+    { name: "Context Engineering", color: "#0891b2", wardley: "Genesis\u2192Custom", status: "Emerging",
+      def: "Systematic management of the agent context lifecycle \u2014 from acquisition, compression, orchestration to persistence \u2014 as a unified discipline",
+      features: ["Unified methodology integrating RAG + memory + compression + protocol","Context lifecycle management","Agent autonomous context engineering"],
       anchors: "get-shit-done (30k), parlant (17.8k), Agent-Skills-for-CE (13.9k)",
-      confuse: "vs 提示工程: 提示工程是 CE 的子集，CE 覆盖整个上下文生命周期" },
-    { name: "代码上下文 Code Context", color: "#db2777", wardley: "Genesis", status: "Emerging",
-      def: "将代码仓库打包为 AI 可消费的结构化上下文",
-      features: ["代码库 → 单文件打包","主动式上下文感知","代码特化的上下文工程"],
+      confuse: "vs Prompt Engineering: Prompt eng is a subset of CE; CE covers the entire context lifecycle" },
+    { name: "Code Context", color: "#db2777", wardley: "Genesis", status: "Emerging",
+      def: "Package code repositories into structured, AI-consumable context",
+      features: ["Codebase \u2192 single-file packaging","Proactive context awareness","Code-specialized context engineering"],
       anchors: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k)",
-      confuse: "vs 通用 RAG: 代码上下文理解代码结构，不只是文本检索" },
-    { name: "Agent 自上下文 Self-Context", color: "#64748b", wardley: "Genesis", status: "Speculative",
-      def: "Agent 自主工程化自身上下文——不是人为 Agent 设计上下文，而是 Agent 自己管理",
-      features: ["Agent 自动决定需要什么上下文","运行时上下文策略自进化","上下文质量自评估"],
+      confuse: "vs generic RAG: Code context understands code structure, not just text retrieval" },
+    { name: "Agent Self-Context", color: "#64748b", wardley: "Genesis", status: "Speculative",
+      def: "Agents autonomously engineering their own context \u2014 not humans designing context for agents, but agents managing it themselves",
+      features: ["Agents autonomously decide what context they need","Runtime context strategy self-evolution","Context quality self-assessment"],
       anchors: "ace (787), context-space (805), gsd-2 (1.1k)",
-      confuse: "vs 上下文工程: CE 由人主导，Self-Context 由 Agent 自主完成" },
-    { name: "CLI / Agent Runtime 终端运行时", color: "#e11d48", wardley: "Custom\u2192Product", status: "Emerging",
-      def: "终端原生 Agent 通过文件级上下文 (CLAUDE.md/SKILL.md) 和 CLI 工具调用替代 MCP 协议，Token 效率提升 10-32x",
-      features: ["文件级上下文 (CLAUDE.md, SOUL.md, rules)","CLI 工具调用 (--help 替代 schema)","Unix 管道组合性"],
+      confuse: "vs Context Engineering: CE is human-led; Self-Context is agent-autonomous" },
+    { name: "CLI / Agent Runtime", color: "#e11d48", wardley: "Custom\u2192Product", status: "Emerging",
+      def: "Terminal-native agents use file-level context (CLAUDE.md/SKILL.md) and CLI tool calls instead of MCP protocol, achieving 10-32x token efficiency gains",
+      features: ["File-level context (CLAUDE.md, SOUL.md, rules)","CLI tool calls (--help replaces schema)","Unix pipe composability"],
       anchors: "OpenClaw (302k), OpenCode (122k), Gemini CLI (98k), Claude Code (78k)",
-      confuse: "vs MCP: CLI 用文件和终端提供上下文，MCP 用协议；二者正在从对立走向共存" }
+      confuse: "vs MCP: CLI uses files and terminal for context, MCP uses protocol; they're moving from opposition toward coexistence" }
   ];
 
   function renderCardGroup(cards, container) {
@@ -570,9 +570,9 @@
         ' <span class="cc-wardley" style="background:' + sColor + '">' + sLabel + '</span>' +
         ' <span class="cc-wardley">' + wLabel + '</span></summary>' +
         '<div class="cc-def">' + cc.def + '</div>' +
-        '<div class="cc-row"><span class="cc-label">特征:</span><span>' + cc.features.join('；') + '</span></div>' +
-        '<div class="cc-row"><span class="cc-label">锚点:</span><span>' + cc.anchors + '</span></div>' +
-        '<div class="cc-row"><span class="cc-label">易混淆:</span><span>' + cc.confuse + '</span></div>';
+        '<div class="cc-row"><span class="cc-label">Traits:</span><span>' + cc.features.join('; ') + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">Anchors:</span><span>' + cc.anchors + '</span></div>' +
+        '<div class="cc-row"><span class="cc-label">Confuse:</span><span>' + cc.confuse + '</span></div>';
       container.appendChild(el);
     });
   }
@@ -580,12 +580,12 @@
   const ccContainer = document.getElementById("class-cards");
   const g1Title = document.createElement("div");
   g1Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#6b7280;margin-top:4px;border-bottom:1px solid #e5e7eb;padding-bottom:4px;";
-  g1Title.textContent = "已确立分类（从项目聚类归纳）";
+  g1Title.textContent = "Established Categories (inductively generalized from project clustering)";
   ccContainer.appendChild(g1Title);
   renderCardGroup(establishedCards, ccContainer);
   const g2Title = document.createElement("div");
   g2Title.style.cssText = "grid-column:1/-1;font-size:13px;font-weight:600;color:#d97706;margin-top:8px;border-bottom:1px solid #fde68a;padding-bottom:4px;";
-  g2Title.textContent = "演化推测分类（从技术发展路径推导）";
+  g2Title.textContent = "Speculative Categories (extrapolated from technology evolution paths)";
   ccContainer.appendChild(g2Title);
   renderCardGroup(futureCards, ccContainer);
 
@@ -594,11 +594,11 @@
   projects.forEach(p => { const l = getLane(p.paradigm); laneCounts[l.id] = (laneCounts[l.id]||0) + 1; });
 
   const tiers = [
-    { title: "成熟赛道", note: "项目多、方案多，已出现头部玩家，工具与基础设施自 2022 年起持续建设",
+    { title: "Mature Lanes", note: "Many projects, many approaches, dominant players have emerged. Tools and infrastructure have been building since 2022.",
       color: "#059669", lanes: ["prompt-eng","rag","memory"] },
-    { title: "爆发赛道", note: "2024-2025 年集中涌现，增长最快；CLI 运行时 2026 年 Q1 爆发式增长，挑战 MCP 作为上下文主要接口",
+    { title: "Explosive Lanes", note: "Concentrated emergence in 2024-2025, fastest growth. CLI runtimes saw explosive growth in 2026 Q1, challenging MCP as the primary context interface.",
       color: "#0284c7", lanes: ["mcp","cli","compress","codectx"] },
-    { title: "萌芽赛道", note: "学科刚命名 (2025)，整合刚开始",
+    { title: "Nascent Lanes", note: "Discipline just named (2025), integration just beginning.",
       color: "#b45309", lanes: ["ce","longctx"] }
   ];
 
@@ -636,45 +636,45 @@
   projects.forEach(p => { const yr = p.created.slice(0,4); yearCounts[yr] = (yearCounts[yr]||0) + 1; });
 
   const phaseData = [
-    { id: "irruption", label: "萌芽", sublabel: "2019\u20132023", css: "past",
-      summary: "工具时代。各子领域独立发展——RAG、Prompt 模板、基础记忆——没有人把它们叫做「上下文工程」。",
-      narrative: "这个时期的关键特征是<strong>碎片化</strong>。每个工具解决上下文的一个子问题——检索、压缩、格式化、持久化——但没人把它们看作同一个领域。就像盲人摸象：RAG 团队在做检索，prompt 团队在做模板，memory 团队在做持久化，但他们都在解决同一个问题的不同切面。",
+    { id: "irruption", label: "Irruption", sublabel: "2019\u20132023", css: "past",
+      summary: "The tool era. Each sub-domain evolved independently \u2014 RAG, prompt templates, basic memory \u2014 nobody called it 'context engineering'.",
+      narrative: "The defining characteristic of this period was <strong>fragmentation</strong>. Each tool solved one sub-problem of context \u2014 retrieval, compression, formatting, persistence \u2014 but nobody saw them as the same domain. Like the blind men and the elephant: the RAG team did retrieval, the prompt team did templates, the memory team did persistence, but they were all solving different facets of the same problem.",
       events: [
-        { date: "2019 Q4", text: "haystack: 最早的上下文驱动 LLM 应用框架" },
-        { date: "2022 Q4", text: "guidance + LMQL + llama_index 同时涌现" },
-        { date: "2023 Q1", text: "DSPy: 可编程提示优化，Prompt 从手艺变为工程" },
-        { date: "2023 Q2", text: "mem0 + GPTCache + Zep: 记忆与缓存基建出现" },
-        { date: "2023 Q3", text: "streaming-llm + LLMLingua: 长上下文与压缩双路线萌芽" },
-        { date: "2023 Q4", text: "ragflow: RAG 引擎化，上下文层概念雏形" }
+        { date: "2019 Q4", text: "haystack: earliest context-driven LLM application framework" },
+        { date: "2022 Q4", text: "guidance + LMQL + llama_index emerged simultaneously" },
+        { date: "2023 Q1", text: "DSPy: programmable prompt optimization, turning prompts from craft to engineering" },
+        { date: "2023 Q2", text: "mem0 + GPTCache + Zep: memory and caching infrastructure appeared" },
+        { date: "2023 Q3", text: "streaming-llm + LLMLingua: long context and compression dual tracks emerged" },
+        { date: "2023 Q4", text: "ragflow: RAG engine, early context-layer concept" }
       ] },
-    { id: "diffusion", label: "扩散", sublabel: "2024", css: "past",
-      summary: "基础设施时代。MCP 协议发布，GraphRAG 升级检索，KV Cache 优化成为子领域。",
-      narrative: "2024 年的关键事件是 MCP 的发布。Anthropic 定义了一个协议标准——这意味着上下文不再只是「塞进去的东西」，而是有正式接口的工程对象。同时 GraphRAG 把检索从「找相似段落」升级为「理解知识结构」。基础设施层的就位，为 2025 年的概念爆发做了铺垫。",
+    { id: "diffusion", label: "Diffusion", sublabel: "2024", css: "past",
+      summary: "The infrastructure era. MCP protocol released, GraphRAG upgraded retrieval, KV Cache optimization became a sub-domain.",
+      narrative: "The key event of 2024 was the release of MCP. Anthropic defined a protocol standard \u2014 this meant context was no longer just 'stuff shoved in', but an engineering object with formal interfaces. Meanwhile GraphRAG upgraded retrieval from 'finding similar paragraphs' to 'understanding knowledge structures'. The infrastructure layer was in place, setting the stage for the 2025 conceptual explosion.",
       events: [
-        { date: "2024 Q1", text: "graphrag + parlant: 知识图谱 RAG + 上下文控制层" },
-        { date: "2024 Q2", text: "HippoRAG + KVCache-Factory: 检索与压缩进化" },
-        { date: "2024 Q3", text: "MCP 规范发布: 上下文有了正式协议接口" },
-        { date: "2024 Q4", text: "LightRAG + MCP servers (81k): 生态爆发" }
+        { date: "2024 Q1", text: "graphrag + parlant: knowledge graph RAG + context control layer" },
+        { date: "2024 Q2", text: "HippoRAG + KVCache-Factory: retrieval and compression evolved" },
+        { date: "2024 Q3", text: "MCP spec released: context got a formal protocol interface" },
+        { date: "2024 Q4", text: "LightRAG + MCP servers (81k): ecosystem explosion" }
       ] },
-    { id: "frenzy", label: "狂热", sublabel: "2025\u2013now", css: "current",
-      summary: "命名时代。Karpathy 2025 年中提出「Context Engineering」。CE 项目、记忆框架、MCP 生态同时爆发。",
-      narrative: "Karpathy 在 2025 年中用了「Context Engineering」这个词，整个领域突然有了名字。命名的力量不可小觑——有了名字就有了品类，有了品类就有了投资和关注。从 2025 年下半年开始，记忆框架密集涌现（memU/Memori/MemOS/MemMachine 在 2 个月内同时出现），上下文工程教程和指南爆发。这不是技术突破驱动的，是<strong>认知转变驱动的</strong>。",
+    { id: "frenzy", label: "Frenzy", sublabel: "2025\u2013now", css: "current",
+      summary: "The naming era. Karpathy coined 'Context Engineering' mid-2025. CE projects, memory frameworks, and MCP ecosystem exploded simultaneously.",
+      narrative: "Karpathy used the term 'Context Engineering' in mid-2025, and suddenly the entire field had a name. The power of naming is immense \u2014 a name creates a category, a category attracts investment and attention. From late 2025, memory frameworks emerged in clusters (memU/Memori/MemOS/MemMachine all appeared within 2 months), and context engineering tutorials and guides proliferated. This wasn't driven by a technical breakthrough \u2014 it was driven by a <strong>cognitive shift</strong>.",
       events: [
-        { date: "2025 Q1", text: "MoBA + chonkie: 长上下文与 RAG 分块持续进化" },
-        { date: "2025 Q2", text: "memvid + fenic + CE 概念诞生: 命名改变一切" },
-        { date: "2025 Q3", text: "记忆框架寒武纪爆发: memU/Memori/MemOS/MemMachine" },
-        { date: "2025 Q4", text: "ace + beads + OpenCE: 上下文工程项目密集涌现" },
-        { date: "2025 Q4", text: "get-shit-done (30k): CE 驱动开发成为爆款" },
-        { date: "2026 Q1", text: "OpenClaw (302k) 引爆 CLI vs MCP 之争" },
-        { date: "2026 Q1", text: "OpenViking + SimpleMem + gsd-2: 整合开始" }
+        { date: "2025 Q1", text: "MoBA + chonkie: long context and RAG chunking continued to evolve" },
+        { date: "2025 Q2", text: "memvid + fenic + CE concept born: naming changes everything" },
+        { date: "2025 Q3", text: "Memory framework Cambrian explosion: memU/Memori/MemOS/MemMachine" },
+        { date: "2025 Q4", text: "ace + beads + OpenCE: CE projects emerged in rapid succession" },
+        { date: "2025 Q4", text: "get-shit-done (30k): CE-driven development goes viral" },
+        { date: "2026 Q1", text: "OpenClaw (302k) ignites the CLI vs MCP debate" },
+        { date: "2026 Q1", text: "OpenViking + SimpleMem + gsd-2: integration begins" }
       ] },
-    { id: "turning", label: "转折", sublabel: "2026H2?", css: "future",
-      summary: "预测：MCP 成为事实标准或被挑战。CE 从「概念」变为「工程实践」。压缩 vs 长上下文路线之争有初步结论。",
-      narrative: "预测：MCP 成为事实标准或被挑战者替代。上下文工程从「概念」变为「工程实践」，出现第一批专门的 CE 平台（不是记忆+RAG 的拼凑，而是原生 CE 设计）。压缩和长上下文的路线之争会有初步结论。",
+    { id: "turning", label: "Turning Point", sublabel: "2026H2?", css: "future",
+      summary: "Predicted: MCP becomes the de facto standard or gets challenged. CE shifts from 'concept' to 'engineering practice'. The compression vs long context debate sees initial conclusions.",
+      narrative: "Predicted: MCP either becomes the de facto standard or gets displaced by a challenger. Context Engineering shifts from 'concept' to 'engineering practice', with the first dedicated CE platforms emerging (not cobbled-together memory+RAG, but natively designed CE). The compression vs long context debate will see preliminary resolution.",
       events: [] },
-    { id: "deployment", label: "整合", sublabel: "2027+", css: "future",
-      summary: "终局：上下文工程被吸收进 Agent 标准工具链，就像「前端工程」已是 Web 开发的默认组成部分。",
-      narrative: "终局：上下文工程不再是独立学科——它被吸收进 Agent 开发的标准工具链，就像今天的「前端工程」已经是 Web 开发的默认组成部分。MCP 或其后继者成为基础设施层，开发者不再需要手动管理上下文。",
+    { id: "deployment", label: "Integration", sublabel: "2027+", css: "future",
+      summary: "Endgame: context engineering gets absorbed into the standard agent toolchain, much like 'frontend engineering' is now a default part of web development.",
+      narrative: "Endgame: context engineering is no longer a standalone discipline \u2014 it gets absorbed into the standard agent development toolchain, just as 'frontend engineering' is already a default part of web development today. MCP or its successor becomes the infrastructure layer, and developers no longer need to manually manage context.",
       events: [] }
   ];
 
@@ -689,7 +689,7 @@
   phaseHtml += '</div>' +
     '<div class="phase-events" id="phase-events"></div></div>';
 
-  futuroSection(1, "阶段判断 — 点击查看各阶段里程碑", phaseHtml);
+  futuroSection(1, "Phase Diagnosis \u2014 Click to explore milestones by phase", phaseHtml);
 
   function showPhase(idx) {
     const ph = phaseData[idx];
@@ -713,18 +713,18 @@
 
   // — 2. Driving Forces —
   const forces = [
-    { title: "上下文窗口的膨胀", tag: "技术驱动", tagColor: "#2563eb",
-      text: "从 GPT-4 的 4K 到 Claude 的 200K 再到 Gemini 的 1M+ token——上下文窗口每 12 个月翻倍。更多上下文需要更多工程来管理。但同时也制造了一个幻觉：「把所有东西都塞进去就行了」。这个幻觉是 CE 最大的敌人，也是最好的催化剂——当开发者发现「全塞进去」效果不好时，就需要工程化管理。",
-      evidence: "证据: GPT-4 4K (2023) → Claude 200K (2024) → Gemini 1M (2025)" },
-    { title: "Agent 的普及", tag: "需求驱动", tagColor: "#059669",
-      text: "一次性对话不需要上下文工程，Agent 需要。Agent 跨 session 运行、调用工具、管理任务——每一步都是上下文管理问题。2023 年 Agent 框架不到 10 个，2025 年超过 100 个。Agent 的爆发直接催生了对系统化上下文管理的刚需。",
-      evidence: "证据: 2023 年 Agent 框架 <10 个, 2025 年 >100 个" },
-    { title: "MCP 的催化效应", tag: "协议驱动", tagColor: "#7c3aed",
-      text: "一个协议标准化了上下文如何被服务给 LLM。MCP servers 从 0 到 81k Stars 只用了 15 个月。当上下文有了标准接口，「上下文工程」才从隐喻变成可操作的工程实践。MCP 之于 CE，就像 HTTP 之于 Web 开发——没有协议就没有工程。",
-      evidence: "证据: MCP servers 81k Stars, 2000+ 社区服务器, 15 个月" },
-    { title: "CLI 运行时的反叛", tag: "效率驱动", tagColor: "#e11d48",
-      text: "OpenClaw 创始人一句「MCP was a mistake. Bash is better」引爆了 CLI vs MCP 之争。核心论据是 Token 效率：MCP 的 GitHub server 93 个工具定义消耗 55,000 token（还没开始提问），而 CLI 的 --help 按需加载近乎 0 成本。Scalekit 基准测试证实 CLI 比 MCP 便宜 10-32x、可靠性高 28%。但这不是终局——Anthropic 自己也在论文中展示了让 Agent 写代码调 MCP 而非直接用 MCP tool，token 省 98.7%。底层逻辑：上下文交付的效率之战。",
-      evidence: "证据: OpenClaw 302k Stars (18 个月), Scalekit 基准 CLI 100% vs MCP 72% 可靠性" }
+    { title: "Context Window Expansion", tag: "Technology-Driven", tagColor: "#2563eb",
+      text: "From GPT-4's 4K to Claude's 200K to Gemini's 1M+ tokens \u2014 context windows double every 12 months. More context requires more engineering to manage. But it also creates an illusion: 'just stuff everything in'. This illusion is CE's greatest enemy and best catalyst \u2014 when developers discover that 'stuff everything in' doesn't work well, they need engineered context management.",
+      evidence: "Evidence: GPT-4 4K (2023) \u2192 Claude 200K (2024) \u2192 Gemini 1M (2025)" },
+    { title: "Rise of Agents", tag: "Demand-Driven", tagColor: "#059669",
+      text: "One-off conversations don't need context engineering; agents do. Agents run across sessions, call tools, manage tasks \u2014 every step is a context management problem. In 2023 there were fewer than 10 agent frameworks; by 2025 there were over 100. The agent explosion directly created hard demand for systematic context management.",
+      evidence: "Evidence: Agent frameworks <10 in 2023, >100 in 2025" },
+    { title: "MCP's Catalytic Effect", tag: "Protocol-Driven", tagColor: "#7c3aed",
+      text: "A protocol standardized how context is served to LLMs. MCP servers went from 0 to 81k stars in just 15 months. When context has a standard interface, 'context engineering' transforms from metaphor to actionable engineering practice. MCP is to CE what HTTP was to web development \u2014 no protocol, no engineering.",
+      evidence: "Evidence: MCP servers 81k Stars, 2000+ community servers, 15 months" },
+    { title: "The CLI Runtime Rebellion", tag: "Efficiency-Driven", tagColor: "#e11d48",
+      text: "OpenClaw's founder declared 'MCP was a mistake. Bash is better', igniting the CLI vs MCP debate. The core argument is token efficiency: MCP's GitHub server burns 55,000 tokens on 93 tool definitions (before you even ask a question), while CLI's --help loads on demand at near-zero cost. Scalekit benchmarks confirmed CLI is 10-32x cheaper and 28% more reliable than MCP. But this isn't the endgame \u2014 Anthropic's own paper showed having agents write code to call MCP instead of using MCP tools directly saves 98.7% of tokens. The underlying logic: a battle over context delivery efficiency.",
+      evidence: "Evidence: OpenClaw 302k Stars (18 months), Scalekit benchmark CLI 100% vs MCP 72% reliability" }
   ];
 
   let forcesHtml = '<div class="futuro-grid-2">';
@@ -736,25 +736,25 @@
       '<div class="fc-evidence">' + f.evidence + '</div></div>';
   });
   forcesHtml += '</div>';
-  futuroSection(2, "驱动力 — 什么在推动整个领域？", forcesHtml);
+  futuroSection(2, "Driving Forces \u2014 What's propelling the entire field?", forcesHtml);
 
   // — 3. Convergence Patterns —
   const convergences = [
-    { formula: "RAG \u00d7 Memory", result: "统一上下文存储",
-      text: "RAG 检索外部知识，Memory 持久化 Agent 经验。HippoRAG 和 cognee 已经在合并两者。外部知识 vs 内部知识的区分正在消融——对 Agent 来说，所有有用的信息都是上下文。",
+    { formula: "RAG \u00d7 Memory", result: "Unified Context Store",
+      text: "RAG retrieves external knowledge; Memory persists agent experience. HippoRAG and cognee are already merging both. The external vs internal knowledge distinction is dissolving \u2014 for agents, all useful information is context.",
       projects: "HippoRAG (3.3k), cognee (13.5k), Acontext (3.2k)" },
-    { formula: "Prompt Engineering \u2192 Context Engineering", result: "单次 → 全生命周期",
-      text: "从手工编写单条 Prompt 到系统化管理整个上下文流水线。DSPy 是桥梁（可编程 Prompt）。演化路径：手工 Prompt → 可编程 Prompt → 上下文管道 → 上下文工程。",
-      projects: "DSPy (32.8k) → promptflow (11.1k) → parlant (17.8k) → OpenCE (335)" },
-    { formula: "Compression \u00d7 Long Context", result: "对立还是互补？",
-      text: "压缩让上下文适配更小的窗口，长上下文让窗口变大。看似矛盾但实际互补：即便有 1M token 窗口，你仍然需要决定什么该放进去。成本优化永远需要压缩。",
+    { formula: "Prompt Engineering \u2192 Context Engineering", result: "Single-shot \u2192 Full Lifecycle",
+      text: "From hand-writing individual prompts to systematically managing the entire context pipeline. DSPy is the bridge (programmable prompts). Evolution path: handwritten prompts \u2192 programmable prompts \u2192 context pipeline \u2192 context engineering.",
+      projects: "DSPy (32.8k) \u2192 promptflow (11.1k) \u2192 parlant (17.8k) \u2192 OpenCE (335)" },
+    { formula: "Compression \u00d7 Long Context", result: "Opposing or Complementary?",
+      text: "Compression fits context into smaller windows; Long Context makes windows bigger. Seemingly contradictory, but actually complementary: even with a 1M token window, you still need to decide what goes in. Cost optimization always needs compression.",
       projects: "LLMLingua (5.9k) vs MoBA (2.1k), claw-compactor (1.6k) vs streaming-llm (7.2k)" },
-    { formula: "MCP \u00d7 Memory", result: "上下文即服务",
-      text: "MCP 提供协议，Memory 提供状态。二者结合实现「Context-as-a-Service」——Agent 通过标准接口请求上下文，获得相关且持久的信息返回。cipher 已经是 MCP 兼容的记忆层。",
-      projects: "MCP servers (81k), mem0 (49.8k), cipher (3.6k, MCP 兼容记忆)" },
-    { formula: "CLI \u00d7 MCP", result: "从对立到共存",
-      text: "CLI 用文件和终端提供上下文（10-32x 更省 token），MCP 用协议标准化接口。Scalekit 基准测试：CLI 100% 可靠性 vs MCP 72%。但 MCP 2026 年初引入 progressive discovery 后差距正在缩小。终局不是二选一，而是 Skills 作为统一抽象层——底层可以是 CLI 也可以是 MCP。",
-      projects: "OpenClaw (302k, CLI-first) vs MCP servers (81k, 协议优先). Codex/Gemini CLI 同时支持两者" }
+    { formula: "MCP \u00d7 Memory", result: "Context-as-a-Service",
+      text: "MCP provides the protocol; Memory provides the state. Combined, they enable 'Context-as-a-Service' \u2014 agents request context through standard interfaces and receive relevant, persistent information in return. cipher is already an MCP-compatible memory layer.",
+      projects: "MCP servers (81k), mem0 (49.8k), cipher (3.6k, MCP-compatible memory)" },
+    { formula: "CLI \u00d7 MCP", result: "From Opposition to Coexistence",
+      text: "CLI uses files and terminal for context (10-32x more token-efficient); MCP standardizes interfaces via protocol. Scalekit benchmark: CLI 100% reliability vs MCP 72%. But after MCP introduced progressive discovery in early 2026, the gap is narrowing. The endgame isn't either/or, but Skills as a unified abstraction layer \u2014 the underlying implementation can be CLI or MCP.",
+      projects: "OpenClaw (302k, CLI-first) vs MCP servers (81k, protocol-first). Codex/Gemini CLI support both" }
   ];
 
   let convHtml = '<div class="futuro-grid-2">';
@@ -765,49 +765,49 @@
       '<div class="conv-projects">' + c.projects + '</div></div>';
   });
   convHtml += '</div>';
-  futuroSection(3, "趋同轨迹 — 泳道之间正在发生什么？", convHtml);
+  futuroSection(3, "Convergence Trajectories \u2014 What's happening between lanes?", convHtml);
 
   // — 4. Inevitable vs Contingent —
   const inevitables = [
-    { fact: "上下文成为一等工程对象", why: "每条泳道都在指向这一点。上下文不再是 afterthought，而是需要专门设计、测试、优化的工程产物。" },
-    { fact: "协议标准化 (MCP 或后继者)", why: "碎片化不可持续。MCP 已有 81k Stars 和 2000+ 社区服务器的先发优势，但即便 MCP 失败，某种协议标准化是必然的。" },
-    { fact: "记忆成为 Agent 标配", why: "无状态 Agent 无法处理真实任务。2025 年 7-8 月 5 个记忆框架同时涌现已经证明：这不是观点，是共识。" },
-    { fact: "检索 + 记忆合流", why: "外部知识 vs 内部知识的区分是人为的。对 Agent 来说，所有有用的信息都是上下文。HippoRAG/cognee 已经在模糊这条线。" }
+    { fact: "Context becomes a first-class engineering object", why: "Every lane points to this. Context is no longer an afterthought \u2014 it's an engineering artifact that requires dedicated design, testing, and optimization." },
+    { fact: "Protocol standardization (MCP or successor)", why: "Fragmentation is unsustainable. MCP has first-mover advantage with 81k stars and 2000+ community servers, but even if MCP fails, some form of protocol standardization is inevitable." },
+    { fact: "Memory becomes standard for agents", why: "Stateless agents can't handle real-world tasks. Five memory frameworks emerging simultaneously in July-August 2025 proved: this isn't opinion, it's consensus." },
+    { fact: "Retrieval + Memory convergence", why: "The external vs internal knowledge distinction is artificial. For agents, all useful information is context. HippoRAG/cognee are already blurring this boundary." }
   ];
 
   const contingents = [
-    { fact: "MCP 还是 CLI 赢得上下文接口之争", why: "OpenClaw 302k Stars 证明 CLI 有效率优势（10-32x 省 token），但 MCP 有企业治理优势。Perplexity CTO 弃 MCP 是强信号，但 MCP progressive discovery 可能扳回。赢家可能是两者之上的抽象层——Skills。" },
-    { fact: "上下文工程是否成为独立学科", why: "可能被吸收进「Agent 工程」，成为子领域而非独立学科。取决于是否出现专门的 CE 平台和 CE 工程师岗位。" },
-    { fact: "长上下文是否消灭压缩需求", why: "取决于模型架构演化。如果 10M+ token 窗口变得廉价，压缩赛道可能萎缩——但成本优化永远有市场。" },
-    { fact: "谁定义 CE 最佳实践", why: "Anthropic? OpenAI? 开源社区? 学术界? 定义权之争决定了整个领域的走向和标准。" }
+    { fact: "Whether MCP or CLI wins the context interface battle", why: "OpenClaw's 302k stars prove CLI has efficiency advantages (10-32x token savings), but MCP has enterprise governance advantages. Perplexity CTO dropping MCP is a strong signal, but MCP's progressive discovery might turn things around. The winner may be an abstraction layer above both \u2014 Skills." },
+    { fact: "Whether Context Engineering becomes an independent discipline", why: "It might get absorbed into 'Agent Engineering' as a sub-domain rather than a standalone discipline. Depends on whether dedicated CE platforms and CE engineer job titles emerge." },
+    { fact: "Whether Long Context kills compression demand", why: "Depends on model architecture evolution. If 10M+ token windows become cheap, the compression lane may shrink \u2014 but cost optimization always has a market." },
+    { fact: "Who defines CE best practices", why: "Anthropic? OpenAI? Open-source community? Academia? The battle for definitional authority determines the entire field's direction and standards." }
   ];
 
   let splitHtml = '<div class="futuro-grid-2">' +
     '<div class="futuro-split-col futuro-card" style="border-left:3px solid #059669">' +
-    '<h4 style="color:#059669">必然趋势 (Inevitable)</h4><ul>';
+    '<h4 style="color:#059669">Inevitable Trends</h4><ul>';
   inevitables.forEach(i => {
     splitHtml += '<li><strong>' + i.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + i.why + '</span></li>';
   });
   splitHtml += '</ul></div>' +
     '<div class="futuro-split-col futuro-card" style="border-left:3px solid #d97706">' +
-    '<h4 style="color:#d97706">偶然变量 (Contingent)</h4><ul>';
+    '<h4 style="color:#d97706">Contingent Variables</h4><ul>';
   contingents.forEach(c => {
     splitHtml += '<li><strong>' + c.fact + '</strong><br><span style="color:#6b7280;font-size:12px">' + c.why + '</span></li>';
   });
   splitHtml += '</ul></div></div>';
-  futuroSection(4, "必然与偶然", splitHtml);
+  futuroSection(4, "Inevitable vs Contingent", splitHtml);
 
   // — 5. Scenario Sketch —
   const scenarios = [
-    { title: "学科确立", tag: "乐观", prob: "30%", tagColor: "#059669", css: "scenario-optimistic",
-      text: "Context Engineering 成为公认的工程学科，出现教科书、认证、专门工具。「CE 工程师」成为职位头衔。主要 CE 框架获得主导采纳，云厂商提供 CE-as-a-Service。",
-      trigger: "触发条件: 一个主要 CE 框架获得主导采纳 + 云厂商提供 CE-as-a-Service" },
-    { title: "框架吸收", tag: "基准", prob: "50%", tagColor: "#2563eb", css: "scenario-base",
-      text: "CE 能力被现有 Agent 框架（LangChain、CrewAI 等）吸收。没有独立的 CE 学科，只是 Agent 工具中更好的上下文处理。自然演化，无颠覆性事件。",
-      trigger: "触发条件: 自然演化，无颠覆性事件" },
-    { title: "窗口溢出", tag: "风险", prob: "20%", tagColor: "#dc2626", css: "scenario-risk",
-      text: "上下文窗口变得足够大（10M+ token）且足够便宜，工程化管理显得不必要。「全塞进去」真的可行了。CE 工具除成本优化外失去存在意义。",
-      trigger: "触发条件: 模型架构突破，实现近乎无限且低成本的上下文" }
+    { title: "Discipline Established", tag: "Optimistic", prob: "30%", tagColor: "#059669", css: "scenario-optimistic",
+      text: "Context Engineering becomes a recognized engineering discipline, with textbooks, certifications, and dedicated tools. 'CE Engineer' becomes a job title. A major CE framework achieves dominant adoption, and cloud providers offer CE-as-a-Service.",
+      trigger: "Trigger: A major CE framework achieves dominant adoption + cloud providers offer CE-as-a-Service" },
+    { title: "Framework Absorption", tag: "Baseline", prob: "50%", tagColor: "#2563eb", css: "scenario-base",
+      text: "CE capabilities get absorbed by existing agent frameworks (LangChain, CrewAI, etc.). No independent CE discipline \u2014 just better context handling within agent tools. Natural evolution, no disruptive events.",
+      trigger: "Trigger: Natural evolution, no disruptive events" },
+    { title: "Window Overflow", tag: "Risk", prob: "20%", tagColor: "#dc2626", css: "scenario-risk",
+      text: "Context windows become large enough (10M+ tokens) and cheap enough that engineered management seems unnecessary. 'Just stuff everything in' actually works. CE tools lose their reason to exist beyond cost optimization.",
+      trigger: "Trigger: Model architecture breakthrough achieves near-infinite, low-cost context" }
   ];
 
   let scenarioHtml = '<div class="futuro-grid-3">';
@@ -819,25 +819,25 @@
       '<div class="fc-evidence">' + s.trigger + '</div></div>';
   });
   scenarioHtml += '</div>';
-  futuroSection(5, "情景推演 — 12 个月后的三种图景", scenarioHtml);
+  futuroSection(5, "Scenario Sketches \u2014 Three landscapes in 12 months", scenarioHtml);
 
   // — 6. Weak Signals —
   const weakSignals = [
-    { title: "学术命名的出现",
-      text: "GAIR-NLP 的「Context Engineering 2.0」标志着学术形式化。当学术界命名一个东西时，制度化随之而来——课程、论文、期刊。这是从「工具集合」到「学科」的关键转折信号。",
-      evidence: "信号: Context-Engineering-2.0 (上海交大, 2025-10)" },
-    { title: "记忆框架的寒武纪大爆发",
-      text: "2025 年 7-8 月，memvid/memU/Memori/MemOS/MemMachine 在 2 个月内同时涌现。这种密度意味着「Agent 需要记忆」已从观点变为共识。记忆是上下文工程的核心基建——当记忆爆发时，CE 的需求也在爆发。",
-      evidence: "信号: 5 个项目在 60 天内发布，合计 50k+ Stars" },
-    { title: "代码上下文的专门化",
-      text: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k) —— 代码库特化的上下文打包已成为独立子赛道。这暗示：不同类型的 Agent 需要不同类型的上下文工程。泛化的 CE 框架可能不够，垂直领域的 CE 可能更有价值。",
-      evidence: "信号: 3 个项目 > 5k Stars，全部代码特化" },
-    { title: "压缩与扩展的赛跑",
-      text: "压缩 (LLMLingua, KV Cache 工具) 和长上下文 (MoBA, streaming-llm) 在并行进化。如果上下文窗口增长快于内容体量，压缩失去意义；如果内容增长快于窗口，压缩赢。这场赛跑的结果塑造整个领域的形态。",
-      evidence: "信号: KV Cache 压缩有 6+ 活跃项目，同时窗口大小每 12 个月翻倍" },
-    { title: "Perplexity CTO 弃用 MCP",
-      text: "2026 年 3 月 11 日，Perplexity CTO Denis Yarats 宣布内部从 MCP 转向 API + CLI。讽刺的是 Perplexity 官网还挂着 MCP server 文档。当 MCP 的早期采用者开始离开，这是一个极强的方向信号。MCP 的 progressive discovery 更新（2026-01）能否挽回局面是关键变量。",
-      evidence: "信号: Perplexity CTO 公开表态 (Ask 2026 大会, 2026-03-11)" }
+    { title: "Academic Naming Emerges",
+      text: "GAIR-NLP's 'Context Engineering 2.0' marks academic formalization. When academia names something, institutionalization follows \u2014 courses, papers, journals. This is the critical inflection signal from 'tool collection' to 'discipline'.",
+      evidence: "Signal: Context-Engineering-2.0 (Shanghai Jiao Tong University, 2025-10)" },
+    { title: "Memory Framework Cambrian Explosion",
+      text: "In July-August 2025, memvid/memU/Memori/MemOS/MemMachine all emerged within 2 months. This density means 'agents need memory' has shifted from opinion to consensus. Memory is the core infrastructure of context engineering \u2014 when memory explodes, CE demand is also exploding.",
+      evidence: "Signal: 5 projects launched within 60 days, combined 50k+ Stars" },
+    { title: "Code Context Specialization",
+      text: "repomix (22.4k), code2prompt (7.2k), MineContext (5.1k) \u2014 codebase-specialized context packaging has become an independent sub-lane. This suggests: different types of agents need different types of context engineering. Generalized CE frameworks may not be enough; domain-specific CE may be more valuable.",
+      evidence: "Signal: 3 projects > 5k Stars, all code-specialized" },
+    { title: "The Compression vs Extension Race",
+      text: "Compression (LLMLingua, KV Cache tools) and Long Context (MoBA, streaming-llm) are evolving in parallel. If context windows grow faster than content volume, compression loses relevance; if content grows faster than windows, compression wins. The outcome of this race shapes the entire field.",
+      evidence: "Signal: KV Cache compression has 6+ active projects, while window sizes double every 12 months" },
+    { title: "Perplexity CTO Drops MCP",
+      text: "On March 11, 2026, Perplexity CTO Denis Yarats announced they're switching from MCP to API + CLI internally. Ironically, Perplexity's website still hosts MCP server documentation. When early adopters of MCP start leaving, it's a very strong directional signal. Whether MCP's progressive discovery update (2026-01) can turn things around is a key variable.",
+      evidence: "Signal: Perplexity CTO public statement (Ask 2026 conference, 2026-03-11)" }
   ];
 
   let signalHtml = '<div class="futuro-grid-2">';
@@ -848,7 +848,7 @@
       '<div class="sig-evidence">' + s.evidence + '</div></div>';
   });
   signalHtml += '</div>';
-  futuroSection(6, "弱信号 — 被低估但可能改变格局", signalHtml);
+  futuroSection(6, "Weak Signals \u2014 Underestimated but potentially game-changing", signalHtml);
 
   // ====== EPILOGUE ======
   (function() {
@@ -861,41 +861,41 @@
     const epiContainer = document.getElementById('epilogue-dims');
     epiContainer.innerHTML =
       '<div class="epi-dim dim-past">' +
-        '<div class="dim-label">来时路</div>' +
-        '<h3>什么模式在重复？</h3>' +
-        '<p>数据中藏着一个清晰的波浪节奏：<strong>工具碎片化 → 基建协议化 → 概念命名 → 学科整合</strong>。2019-2023 年碎片化工具期（haystack, RAG, prompt templates, basic memory —— 每个解决一块）；2024 年协议化（MCP 发布，提供统一接口）；2025 年命名期（Karpathy 命名「context engineering」，教程/指南爆发）；2026 年整合开始（OpenViking, CE toolkits 涌现）。</p>' +
-        '<p>每个阶段都建立在前一阶段的基础上。没有 MCP（协议），命名就没有具体的东西可以指向。没有命名，整合就没有方向。</p>' +
-        '<p><strong>这个模式预示了什么？</strong>命名之后是标准化。下一波应该是「CE 平台」——不是工具包，而是管理完整上下文生命周期的集成平台。这还没有发生。</p>' +
+        '<div class="dim-label">Looking Back</div>' +
+        '<h3>What patterns keep repeating?</h3>' +
+        '<p>The data reveals a clear wave rhythm: <strong>tool fragmentation \u2192 infrastructure protocol \u2192 conceptual naming \u2192 disciplinary integration</strong>. 2019-2023 was the fragmented tools era (haystack, RAG, prompt templates, basic memory \u2014 each solving one piece); 2024 was protocol infrastructure (MCP released, providing a unified interface); 2025 was the naming era (Karpathy coined \'context engineering\', tutorials/guides exploded); 2026 marks the beginning of integration (OpenViking, CE toolkits emerging).</p>' +
+        '<p>Each phase builds on the previous one. Without MCP (protocol), naming would have nothing concrete to point to. Without naming, integration would have no direction.</p>' +
+        '<p><strong>What does this pattern predict?</strong> After naming comes standardization. The next wave should be \'CE platforms\' \u2014 not toolkits, but integrated platforms managing the full context lifecycle. This hasn\'t happened yet.</p>' +
         '<div class="epi-data">' +
-          '<span style="font-weight:600">2019-2023</span> 碎片化: 各子领域独立发展<br>' +
-          '<span style="font-weight:600">2024</span> 协议化: MCP 发布<br>' +
-          '<span style="font-weight:600">2025</span> 命名: Karpathy + 教程爆发<br>' +
-          '<span style="font-weight:600">2026 Q1</span> CLI 反叛: OpenClaw 302k, CLI vs MCP 之争<br>' +
-          '<span style="font-weight:600">?</span> 收敛: Skills 统一抽象层、专门 CE 平台——尚未到来' +
+          '<span style="font-weight:600">2019-2023</span> Fragmentation: sub-domains evolved independently<br>' +
+          '<span style="font-weight:600">2024</span> Protocol: MCP released<br>' +
+          '<span style="font-weight:600">2025</span> Naming: Karpathy + tutorial explosion<br>' +
+          '<span style="font-weight:600">2026 Q1</span> CLI Rebellion: OpenClaw 302k, CLI vs MCP debate<br>' +
+          '<span style="font-weight:600">?</span> Convergence: Skills as unified abstraction, dedicated CE platforms \u2014 not yet here' +
         '</div>' +
       '</div>' +
 
       '<div class="epi-dim dim-future">' +
-        '<div class="dim-label">未来观</div>' +
-        '<h3>无论哪种未来，什么张力必须被解决？</h3>' +
-        '<p><strong>张力一：压缩 vs 扩展——上下文工程的存在性问题。</strong>如果上下文窗口变得无限且廉价，CE 还重要吗？答案决定了 CE 是永久学科还是过渡技术。在所有情景中，这个张力都必须被面对。</p>' +
-        '<p><strong>张力二：人工编排 vs Agent 自治——谁工程化上下文？</strong>目前是人设计上下文管道。但 Agent 越来越自主管理自己的上下文（ace, Acontext）。从「人为 Agent 工程化上下文」到「Agent 自己工程化上下文」的转变是结构性张力。如果 Agent 赢，CE 作为人类学科消失；如果人类仍然必要，CE 稳固。</p>' +
-        '<p><strong>张力三：协议 vs 终端——MCP 与 CLI 的效率之争。</strong>MCP 押注一个协议标准化上下文接口。CLI 阵营（OpenClaw 302k Stars）用 Token 效率数据反击：同一任务 CLI 1,365 tokens vs MCP 44,026 tokens。但效率不是唯一维度——企业治理、审计、权限需要 MCP 的结构化。Skills 可能成为二者之上的统一抽象层。</p>' +
+        '<div class="dim-label">Looking Ahead</div>' +
+        '<h3>What structural tensions must be resolved, regardless of the future?</h3>' +
+        '<p><strong>Tension 1: Compression vs Expansion \u2014 CE\'s existential question.</strong> If context windows become infinite and cheap, does CE still matter? The answer determines whether CE is a permanent discipline or a transitional technology. In all scenarios, this tension must be faced.</p>' +
+        '<p><strong>Tension 2: Human Orchestration vs Agent Autonomy \u2014 Who engineers the context?</strong> Currently, humans design context pipelines. But agents are increasingly managing their own context autonomously (ace, Acontext). The shift from \'humans engineer context for agents\' to \'agents engineer their own context\' is a structural tension. If agents win, CE as a human discipline disappears; if humans remain necessary, CE solidifies.</p>' +
+        '<p><strong>Tension 3: Protocol vs Terminal \u2014 The MCP vs CLI efficiency battle.</strong> MCP bets on a protocol standardizing context interfaces. The CLI camp (OpenClaw\'s 302k stars) counterattacks with token efficiency data: same task, CLI 1,365 tokens vs MCP 44,026 tokens. But efficiency isn\'t the only dimension \u2014 enterprise governance, auditing, and permissions need MCP\'s structure. Skills may become the unified abstraction layer above both.</p>' +
         '<div class="epi-data">' +
-          '结构性张力不是预测，而是无论哪种情景发生都必须面对的问题。<br>它们的解决方式决定了最终走向哪个情景。' +
+          'Structural tensions are not predictions \u2014 they are problems that must be faced regardless of which scenario unfolds.<br>How they get resolved determines which scenario ultimately materializes.' +
         '</div>' +
       '</div>' +
 
       '<div class="epi-dim dim-now">' +
-        '<div class="dim-label">看当下</div>' +
-        '<h3>什么决策是有时间窗口的？</h3>' +
-        '<p><strong>命名窗口。</strong>上下文工程的定义还在流动期。谁现在写出最好的 CE 教科书/框架，谁就定义这个学科。2025 年「Context Engineering」从 0 到 20+ 项目——这个速度意味着窗口正在快速关闭。</p>' +
-        '<p><strong>MCP vs CLI 站队窗口。</strong>MCP 协议还年轻（15 个月），CLI 阵营刚刚崛起（OpenClaw 18 个月内 302k Stars）。Perplexity CTO 已公开转向 CLI。现在是影响「上下文接口标准」的最后窗口——一旦大厂集体站队，格局将固化。</p>' +
-        '<p><strong>报告视野边界。</strong>数据来源为 GitHub 开源项目。Anthropic/OpenAI/Google 内部的上下文管理能力不在视野内。Stars 衡量流行度不是重要性。</p>' +
+        '<div class="dim-label">Looking at Now</div>' +
+        '<h3>What decisions have a closing window?</h3>' +
+        '<p><strong>The Naming Window.</strong> Context engineering\'s definition is still fluid. Whoever writes the best CE textbook/framework now defines the discipline. In 2025, \'Context Engineering\' went from 0 to 20+ projects \u2014 this velocity means the window is closing fast.</p>' +
+        '<p><strong>The MCP vs CLI Alignment Window.</strong> MCP is still young (15 months), and the CLI camp just emerged (OpenClaw reached 302k stars in 18 months). Perplexity\'s CTO has already publicly shifted to CLI. Now is the last window to influence the \'context interface standard\' \u2014 once major players collectively take sides, the landscape will solidify.</p>' +
+        '<p><strong>Report Scope Boundaries.</strong> Data sourced from GitHub open-source projects. Internal context management capabilities at Anthropic/OpenAI/Google are outside the scope. Stars measure popularity, not importance.</p>' +
         '<div class="epi-data">' +
-          '项目分布: ' + yrLine + '<br>' +
-          '2026 新项目: ' + newCount + ' 个 (仅 Q1)<br>' +
-          '数据来源: GitHub 开源项目 (不含闭源研究、学术论文、专利)' +
+          'Project distribution: ' + yrLine + '<br>' +
+          '2026 new projects: ' + newCount + ' (Q1 only)<br>' +
+          'Data source: GitHub open-source projects (excludes closed-source research, academic papers, patents)' +
         '</div>' +
       '</div>';
   })();
@@ -976,8 +976,8 @@
     { date: "2023-06-01", label: "mem0", lane: "memory" },
     { date: "2024-09-01", label: "MCP", lane: "mcp" },
     { date: "2024-07-01", label: "repomix", lane: "codectx" },
-    { date: "2025-06-01", label: "CE 命名", lane: "ce" },
-    { date: "2025-07-01", label: "记忆爆发", lane: "memory" },
+    { date: "2025-06-01", label: "CE Named", lane: "ce" },
+    { date: "2025-07-01", label: "Memory Boom", lane: "memory" },
     { date: "2026-01-01", label: "OpenViking", lane: "ce" },
     { date: "2024-09-01", label: "OpenClaw", lane: "cli" },
     { date: "2025-06-01", label: "Gemini CLI", lane: "cli" }
@@ -1078,7 +1078,7 @@
   // Tooltip
   nodes.on("mouseenter", function(event, d) {
     const color = paradigmColors[d.paradigm] || "#6b7280";
-    const statusLabel = d.status === "new" ? "新项目" : d.status === "active" ? "活跃" : "稳定";
+    const statusLabel = d.status === "new" ? "New" : d.status === "active" ? "Active" : "Stable";
     tooltip.html(`
       <div class="tt-name" style="color:${color}">${d.name}</div>
       <div class="tt-org">${d.org}</div>
@@ -1111,9 +1111,9 @@
   const legendY = margin.top + chartHeight + 36;
   const statusLegend = svg.append("g").attr("transform", `translate(${margin.left}, ${legendY})`);
   const statuses = [
-    { label: "新项目", color: "#ef4444" },
-    { label: "稳定", color: "#9ca3af" },
-    { label: "活跃", color: "none" }
+    { label: "New", color: "#ef4444" },
+    { label: "Stable", color: "#9ca3af" },
+    { label: "Active", color: "none" }
   ];
   let sx = 0;
   statuses.forEach(s => {

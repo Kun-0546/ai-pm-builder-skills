@@ -67,7 +67,7 @@ github-trend-observer/
 │   ├── deep_link.py             # Mode 4 relationship analysis
 │   ├── evolution_timeline.py    # Mode 5 topic evolution data collector
 │   ├── generate_report.py       # HTML/MD report generation
-│   └── test_oss.py              # Automated tests (6 tiers, 41 tests)
+│   └── test_oss.py              # Automated tests (6 tiers, 48 tests)
 ├── config/
 │   ├── seed_list.json           # Key developer list
 │   └── domain_keywords.json     # Domain keyword mappings
